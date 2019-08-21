@@ -1,0 +1,231 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>Mostrar Bolsa</title>
+{% endblock %}
+
+{% block body -%}
+{% set head = entity.guides|first %}
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Información de Bolsa</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('bag') }}">Bolsas</a></li>
+            <li class="active"> Mostrar Bolsa</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        <div class="block-flat">
+            <div class="header">
+                <div class="row">
+                    <div class="col-sm-4 col-md-4">
+                        <h3>Bolsa {{ entity.number }} </h3>
+                    </div>
+                    <div class="col-sm-8 col-md-8">
+                        {% if entity.status != 'CONSOLIDADA' %}
+                        <div class="btn-group" style="margin-bottom: 5px;margin-top: 4px;">
+                            <button type="button" class="btn btn-default">Opciones</button>
+                            <button type="button" data-toggle="dropdown" class="btn btn-default dropdown-toggle">
+                            <span class="caret"></span><span class="sr-only">Opciones</span></button>
+                            <ul role="menu" class="dropdown-menu">
+                                {% if entity.status == "LISTA" %}
+                                    {% if app.user.agency.type == "MASTER" %}
+                                        <li><a href="{{ path('bag_report', {'id': entity.id }) }}">Recibir bolsa</a></li>
+                                    {% endif %}
+                                    <li><a class="bcancel" data-toggle="modal" data-target="#cancelbag" href="#">Anular</a></li>
+                                    {# <li><a href="{{ path('bag_cancel', {'id': entity.id }) }}">Anular</a></li>#}
+                                {% endif %}
+                                {% if (entity.status == "ENTREGADA") and (app.user.agency.type == "MASTER") %}
+                                    {# <li><a class="bconsol" data-toggle="modal" data-target="#consolbag" href="#">{% trans %}Consolidar{% endtrans %}</a></li> #}
+                                    <li><a href="{{ path('bag_toconsol', {'id': entity.id }) }}">{% trans %}Consolidar{% endtrans %}</a></li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                        <button type="button" title="Imprimir" class="btn btn-default" onclick="location.href='{{ path('bag_print', { 'id': entity.id }) }}';"><i class="fa fa-print"></i></button>
+                        <button type="button" title="Generar PDF" class="btn btn-default" onclick="location.href='{{ path('bag_printpdf', { 'id': entity.id }) }}';"><i class="fa fa-file-text"></i></button>
+                        <button type="button" title="Etiqueta" class="btn btn-default" onclick="location.href='{{ path('bag_labelpdf', { 'id': entity.id }) }}';"><i class="fa fa-tag"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="row">
+                    <div class="col-md-6 col-sm-6">
+                        <b>
+                        <i class="fa fa-building-o"></i> Agencia: {{ entity.agency }}<BR>
+                        <i class="fa fa-flag-o"></i> País origen: {{ head.countryfrom }}</BR>
+                        <i class="fa fa-flag"></i> País destino: {{ head.countryto }}<BR>
+                        </b>
+                    </div>
+                    {% if head.shippingtype.name == "Aéreo" %}
+                        {% set iconvia = "fa fa-plane" %}
+                    {% else %}
+                        {% set iconvia = "fa fa-ship" %}
+                    {% endif %}
+                    <div class="col-md-6 col-sm-6">
+                        <b>
+                        <i class="{{ iconvia }}"></i> Vía: {{ head.shippingtype }}<br>
+                        <i class="fa fa-calendar-check-o"></i> Fecha: {{ entity.creationdate|date('m/d/Y') }}<BR>
+                        <i class="fa fa-plus-square-o"></i> Nro de {% trans %}Guías{% endtrans %}: {{ entity.guides|length }}<br>
+                        <i class="fa fa-thermometer-half"></i> Status: {{ entity.status }}
+                        </b>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="block-flat">
+            <div class="header">
+                <h3>Listado de {% trans %}Guías{% endtrans %} incluidas en la bolsa</h3>
+            </div>
+            <div class="content">
+                <table id="guideTable" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
+                <thead>
+                    <tr>
+                        <th>Número</th>
+                        <th>Peso</th>
+                        <th>Volumen</th>
+                        <th>Piezas</th>
+                        <th>Valor</th>
+                        <th>Monto</th>
+                    </tr>	
+                </thead>
+                    {% for guide in entity.guides %}
+                        <tr>
+                            <td><a  class="btn btn-success btn-xs btn-flat" href="{{ path('guide_show', { 'id': guide.id }) }}">{{ guide.number }}</a></td>
+                            <td>{{ guide.realweight }}</td>
+                            {% set pri = true %}
+                            <td>
+                                {% set volcad = '' %}
+                                {% if guide.masterec %}
+                                    {% set listrec = [guide.masterec] %}
+                                {% else %}
+                                    {% set listrec = guide.receipts %}
+                                {% endif %}
+                                {% for receipt in listrec %}
+                                    {% set vol = (receipt.length*receipt.width*receipt.height/guide.agency.maincompany.convertvol)|number_format(2, '.', ',') %}
+                                    {% if pri %}
+                                        {% set volcad = volcad ~ vol ~ 'dimension'|trans %}
+                                        {% set pri = false %}
+                                    {% else %}
+                                        {% set volcad =  volcad ~ ',  ' ~ vol ~ 'dimension'|trans %}
+                                    {% endif %} 
+                                {% endfor %}
+                                {{ volcad }}
+                            </td>
+                            <td>{{ guide.pieces }}</td>
+                            <td>{{ guide.declared }}</td>
+                            <td>{{ guide.totalpaid }}</td>
+                        </tr>
+                    {% endfor %}
+                <tbody>
+                </tbody>
+                </table>
+                <!-- Modal -->
+                <div class="modal fade colored-header md-effect-9" id="cancelbag" role="dialog">
+                    <div class="modal-dialog">
+                    <!-- Modal content-->
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button id="closecancelbag" type="button" class="close" data-dismiss="modal">&times;</button>
+                                <center><h2 class="modal-title">Confirme la anulación de la Bolsa</h2></center>
+                            </div>
+                            <div class="modal-body form">
+                                <table class="table no-border dt-responsive nowrap" cellspacing="0" width="100%">
+                                <thead>
+                                <tr>
+                                    <th style="text-align:center;color:red;">
+                                        <h2>Anular bolsa {{ entity.number }}</h2>
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td style="border:0px; text-align:center;"><button type="button" class="btn btn-info btn-flat gotocancel">Confirmar</button>
+                                    </td>
+                                </tr>
+                                </tbody>
+                                </table>
+                            </div>
+        
+                            <div class="modal-footer">
+                            <button id="closecancelbag" type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                            </div>
+                        </div>     
+                    </div>
+                </div>
+                
+                <!-- Modal -->
+                <div class="modal fade colored-header md-effect-9" id="consolbag" role="dialog">
+                    <div class="modal-dialog">
+                    <!-- Modal content-->
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button id="closeconsolbag" type="button" class="close" data-dismiss="modal">&times;</button>
+                                <center><h2 class="modal-title">{% trans %}Consolidar{% endtrans %} Bolsa</h2></center>
+                            </div>
+                            <div class="modal-body form">
+                                <table class="table no-border dt-responsive nowrap" cellspacing="0" width="100%">
+                                <thead>
+                                <tr>
+                                    <th style="text-align:center;color:red;">
+                                        <h2>{% trans %}Consolidar{% endtrans %} bolsa {{ entity.number }}</h2>
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td style="border:0px; text-align:center;"><button type="button" class="btn btn-info btn-flat gotoconsol">Confirmar</button>
+                                    </td>
+                                </tr>
+                                </tbody>
+                                </table>
+                            </div>
+        
+                            <div class="modal-footer">
+                            <button id="closeconsolbag" type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                            </div>
+                        </div>     
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+{% block javascripts %}
+<script type="text/javascript">
+    $(document).ready(function(){
+        var $guideTable = $('#guideTable').DataTable({
+            paginate: false,
+            info: false,
+            searching: false,
+            ordering: false,
+        });
+        $('.gotocancel').click(function(e) {
+            e.preventDefault();
+            $('#closecancelbag').click();
+            var url="{{ path('bag_cancel', { 'id': entity.id }) }}";
+            // alert('VOY A ANULAR LA FACTURA: ' + url);
+            window.location.href = url;
+            return false;
+        });
+        $('.gotoconsol').click(function(e) {
+            e.preventDefault();
+            $('#closeconsolbag').click();
+            var url="{{ path('bag_toconsol', { 'id': entity.id }) }}";
+            // alert('VOY A ANULAR LA FACTURA: ' + url);
+            window.location.href = url;
+            return false;
+        });
+    });
+</script>
+{% endblock %}

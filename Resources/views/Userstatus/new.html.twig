@@ -1,0 +1,25 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+<div class="widget">
+    <div class="widget-header"> <i class="icon-user-md"></i>
+              <h3>Nuevo status de usuario</h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+	{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+    <table class="table table-bordered">
+	<tbody>
+		<td>{{ form_row(form.name) }} </td>
+		<td>{{ form_row(form.description) }} </td>
+	</tbody>
+       <tfoot>
+		<td>{{ form_row(form.submit) }}</td>
+		<td><a href="{{ path('userstatus') }}" class="btn btn-default">Regresar a la lista</a></td>
+		
+	</tfoot>
+    </table>
+	{{ form_end(form) }}
+   </div>
+</div>
+{% endblock %}

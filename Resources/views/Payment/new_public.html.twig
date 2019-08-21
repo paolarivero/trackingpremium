@@ -1,0 +1,401 @@
+% extends '::layout.html.twig' %}
+
+{% block title %}
+    <title>{{ nameform }}</title>
+{% endblock %}
+
+{% form_theme form 'form/fields.html.twig' %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>{{ nameform }}</h2>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+            {% for flashMessage in app.session.flashbag.get('warning') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        {{ form_start(form, {attr: {novalidate: 'novalidate', 'id': 'receipt_type' }}) }}
+        <div class="block-flat">
+            <div class="header">
+                <h3>Datos del pago</h3>
+            </div>
+            <div class="content">
+                {{ form_row(form.name_customer) }}
+                {{ form_row(form.lastname_customer) }}
+                {{ form_row(form.email_customer) }}
+                {{ form_row(form.guide) }}
+                {{ form_row(form.account) }}
+                {{ form_row(form.paydate) }}
+                {{ form_row(form.amount) }}	
+                <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        <td>
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default" >Regresar</button>
+                        </td>
+                        <td style="text-align:right;">
+                            {{ form_row(form.submit, { 'attr': {'class': 'btn btn-primary'} }) }}
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+            </div>
+        </div>
+        {{ form_end(form) }}
+        <!-- Modal -->
+        <div class="modal fade" id="customersearch" role="dialog">
+            <div class="modal-dialog modal-lg">
+            <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button id="closemodalcus1" type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h2 class="modal-title">Buscar Cliente</h2>
+                    </div>
+                    <div class="modal-body">
+                        <div class="table-responsive"> 
+                            <input type="text" class="filter_name" id="filter_name" placeholder="Nombre del cliente">
+                            <input type="text" class="filter_lastname" id="filter_lastname" placeholder="Apellido del cliente">
+                            <input type="text" class="filter_email" id="filter_email" placeholder="Email del cliente">
+                            <table id="customerTable" class="table">
+                                <thead>
+                                </thead>
+                                <tbody >
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                    <button id="closemodalcus" type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>     
+            </div>
+        </div> 
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+
+<script type="text/javascript">
+    function ClearCustomer() {
+        $('#payment_type_id_customer').val(0);
+        $('#payment_type_name_customer').val('');
+        $('#payment_type_lastname_customer').val('');
+        $('#payment_type_email_customer').val('');
+        return false;	
+    }
+    function returnSelectCustomer(vidcus, vname, vlastname, vemail){
+        $('#payment_type_id_customer').val(vidcus);
+        $('#payment_type_name_customer').val(vname);
+        $('#payment_type_lastname_customer').val(vlastname);
+        $('#payment_type_email_customer').val(vemail);
+        $('#payment_type_email_customer').change();
+        $("#closemodalcus1").click();    
+        return true;
+    }
+    jQuery.fn.DataTable.ext.type.search.string = function ( data ) {
+    return ! data ?
+        '' :
+        typeof data === 'string' ?
+            data
+                .replace( /έ/g, 'ε')
+                .replace( /ύ/g, 'υ')
+                .replace( /ό/g, 'ο')
+                .replace( /ώ/g, 'ω')
+                .replace( /ά/g, 'α')
+                .replace( /ί/g, 'ι')
+                .replace( /ή/g, 'η')
+                .replace( /\n/g, ' ' )
+                .replace( /[áÁ]/g, 'a' )
+                .replace( /[éÉ]/g, 'e' )
+                .replace( /[íÍ]/g, 'i' )
+                .replace( /[óÓ]/g, 'o' )
+                .replace( /[úÚ]/g, 'u' )
+                .replace( /ê/g, 'e' )
+                .replace( /î/g, 'i' )
+                .replace( /ô/g, 'o' )
+                .replace( /è/g, 'e' )
+                .replace( /ï/g, 'i' )
+                .replace( /ü/g, 'u' )
+                .replace( /ã/g, 'a' )
+                .replace( /õ/g, 'o' )
+                .replace( /ç/g, 'c' )
+                .replace( /ì/g, 'i' ) :
+            data;
+    };
+    function regExpEscape(literal_string) {
+    	return literal_string.replace(/[-[\]{}()*+!<=:?.\/\\^$|#\s,]/g, '\\$&');
+    }
+    $(document).ready(function () {
+        $('#payment_type_guide').change(function(){
+            var val = $(this).val();
+            $.ajax({
+                type: "POST",
+                url: "{{ url('totalpaid_guide') }}?guide_id=" + val,
+                success: function(data) {
+                    if (data){       
+                        $('#payment_type_amount').val(data);
+                    } else {
+                        funalert('No se encontró la guía');
+                    }
+                }
+	    	});
+        });
+        $('#payment_type_email_customer').change(function(){
+           var val = $(this).val();
+            if (val == '') {
+                funalert('Debe asignar el email del cliente');
+            } else {
+                // Remove current options
+                $.ajax({
+                    type: "POST",
+                    url: "{{ url('select_guides') }}?customer_email=" + val,
+                    success: function(data) {
+                        if (data){       
+                            var num = (data + '').length;
+                            if (num == 0) {
+                                alert('El cliente no tiene guías registradas que pueda pagar');
+                            } else {
+                                $('#payment_type_guide').html('');
+                                $.each(data, function(k, v) {
+                                    $('#payment_type_guide').append('<option value="' + v + '">' + k + '</option>');
+                                })
+                                $('#payment_type_guide').change();
+                            }
+                        } else {
+                            funalert('No se encontraron guías');
+                        }
+                    }
+                });
+            }
+            return false;
+        });
+        $('#payment_type_paydate').datepicker();
+        $("#payment_type_paydate").val($.datepicker.formatDate('mm/dd/yy', new Date()));
+        var $thisCusTable=null;	
+        // $("label.required").append('<span class="red-star" title="Campo Obligatorio"> *</span>');
+
+        $('#customersearch').on('shown.bs.modal', function () {
+            $('input.filter_name').val('');
+            $('input.filter_lastname').val('');
+            $('input.filter_email').val('');
+            if ($thisCusTable) {
+                //console.log('La tabla ya existía');
+                $thisCusTable.clear();
+                $thisCusTable.destroy();	
+            }
+            $.ajax({
+                type: "GET",
+                url: "{{ url('customer_listall') }}",
+                success: function(data) {
+                    var tableHead = document.getElementById('customerTable').getElementsByTagName('thead')[0];
+                    var nh = tableHead.rows.length;
+                    for (i=0; i < nh; i++) {
+                        tableHead.deleteRow(0);
+                    }
+                    var newhead = tableHead.insertRow(0); 
+                    newhead.id="htcustomer";
+                    newhead.insertCell(0).outerHTML = "<th><h4>Id</h4></th>";
+                    newhead.insertCell(1).outerHTML = "<th><h4>Nombre</h4></th>";
+                    newhead.insertCell(2).outerHTML = "<th><h4>Apellido</h4></th>";
+                    newhead.insertCell(3).outerHTML = "<th><h4>Email</h4></th>";
+                    newhead.insertCell(4).outerHTML = "<th><h4>Ciudad</h4></th>";
+                    newhead.insertCell(5).outerHTML = "<th><h4>Estado</h4></th>";
+                    newhead.insertCell(6).outerHTML = "<th><h4>País</h4></th>";
+
+                    var tableRef = document.getElementById('customerTable').getElementsByTagName('tbody')[0];
+                    var nf = tableRef.rows.length;
+                    for (i=0; i < nf; i++) {
+                        tableRef.deleteRow(0);
+                    }
+                    var nc = data.length;
+                    //console.log(nc);
+                    //console.log(tableRef.rows.length);
+                    for (i = 0; i < nc; i++) {
+                        var customerid = data[i]['customerid'];
+                        var namecus = data[i]['name'];
+                        var docid = data[i]['docid'];
+                        var lastnamecus = data[i]['lastname'];
+                        var address = data[i]['address'];
+                        var cityid = data[i]['cityid'];
+                        var cityname = data[i]['cityname'];
+                        var state = data[i]['state'];
+                        var country = data[i]['country'];
+                        var phone = data[i]['phone'];
+                        var mobile = data[i]['mobile'];
+                        var barrio = data[i]['barrio'];
+                        var email = data[i]['email'];
+                        var zip = data[i]['zip'];
+                        // Insert a row in the table at the last row
+                        var newRow   = tableRef.insertRow(tableRef.rows.length);
+
+                        // Insert a cell in the row at index 0
+                        var newCell0  = newRow.insertCell(0);
+                        var newCell1  = newRow.insertCell(1);
+                        var newCell2  = newRow.insertCell(2);	
+                        var newCell3  = newRow.insertCell(3);
+                        var newCell4  = newRow.insertCell(4);
+                        var newCell5  = newRow.insertCell(5);
+                        var newCell6  = newRow.insertCell(6);
+                        // Append a text node to the cell
+                        var btn = document.createElement("input");        // Create a <button> element
+
+                        var tag = "Cliente_" + customerid;
+                        var t = document.createTextNode(tag);
+
+                        btn.type = "button";
+                        btn.value = tag;
+                    
+                        // btn.onclick = (function(){ var ci = cityid; var cn= cityname; var sn=state; var pn = country; return function() 				//  {returnSelectCity(ci,cn,sn,pn)}})();
+                        btn.onclick = (function(){ var vidcus = customerid; var vname = namecus; var vlastname = lastnamecus; 
+                                var vdocid = docid; var vaddress = address;  var vcityid = cityid; var vcity= cityname; var vstate = state; 
+                                var vcountry = country; var vphone = phone; var vmobile = mobile; var vbarrio = barrio; 
+                                var vemail = email; var vzip = zip; 	return function() 
+                            {returnSelectCustomer(vidcus, vname, vlastname,  vemail)}})();  
+
+                        newCell0.appendChild(btn);
+
+                        var newText1 = document.createTextNode(namecus);
+                        newCell1.appendChild(newText1);
+
+                        var newText2 = document.createTextNode(lastnamecus);
+                        newCell2.appendChild(newText2);
+
+                        var newText3 = document.createTextNode(email);
+                        newCell3.appendChild(newText3);		
+                        
+                        var newText4 = document.createTextNode(cityname);
+                        newCell4.appendChild(newText4);
+
+                        var newText5 = document.createTextNode(state);
+                        newCell5.appendChild(newText5);
+
+                        var newText6 = document.createTextNode(country);
+                        newCell6.appendChild(newText6);
+                    }
+                    $thisCusTable=$('#customerTable').DataTable({
+                        "ordering": false,
+                        "searching": true,
+                        "info":     false,
+                        "lengthChange": false,
+                        "scrollX": true,
+                        "pageLength": 5,
+                        "columns": [ { "searchable": false }, null,  null,  null,  
+                                { "searchable": false }, { "searchable": false }, { "searchable": false }],
+                        "language": {
+                            "sSearch": "",
+                            "lengthMenu": "Mostrando  _MENU_  clientes por página",
+                            "zeroRecords": "<div style=\"color:red;\">Lo siento no se encontraron clientes</div>",
+                            "sInfo": "Mostrando _START_ a _END_ de _TOTAL_ clientes",
+                            "infoEmpty": "No hay registros disponibles",
+                            "infoFiltered": "(Filtradas de un total de _MAX_ )",
+                            "searchPlaceholder": "Nombre del cliente",
+                            "paginate" : {
+                                first:    '«',
+                                previous: '‹',
+                                next:     '›',
+                                last:     '»'
+                            }
+                        },
+                        "pagingType": "full_numbers",
+                        "fnDrawCallback": function(oSettings) {
+                            if (oSettings._iDisplayLength >= oSettings.fnRecordsDisplay()) {
+                                    $(oSettings.nTableWrapper).find('.dataTables_paginate').hide();
+                            
+                            } else {
+                                $(oSettings.nTableWrapper).find('.dataTables_paginate').show();
+                            }
+                        },
+                    });
+                    $('.dataTables_paginate').hide();
+                    $('.dataTables_filter').hide();
+                    document.getElementById("customerTable").style.display="none";
+                    document.getElementById("htcustomer").style.visibility = "hidden";
+                    $('input.filter_name').on( 'keyup click', function () {
+                        var value = jQuery.fn.DataTable.ext.type.search.string($('#filter_name').val());
+                        if (value.length == 1) {
+                            $('input.filter_lastname').val('');
+                            $thisCusTable.column(2).search('').draw();
+                            $('input.filter_email').val('');
+                            $thisCusTable.column(3).search('').draw();
+                        }
+                        // alert(value);
+                        if (value.length > 0) {
+                            $('input.filter_lastname').val('');
+                            $('input.filter_email').val('');
+                            document.getElementById("customerTable").style.display="table";
+                            document.getElementById("htcustomer").style.visibility = "visible";
+                            $thisCusTable.column(1).search('^' + value,true,true).draw();
+                        }  else {
+                            document.getElementById("htcustomer").style.visibility = "hidden";
+                            document.getElementById("customerTable").style.display="none";
+                            //$thisCusTable.search('').draw();
+                            $thisCusTable.column(1).search('').draw();
+                            $('.dataTables_paginate').hide();
+                        }
+                    });
+                    $('input.filter_lastname').on( 'keyup click', function () {
+                        var value = jQuery.fn.DataTable.ext.type.search.string($('#filter_lastname').val());
+                        // alert(value);
+                        if (value.length == 1) {
+                            $('input.filter_name').val('');
+                            $thisCusTable.column(1).search('').draw();
+                            $('input.filter_email').val('');
+                            $thisCusTable.column(3).search('').draw();
+                        }
+                        if (value.length > 0) {
+                            $('input.filter_name').val('');
+                            $('input.filter_email').val('');
+                            document.getElementById("customerTable").style.display="table";
+                            document.getElementById("htcustomer").style.visibility = "visible";
+                            $thisCusTable.column(2).search('^' + value,true,true).draw();
+                        }  else {
+                            document.getElementById("htcustomer").style.visibility = "hidden";
+                            document.getElementById("customerTable").style.display="none";
+                            //$thisCusTable.search('').draw();
+                            $thisCusTable.column(2).search('').draw();
+                            $('.dataTables_paginate').hide();
+                        }
+                    });
+                    $('input.filter_email').on( 'keyup click', function () {
+                        var value = jQuery.fn.DataTable.ext.type.search.string($('#filter_email').val());
+                        // alert(value);
+                        if (value.length == 1) {
+                            $('input.filter_name').val('');
+                            $thisCusTable.column(1).search('').draw();
+                            $('input.filter_lastname').val('');
+                            $thisCusTable.column(2).search('').draw();
+                        }
+                        if (value.length > 0) {
+                            $('input.filter_name').val('');
+                            $('input.filter_lastname').val('');
+                            document.getElementById("customerTable").style.display="table";
+                            document.getElementById("htcustomer").style.visibility = "visible";
+                            $thisCusTable.column(3).search('^' + value,true,true).draw();
+                        }  else {
+                            document.getElementById("htcustomer").style.visibility = "hidden";
+                            document.getElementById("customerTable").style.display="none";
+                            //$thisCusTable.search('').draw();
+                            $thisCusTable.column(3).search('').draw();
+                            $('.dataTables_paginate').hide();
+                    
+                        }
+                    });
+                }
+            });
+            return false;
+        });
+    });
+</script>
+{% endblock %}

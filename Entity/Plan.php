@@ -1,0 +1,1254 @@
+<?php
+// src/NvCarga/Bundle/Entity/Plan.php
+
+namespace NvCarga\Bundle\Entity;
+
+use Symfony\Component\HttpFoundation\File\File;
+use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Validator\Constraints as Assert;
+
+/**
+ * @ORM\Entity
+ * @ORM\Table(name="plan")
+ * @ORM\HasLifecycleCallbacks()
+ */
+class Plan
+{
+    /**
+     * @ORM\Id
+     * @ORM\Column(type="integer")
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    protected $id;
+    /**
+     * @Assert\NotBlank(message = "El nombre de la plan NO puede estar vacío")
+     * @Assert\Length(
+     *      min = 5,
+     *	    max = 100,
+     *      minMessage = "El nombre de la plan debe tener al menos {{ limit }} caracteres",
+     *      maxMessage = "El nombre de la plan no debe tener mas de {{ limit }} caracteres",
+     * )
+     * @ORM\Column(type="string", length=100, unique=true, nullable=false)
+     */
+    protected $name;
+    /**
+     * @Assert\NotBlank(message = "La descripción del plan NO puede estar vacío")
+     * @Assert\Length(
+     *      min = 10,
+     *      minMessage = "La descripción del plan debe tener al menos {{ limit }} caracteres",
+     * )
+     * @ORM\Column(type="text", nullable=false)
+     */
+    protected $description;
+    /** 
+    * @ORM\Column(type="string", length=255, nullable=true)
+    */ 
+    protected $stripePlan;
+    /**
+     * @Assert\NotBlank(message = "Debe asignar el precio del plan")
+     * @Assert\Range(
+     *      min = 0.1,
+     *      minMessage = "El valor debe ser igual o mayor a {{ limit }}$",
+     * )
+     * @ORM\Column(type="decimal", precision=10, scale=2)
+     */
+    protected $price;
+    /**
+     * @ORM\OneToMany(targetEntity="Maincompany", mappedBy="plan")
+     */
+    protected $companies;
+    /**
+     * @ORM\OneToMany(targetEntity="Subscriber", mappedBy = "plan")
+     */
+    protected $subscribers;
+    /** 
+     * @Assert\NotBlank(message = "Debe asignar el valor para para esta cantidad")
+     * @Assert\Range(
+     *      min = 10,
+     *      minMessage = "El número máximo de GUÍAS debe ser al menos {{ limit }}",
+     * )
+     * @ORM\Column(type="integer", nullable=false) 
+    */
+    protected $maxguides;
+    /** 
+    * @Assert\NotBlank(message = "Debe asignar el valor para para esta cantidad")
+     * @Assert\Range(
+     *      min = 10,
+     *      minMessage = "El número máximo de PAQUETES debe ser al menos {{ limit }}",
+     * )
+     * @ORM\Column(type="integer", nullable=false) 
+    */
+    protected $maxreceipts;
+    /** 
+    * @Assert\NotBlank(message = "Debe asignar el valor para para esta cantidad")
+     * @Assert\Range(
+     *      min = 10,
+     *      minMessage = "El número máximo de RECIBOS debe ser al menos {{ limit }}",
+     * )
+     * @ORM\Column(type="integer", nullable=false) 
+    */
+    protected $maxwhrecs;
+    /** 
+    * @Assert\NotBlank(message = "Debe asignar el valor para para esta cantidad")
+     * @Assert\Range(
+     *      min = 10,
+     *      minMessage = "El número máximo de CONSOLIDADOS debe ser al menos {{ limit }}",
+     * )
+     * @ORM\Column(type="integer", nullable=false) 
+    */
+    protected $maxconsolidates;
+    /** 
+    * @Assert\NotBlank(message = "Debe asignar el valor para para esta cantidad")
+     * @Assert\Range(
+     *      min = 10,
+     *      minMessage = "El número máximo de FACTURAS debe ser al menos {{ limit }}",
+     * )
+     * @ORM\Column(type="integer", nullable=false) 
+    */
+    protected $maxbills;
+    /** 
+    * @Assert\NotBlank(message = "Debe asignar el valor para para esta cantidad")
+     * @Assert\Range(
+     *      min = 10,
+     *      minMessage = "El número máximo de CLIENTES debe ser al menos {{ limit }}",
+     * )
+     * @ORM\Column(type="integer", nullable=false) 
+    */
+    protected $maxcustomers;
+    /** 
+    * @Assert\NotBlank(message = "Debe asignar el valor para para esta cantidad")
+     * @Assert\Range(
+     *      min = 10,
+     *      minMessage = "El número máximo de USUARIOS debe ser al menos {{ limit }}",
+     * )
+     * @ORM\Column(type="integer", nullable=false) 
+    */
+    protected $maxusers;
+    /** 
+    * @Assert\NotBlank(message = "Debe asignar el valor para para esta cantidad")
+     * @Assert\Range(
+     *      min = 10,
+     *      minMessage = "El número máximo de CASILLEROS debe ser al menos {{ limit }}",
+     * )
+     * @ORM\Column(type="integer", nullable=false) 
+    */
+    protected $maxpoboxes;
+    /** 
+    * @Assert\NotBlank(message = "Debe asignar el valor para para esta cantidad")
+     * @Assert\Range(
+     *      min = 10,
+     *      minMessage = "El número máximo de AGENCIAS debe ser al menos {{ limit }}",
+     * )
+     * @ORM\Column(type="integer", nullable=false) 
+    */
+    protected $maxagencies;
+    /** 
+    * @Assert\NotBlank(message = "Debe asignar el valor para para esta cantidad")
+     * @Assert\Range(
+     *      min = 10,
+     *      minMessage = "El número máximo de BOLSAS debe ser al menos {{ limit }}",
+     * )
+     * @ORM\Column(type="integer", nullable=false) 
+    */
+    protected $maxbags;
+    /** 
+    * @Assert\NotBlank(message = "Debe asignar el valor para para esta cantidad")
+     * @Assert\Range(
+     *      min = 10,
+     *      minMessage = "El número máximo de CUENTAS BANCARIAS debe ser al menos {{ limit }}",
+     * )
+     * @ORM\Column(type="integer", nullable=false) 
+    */
+    protected $maxaccounts;
+    /** 
+    * @Assert\NotBlank(message = "Debe asignar el valor para para esta cantidad")
+     * @Assert\Range(
+     *      min = 10,
+     *      minMessage = "El número máximo de ALERTAS debe ser al menos {{ limit }}",
+     * )
+     * @ORM\Column(type="integer", nullable=false) 
+    */
+    protected $maxalerts;
+    /** 
+    * @Assert\NotBlank(message = "Debe asignar el valor para para esta cantidad")
+     * @Assert\Range(
+     *      min = 10,
+     *      minMessage = "El número máximo de SERVICIOS ADICIONALES debe ser al menos {{ limit }}",
+     * )
+     * @ORM\Column(type="integer", nullable=false) 
+    */
+    protected $maxadservices;
+    /** 
+    * @Assert\NotBlank(message = "Debe asignar el valor para para esta cantidad")
+     * @Assert\Range(
+     *      min = 10,
+     *      minMessage = "El número máximo de EMPRESAS LOCALES debe ser al menos {{ limit }}",
+     * )
+     * @ORM\Column(type="integer", nullable=false) 
+    */
+    protected $maxcompanies;
+    /** 
+    * @Assert\NotBlank(message = "Debe asignar el valor para para esta cantidad")
+     * @Assert\Range(
+     *      min = 1,
+     *      minMessage = "El número máximo de PAÍSES debe ser al menos {{ limit }}",
+     * )
+     * @ORM\Column(type="integer", nullable=false) 
+    */
+    protected $maxcountries;
+    /** 
+    * @Assert\NotBlank(message = "Debe asignar el valor para para esta cantidad")
+     * @Assert\Range(
+     *      min = 1,
+     *      minMessage = "El número máximo de ADMINISTRADORES debe ser al menos {{ limit }}",
+     * )
+     * @ORM\Column(type="integer", nullable=false) 
+    */
+    protected $maxadmins;
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    protected $admins;
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    protected $formats;
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    protected $countries;
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    protected $guides;
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    protected $receipts;
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    protected $whrecs;
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    protected $consolidates;
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    protected $bills;
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    protected $customers;
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    protected $users;
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    protected $poboxes;
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    protected $agencies;
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    protected $bags;
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    protected $accounts;
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    protected $alerts;
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    protected $adservices;
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    protected $compans;
+    
+    
+    public function __construct()
+    {
+        $this->companies = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->subscribers = new \Doctrine\Common\Collections\ArrayCollection();
+        
+    }
+    public function __toString() {
+        return (string) ($this->getName() . ' ($' . $this->getPrice() . '/mes)');
+    }
+
+    /**
+     * Get id
+     *
+     * @return integer
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set name
+     *
+     * @param string $name
+     *
+     * @return Plan
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * Get name
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Set description
+     *
+     * @param string $description
+     *
+     * @return Plan
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * Get description
+     *
+     * @return string
+     */
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    /**
+     * Set price
+     *
+     * @param string $price
+     *
+     * @return Plan
+     */
+    public function setPrice($price)
+    {
+        $this->price = $price;
+
+        return $this;
+    }
+
+    /**
+     * Get price
+     *
+     * @return string
+     */
+    public function getPrice()
+    {
+        return $this->price;
+    }
+
+    /**
+     * Set maxguides
+     *
+     * @param integer $maxguides
+     *
+     * @return Plan
+     */
+    public function setMaxguides($maxguides)
+    {
+        $this->maxguides = $maxguides;
+
+        return $this;
+    }
+
+    /**
+     * Get maxguides
+     *
+     * @return integer
+     */
+    public function getMaxguides()
+    {
+        return $this->maxguides;
+    }
+
+    /**
+     * Set maxreceipts
+     *
+     * @param integer $maxreceipts
+     *
+     * @return Plan
+     */
+    public function setMaxreceipts($maxreceipts)
+    {
+        $this->maxreceipts = $maxreceipts;
+
+        return $this;
+    }
+
+    /**
+     * Get maxreceipts
+     *
+     * @return integer
+     */
+    public function getMaxreceipts()
+    {
+        return $this->maxreceipts;
+    }
+
+    /**
+     * Set maxwhrecs
+     *
+     * @param integer $maxwhrecs
+     *
+     * @return Plan
+     */
+    public function setMaxwhrecs($maxwhrecs)
+    {
+        $this->maxwhrecs = $maxwhrecs;
+
+        return $this;
+    }
+
+    /**
+     * Get maxwhrecs
+     *
+     * @return integer
+     */
+    public function getMaxwhrecs()
+    {
+        return $this->maxwhrecs;
+    }
+
+    /**
+     * Set maxconsolidates
+     *
+     * @param integer $maxconsolidates
+     *
+     * @return Plan
+     */
+    public function setMaxconsolidates($maxconsolidates)
+    {
+        $this->maxconsolidates = $maxconsolidates;
+
+        return $this;
+    }
+
+    /**
+     * Get maxconsolidates
+     *
+     * @return integer
+     */
+    public function getMaxconsolidates()
+    {
+        return $this->maxconsolidates;
+    }
+
+    /**
+     * Set maxbills
+     *
+     * @param integer $maxbills
+     *
+     * @return Plan
+     */
+    public function setMaxbills($maxbills)
+    {
+        $this->maxbills = $maxbills;
+
+        return $this;
+    }
+
+    /**
+     * Get maxbills
+     *
+     * @return integer
+     */
+    public function getMaxbills()
+    {
+        return $this->maxbills;
+    }
+
+    /**
+     * Set maxcustomers
+     *
+     * @param integer $maxcustomers
+     *
+     * @return Plan
+     */
+    public function setMaxcustomers($maxcustomers)
+    {
+        $this->maxcustomers = $maxcustomers;
+
+        return $this;
+    }
+
+    /**
+     * Get maxcustomers
+     *
+     * @return integer
+     */
+    public function getMaxcustomers()
+    {
+        return $this->maxcustomers;
+    }
+
+    /**
+     * Set maxusers
+     *
+     * @param integer $maxusers
+     *
+     * @return Plan
+     */
+    public function setMaxusers($maxusers)
+    {
+        $this->maxusers = $maxusers;
+
+        return $this;
+    }
+
+    /**
+     * Get maxusers
+     *
+     * @return integer
+     */
+    public function getMaxusers()
+    {
+        return $this->maxusers;
+    }
+
+    /**
+     * Set maxpoboxes
+     *
+     * @param integer $maxpoboxes
+     *
+     * @return Plan
+     */
+    public function setMaxpoboxes($maxpoboxes)
+    {
+        $this->maxpoboxes = $maxpoboxes;
+
+        return $this;
+    }
+
+    /**
+     * Get maxpoboxes
+     *
+     * @return integer
+     */
+    public function getMaxpoboxes()
+    {
+        return $this->maxpoboxes;
+    }
+
+    /**
+     * Set maxagencies
+     *
+     * @param integer $maxagencies
+     *
+     * @return Plan
+     */
+    public function setMaxagencies($maxagencies)
+    {
+        $this->maxagencies = $maxagencies;
+
+        return $this;
+    }
+
+    /**
+     * Get maxagencies
+     *
+     * @return integer
+     */
+    public function getMaxagencies()
+    {
+        return $this->maxagencies;
+    }
+
+    /**
+     * Set maxbags
+     *
+     * @param integer $maxbags
+     *
+     * @return Plan
+     */
+    public function setMaxbags($maxbags)
+    {
+        $this->maxbags = $maxbags;
+
+        return $this;
+    }
+
+    /**
+     * Get maxbags
+     *
+     * @return integer
+     */
+    public function getMaxbags()
+    {
+        return $this->maxbags;
+    }
+
+    /**
+     * Set maxaccounts
+     *
+     * @param integer $maxaccounts
+     *
+     * @return Plan
+     */
+    public function setMaxaccounts($maxaccounts)
+    {
+        $this->maxaccounts = $maxaccounts;
+
+        return $this;
+    }
+
+    /**
+     * Get maxaccounts
+     *
+     * @return integer
+     */
+    public function getMaxaccounts()
+    {
+        return $this->maxaccounts;
+    }
+
+    /**
+     * Set maxalerts
+     *
+     * @param integer $maxalerts
+     *
+     * @return Plan
+     */
+    public function setMaxalerts($maxalerts)
+    {
+        $this->maxalerts = $maxalerts;
+
+        return $this;
+    }
+
+    /**
+     * Get maxalerts
+     *
+     * @return integer
+     */
+    public function getMaxalerts()
+    {
+        return $this->maxalerts;
+    }
+
+    /**
+     * Set maxadservices
+     *
+     * @param integer $maxadservices
+     *
+     * @return Plan
+     */
+    public function setMaxadservices($maxadservices)
+    {
+        $this->maxadservices = $maxadservices;
+
+        return $this;
+    }
+
+    /**
+     * Get maxadservices
+     *
+     * @return integer
+     */
+    public function getMaxadservices()
+    {
+        return $this->maxadservices;
+    }
+
+    /**
+     * Set maxcompanies
+     *
+     * @param integer $maxcompanies
+     *
+     * @return Plan
+     */
+    public function setMaxcompanies($maxcompanies)
+    {
+        $this->maxcompanies = $maxcompanies;
+
+        return $this;
+    }
+
+    /**
+     * Get maxcompanies
+     *
+     * @return integer
+     */
+    public function getMaxcompanies()
+    {
+        return $this->maxcompanies;
+    }
+
+    /**
+     * Add company
+     *
+     * @param \NvCarga\Bundle\Entity\Maincompany $company
+     *
+     * @return Plan
+     */
+    public function addCompany(\NvCarga\Bundle\Entity\Maincompany $company)
+    {
+        $this->companies[] = $company;
+
+        return $this;
+    }
+
+    /**
+     * Remove company
+     *
+     * @param \NvCarga\Bundle\Entity\Maincompany $company
+     */
+    public function removeCompany(\NvCarga\Bundle\Entity\Maincompany $company)
+    {
+        $this->companies->removeElement($company);
+    }
+
+    /**
+     * Get companies
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getCompanies()
+    {
+        return $this->companies;
+    }
+
+    /**
+     * Add subscriber
+     *
+     * @param \NvCarga\Bundle\Entity\Subscriber $subscriber
+     *
+     * @return Plan
+     */
+    public function addSubscriber(\NvCarga\Bundle\Entity\Subscriber $subscriber)
+    {
+        $this->subscribers[] = $subscriber;
+
+        return $this;
+    }
+
+    /**
+     * Remove subscriber
+     *
+     * @param \NvCarga\Bundle\Entity\Subscriber $subscriber
+     */
+    public function removeSubscriber(\NvCarga\Bundle\Entity\Subscriber $subscriber)
+    {
+        $this->subscribers->removeElement($subscriber);
+    }
+
+    /**
+     * Get subscribers
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getSubscribers()
+    {
+        return $this->subscribers;
+    }
+
+    /**
+     * Set stripePlan
+     *
+     * @param string $stripePlan
+     *
+     * @return Plan
+     */
+    public function setStripePlan($stripePlan)
+    {
+        $this->stripePlan = $stripePlan;
+
+        return $this;
+    }
+
+    /**
+     * Get stripePlan
+     *
+     * @return string
+     */
+    public function getStripePlan()
+    {
+        return $this->stripePlan;
+    }
+
+    /**
+     * Set guides
+     *
+     * @param boolean $guides
+     *
+     * @return Plan
+     */
+    public function setGuides($guides)
+    {
+        $this->guides = $guides;
+
+        return $this;
+    }
+
+    /**
+     * Get guides
+     *
+     * @return boolean
+     */
+    public function getGuides()
+    {
+        return $this->guides;
+    }
+
+    /**
+     * Set receipts
+     *
+     * @param boolean $receipts
+     *
+     * @return Plan
+     */
+    public function setReceipts($receipts)
+    {
+        $this->receipts = $receipts;
+
+        return $this;
+    }
+
+    /**
+     * Get receipts
+     *
+     * @return boolean
+     */
+    public function getReceipts()
+    {
+        return $this->receipts;
+    }
+
+    /**
+     * Set whrecs
+     *
+     * @param boolean $whrecs
+     *
+     * @return Plan
+     */
+    public function setWhrecs($whrecs)
+    {
+        $this->whrecs = $whrecs;
+
+        return $this;
+    }
+
+    /**
+     * Get whrecs
+     *
+     * @return boolean
+     */
+    public function getWhrecs()
+    {
+        return $this->whrecs;
+    }
+
+    /**
+     * Set consolidates
+     *
+     * @param boolean $consolidates
+     *
+     * @return Plan
+     */
+    public function setConsolidates($consolidates)
+    {
+        $this->consolidates = $consolidates;
+
+        return $this;
+    }
+
+    /**
+     * Get consolidates
+     *
+     * @return boolean
+     */
+    public function getConsolidates()
+    {
+        return $this->consolidates;
+    }
+
+    /**
+     * Set bills
+     *
+     * @param boolean $bills
+     *
+     * @return Plan
+     */
+    public function setBills($bills)
+    {
+        $this->bills = $bills;
+
+        return $this;
+    }
+
+    /**
+     * Get bills
+     *
+     * @return boolean
+     */
+    public function getBills()
+    {
+        return $this->bills;
+    }
+
+    /**
+     * Set customers
+     *
+     * @param boolean $customers
+     *
+     * @return Plan
+     */
+    public function setCustomers($customers)
+    {
+        $this->customers = $customers;
+
+        return $this;
+    }
+
+    /**
+     * Get customers
+     *
+     * @return boolean
+     */
+    public function getCustomers()
+    {
+        return $this->customers;
+    }
+
+    /**
+     * Set users
+     *
+     * @param boolean $users
+     *
+     * @return Plan
+     */
+    public function setUsers($users)
+    {
+        $this->users = $users;
+
+        return $this;
+    }
+
+    /**
+     * Get users
+     *
+     * @return boolean
+     */
+    public function getUsers()
+    {
+        return $this->users;
+    }
+
+    /**
+     * Set poboxes
+     *
+     * @param boolean $poboxes
+     *
+     * @return Plan
+     */
+    public function setPoboxes($poboxes)
+    {
+        $this->poboxes = $poboxes;
+
+        return $this;
+    }
+
+    /**
+     * Get poboxes
+     *
+     * @return boolean
+     */
+    public function getPoboxes()
+    {
+        return $this->poboxes;
+    }
+
+    /**
+     * Set agencies
+     *
+     * @param boolean $agencies
+     *
+     * @return Plan
+     */
+    public function setAgencies($agencies)
+    {
+        $this->agencies = $agencies;
+
+        return $this;
+    }
+
+    /**
+     * Get agencies
+     *
+     * @return boolean
+     */
+    public function getAgencies()
+    {
+        return $this->agencies;
+    }
+
+    /**
+     * Set bags
+     *
+     * @param boolean $bags
+     *
+     * @return Plan
+     */
+    public function setBags($bags)
+    {
+        $this->bags = $bags;
+
+        return $this;
+    }
+
+    /**
+     * Get bags
+     *
+     * @return boolean
+     */
+    public function getBags()
+    {
+        return $this->bags;
+    }
+
+    /**
+     * Set accounts
+     *
+     * @param boolean $accounts
+     *
+     * @return Plan
+     */
+    public function setAccounts($accounts)
+    {
+        $this->accounts = $accounts;
+
+        return $this;
+    }
+
+    /**
+     * Get accounts
+     *
+     * @return boolean
+     */
+    public function getAccounts()
+    {
+        return $this->accounts;
+    }
+
+    /**
+     * Set alerts
+     *
+     * @param boolean $alerts
+     *
+     * @return Plan
+     */
+    public function setAlerts($alerts)
+    {
+        $this->alerts = $alerts;
+
+        return $this;
+    }
+
+    /**
+     * Get alerts
+     *
+     * @return boolean
+     */
+    public function getAlerts()
+    {
+        return $this->alerts;
+    }
+
+    /**
+     * Set adservices
+     *
+     * @param boolean $adservices
+     *
+     * @return Plan
+     */
+    public function setAdservices($adservices)
+    {
+        $this->adservices = $adservices;
+
+        return $this;
+    }
+
+    /**
+     * Get adservices
+     *
+     * @return boolean
+     */
+    public function getAdservices()
+    {
+        return $this->adservices;
+    }
+
+    /**
+     * Set compans
+     *
+     * @param boolean $compans
+     *
+     * @return Plan
+     */
+    public function setCompans($compans)
+    {
+        $this->compans = $compans;
+
+        return $this;
+    }
+
+    /**
+     * Get compans
+     *
+     * @return boolean
+     */
+    public function getCompans()
+    {
+        return $this->compans;
+    }
+
+    /**
+     * Set maxcountries
+     *
+     * @param integer $maxcountries
+     *
+     * @return Plan
+     */
+    public function setMaxcountries($maxcountries)
+    {
+        $this->maxcountries = $maxcountries;
+
+        return $this;
+    }
+
+    /**
+     * Get maxcountries
+     *
+     * @return integer
+     */
+    public function getMaxcountries()
+    {
+        return $this->maxcountries;
+    }
+
+    /**
+     * Set countries
+     *
+     * @param boolean $countries
+     *
+     * @return Plan
+     */
+    public function setCountries($countries)
+    {
+        $this->countries = $countries;
+
+        return $this;
+    }
+
+    /**
+     * Get countries
+     *
+     * @return boolean
+     */
+    public function getCountries()
+    {
+        return $this->countries;
+    }
+
+    /**
+     * Set maxadmins
+     *
+     * @param integer $maxadmins
+     *
+     * @return Plan
+     */
+    public function setMaxadmins($maxadmins)
+    {
+        $this->maxadmins = $maxadmins;
+
+        return $this;
+    }
+
+    /**
+     * Get maxadmins
+     *
+     * @return integer
+     */
+    public function getMaxadmins()
+    {
+        return $this->maxadmins;
+    }
+
+    /**
+     * Set admins
+     *
+     * @param boolean $admins
+     *
+     * @return Plan
+     */
+    public function setAdmins($admins)
+    {
+        $this->admins = $admins;
+
+        return $this;
+    }
+
+    /**
+     * Get admins
+     *
+     * @return boolean
+     */
+    public function getAdmins()
+    {
+        return $this->admins;
+    }
+
+    /**
+     * Set formats
+     *
+     * @param boolean $formats
+     *
+     * @return Plan
+     */
+    public function setFormats($formats)
+    {
+        $this->formats = $formats;
+
+        return $this;
+    }
+
+    /**
+     * Get formats
+     *
+     * @return boolean
+     */
+    public function getFormats()
+    {
+        return $this->formats;
+    }
+}

@@ -1,0 +1,616 @@
+{% extends '::layout-pdf.html.twig' %}
+
+{% block body %}
+
+<style type="text/css">
+    table { page-break-inside:auto }
+    tr    { page-break-inside:avoid; page-break-after:auto }
+    thead { display:table-header-group }
+    tfoot { display:table-footer-group; page-break-inside:avoid; page-break-after:auto }
+    html *
+    {
+    // color: #000 !important;
+    font-family: Arial !important;
+    line-height: 1.2;
+    -webkit-print-color-adjust: exact; 
+    }
+    p {margin: 0;}
+
+    .table th, .table td {
+    line-height: 0.4;
+    text-align: center;
+    }
+
+    .table > tfoot > tr > th {
+        vertical-align: middle;
+        background-color: #dddddd;
+    }
+
+    .table > thead > tr > th {
+        vertical-align: middle;
+        background-color: #bbbbbb;
+    }
+
+    .container {
+    border:1px; 
+    border-style:none; 
+    border-color:#000000; 
+    padding: 3px 3px;	
+    }
+
+</style>
+{% set dimfactor = app.user.maincompany.dimfactor %}
+{% if 'peso'|trans == 'Lb' %}
+    {% set conwei = 0.454 %}
+{% else %}
+    {% set conwei = 1/0.454 %}
+{% endif %}
+{% if 'dimension'|trans == 'CF' %}
+    {% set convol = 1/35.3147 %}
+{% else %}
+    {% set convol =  35.3147 %}
+{% endif %}
+{% if entity.guides|length == 1 %} {# SOLO UNA GUIA.... FORMATO DIFERENTE #}
+    {% set tfactura = 0.0 %}
+    {% for guide in entity.guides %}
+        <div class="page" style="page-break-before: always;"> 
+            <div class="row"> {# GRUPO 1 #}
+                <div class="span6">
+                    {% if entity.maincompany.logo %}
+                        {% set name = companies_logos ~ entity.maincompany.logo %}
+                    {% else %}
+                        {% set name = companies_logos ~ 'default.png' %}
+                    {% endif %}
+                    <img src="{{ absolute_url(asset(name)) }}" alt="Logo" style="width:auto;height:auto;max-height:100px; max-width:200px;"><br>
+                    {{ guide.agency.address }}
+                    {{ guide.agency.city }}, {{ guide.agency.city.state }} {{ guide.agency.zip }}. {{ guide.agency.city.state.country }}<br>
+                    Ph. {{ guide.agency.phone }} <br>
+                    {{ guide.agency.maincompany.url }}<br>
+
+                </div>
+                <div class="span6">
+                    <center>
+                        <h2>FACTURA</h2>
+                        <div id="demo"></div>
+                        <h3>{{ entity.number }}</h3><br>
+                        <h3>{{ entity.creationdate |date('M d, Y') }}</h3>
+                    </center>
+                </div>
+            </div>
+            <br>
+            <div class="row"> {# GRUPO 2 #}
+                <div class="span6">
+                    <center>
+                        <p style="border:1px; border-style:solid; border-color:#000000; background-color: #bbbbbb;">
+                        <b>CLIENTE</b>
+                        </p>
+                        <p style="border:1px; border-style:solid; border-color:#000000;">
+                        {{ entity.customer }}<br>
+                        {{ entity.customer.adrdefault.address }}<br>
+                        {{ entity.customer.adrdefault.city }}-{{ entity.customer.adrdefault.city.state }}, {{ entity.customer.adrdefault.zip }}. {{ entity.customer.adrdefault.city.state.country }}<br>
+                        {{ entity.customer.email }}<br>
+                        {% if entity.customer.adrdefault.mobile %}
+                        Móvil:{{ entity.customer.adrdefault.mobile }}
+                        {% endif %}
+                        </p>
+                    </center>
+                </div>
+                <div class="span6">
+                    <center>
+                        <p style="border:1px; border-style:solid; border-color:#000000; background-color: #bbbbbb;">
+                        <b>Envíado a</b>
+                        </p>
+                        <p style="border:1px; border-style:solid; border-color:#000000;">
+                        {{ guide.addressee.name  }} {{ guide.addressee.lastname  }}<br>
+                        {{ guide.addressee.address }}<br>
+                        {{ guide.addressee.city }}-{{ guide.addressee.city.state }}, {{ guide.addressee.zip }}. {{ guide.addressee.city.state.country }}<br>
+                        {{ guide.addressee.customer.email }}<br>
+                        {% if guide.addressee.mobile %}
+                            Móvil:{{ guide.addressee.mobile }}
+                        {% endif %}
+                        </p>
+                    </center>
+                </div>
+            </div>
+            <br>
+            {# TABLA DE PAQUETES CONTENIDOS EN LA GUIA #}
+            <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                <th>Total</th><th colspan=3>Dimensiones</th><th colspan=3>Volumen - Peso</th>
+                </tr>
+                <tr>
+                <th>Piezas</th>
+                <th>Largo</th>
+                <th>Ancho</th>
+                <th>Alto</th>
+                <th>Peso ({% trans %}peso{% endtrans %}/{% trans %}altpeso{% endtrans %})</th>
+                <th>Volumen({% trans %}dimension{% endtrans %}/{% trans %}altdimension{% endtrans %})</th>
+                <th>VOL-{% trans %}peso{% endtrans %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set ptotal = 0 %}
+                {% set pvol = 0.0 %}
+                {% set pvoldim = 0.0 %}
+                {% set pvoldimkg = 0.0 %}
+                {% set pkg = 0.0 %}
+                {% set pwei = 0.0 %}
+                {% if guide.masterec %}
+                    {% set listrec = [guide.masterec] %}
+                {% else %}
+                    {% set listrec = guide.receipts %}
+                {% endif %}
+
+                {% for receipt in  listrec %}
+                    {% set vol = receipt.height*receipt.length*receipt.width/guide.agency.maincompany.convertvol %}
+                    {% set voldim = receipt.height*receipt.length*receipt.width/guide.agency.maincompany.dimfactor %}
+                    {% set voldimkg = receipt.height*receipt.length*receipt.width*2.54*2.54*2.54/6000 %}
+                    {% set pesoalt = receipt.weight*conwei %}
+                    {% set ptotal = ptotal + receipt.quantity %}
+                    {% set pvol = pvol + vol %}
+                    {% set pvoldim = pvoldim + voldim %}
+                    {% set pvoldimkg = pvoldimkg + voldimkg %}
+                    {% set pkg = pkg + pesoalt %}
+                    {% set pwei = pwei + receipt.weight %}
+                    <tr>
+                        <td>{{ receipt.quantity }}</td>
+                        <td>{{ receipt.length }}</td>
+                        <td>{{ receipt.width }}</td>
+                        <td>{{ receipt.height }}</td>
+                        <td>{{ receipt.weight }}/{{ (receipt.weight*conwei)|number_format(2, '.', ',') }}</td>
+                        <td>{{ vol|number_format(2, '.', ',') }}/{{ (vol*convol)|number_format(2, '.', ',') }}</td>
+                        <td>{{ voldim|number_format(2, '.', ',') }}</td>
+                    </tr>
+                {% endfor %}
+                <tr>
+                    <th>{{ ptotal }} </th>
+                    <th colspan=3> Total </th>
+                    <th>{{ pwei|number_format(2, '.', ',') }}/{{ (pwei*conwei)|number_format(2, '.', ',') }} </th>
+                    <th>{{ pvol|number_format(2, '.', ',') }}/{{ (pvol*convol)|number_format(2, '.', ',') }} </th>
+                    <th>{{ pvoldim|number_format(2, '.', ',') }} </th>
+                </tr>
+                {% set subtotal = guide.freight + guide.volfreight +  guide.taxpaid  + guide.insurancepaid +  guide.otherfees %}
+            </tbody>
+            </table> {# FIN DE TABLA DE PAQUETES CONTENIDOS EN LA GUIA #} 
+
+            <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                <th colspan=9 >Servicios para {% trans %}Guía{% endtrans %} {{ guide.number }}</th>
+                </tr>
+                <tr>
+                <th colspan=3>Nombre</th><th>Tamaño</th><th>Cantidad</th><th colspan=2>Precio ($)</th><th colspan=2>Total ($)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td  colspan=3>{{ guide.tariff.name }}</td>
+                    <td>{{ guide.tariff.measure }}</td>
+                    {% if guide.tariff.measure.name == "Lb" %}
+                        {% set tam =  guide.paidweight %}
+                    {% else %}
+                        {% set tam =  pvol %}
+                    {% endif %}
+                    <td>{{ tam|number_format(2, '.', ',') }}</td>
+                    <td colspan=2>{{ guide.measurevalue }}</td>
+                    {% set pago = tam*guide.measurevalue %}
+                    <td style="text-align: right; background-color: #bbbbbb;" colspan=2>{{ pago|number_format(2, '.', ',') }}</td>
+                </tr>
+                <tr>
+                    <td  colspan=3>Impuesto</td>
+                    <td>%</td>
+                    <td>{{ pago|number_format(2, '.', ',') }}</td>
+                    <td colspan=2>{{ guide.taxper }}</td>
+                    <td style="text-align: right; background-color: #bbbbbb;" colspan=2> {{ guide.taxpaid }}</td>
+                </tr>
+                <tr>
+                    <td  colspan=3>Seguro</td>
+                    <td>%</td>
+                    <td>{{ guide.declared }}</td>
+                    <td colspan=2>{{ guide.insuranceper }}</td>
+                    <td style="text-align: right; background-color: #bbbbbb;" colspan=2> {{ guide.insurancepaid }}</td>
+                </tr>
+                <tr>
+                    <td colspan=3>Otros cargos</td>
+                    <td>$</td>
+                    <td>N/A</td>
+                    <td colspan=2>N/A</td>
+                    <td style="text-align: right; background-color: #bbbbbb;" colspan=2> {{ guide.otherfees }}</td>
+                </tr>
+                {% set sserv = 0 %}
+                {% for service in services if ((service.guide == guide) and (service.adservice.medependof|length == 0)) %}
+                    {% if 'paypal' not in service.adservice.name|lower %}
+                        <tr>
+                            {% set sserv = sserv + service.total %}
+                            <td colspan=3>{{ service.adservice.name }}</td><td >{{ service.adservice.measure }}</td><td>{{ service.amount }}</td><td colspan=2>{{ service.adservice.price }}</td><td style="text-align: right; background-color: #bbbbbb;" colspan=2>{{ service.total }}</td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+                {% if guide.tariff.additional > 0 %}
+                    <tr>
+                    {% set sserv = sserv + guide.tariff.additional %}
+                    <td colspan=3>{{ guide.tariff.labeladditional}}</td><td >$</td><td>N/A</td><td colspan=2>N/A</td><td style="text-align: right; background-color: #bbbbbb;" colspan=2>{{ guide.tariff.additional }}</td>
+                    </tr>
+                {% endif %} 
+            </tbody>
+            </table>
+
+            <div class="row">
+                <div class="span6">
+                    Comment
+                    <div class="container">
+                        <p style="width:45%; word-wrap:break-word; border-style:solid; ">{{ termcond }}</p>
+                    </div>
+                    <h2> {{ entity.status  }}</h2>
+                </div>
+                <div class="span6">
+                    <table class="table">
+                    <tbody>
+                        <tr>
+                            {% set subtotal = subtotal + sserv %}
+                            <td style="text-align: left;">Subtotal</td><td></td>
+                            <td style="text-align: right; background-color: #bbbbbb;">${{ subtotal |number_format(2, '.', ',') }} </td> 
+                        </tr>
+                        {% set sserv = 0 %}
+                        {% for service in services if ((service.guide == guide) and (service.adservice.medependof|length > 0)) %}
+                            <tr>
+                                {% set sserv = sserv + service.total %}
+                                <td style="text-align: left;">{{ service.adservice.name }}</td><td>{{ service.adservice.price }}</td><td style="text-align: right; background-color: #bbbbbb;" colspan=2>${{ service.total }} </td>
+                            </tr>
+                        {% endfor %}
+                        <tr>
+                            {% set subtotal = subtotal + sserv %}
+                            <td style="text-align: left;">Total Servicios</td><td></td>
+                            <td style="text-align: right; background-color: #bbbbbb;">${{ subtotal |number_format(2, '.', ',') }}</td>
+                        </tr>
+                        <tr>
+                            <td style="text-align: left;">Descuento</td> <td></td> 
+                            <td style="text-align: right; background-color: #bbbbbb;">${{ guide.discount }}</td>
+                        </tr>
+                        <tr>
+                            {% set subtotal = subtotal + sserv %}
+                            <td style="text-align: left;">Pago inicial</td><td></td>
+                            <td style="text-align: right; background-color: #bbbbbb;">${{ guide.downpayment }}</td>
+                        </tr>
+                        {% set sserv = 0 %}
+                        {% for service in services if ((service.guide == guide) and (service.adservice.medependof|length == 0)) %}
+                            {% if 'paypal' in service.adservice.name|lower %}
+                                <tr>
+                                    {% set sserv = sserv + service.total %}
+                                    <td style="text-align: left;">{{ service.adservice.name }}</td><td>{{ service.adservice.price }} {{ service.adservice.measure }}</td><td style="text-align: right; background-color: #bbbbbb;" colspan=2>${{ service.total }}</td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                        {% set gtotal = guide.totalpaid - guide.downpayment %}
+                        {% set tfactura = tfactura + gtotal %}
+                        <tr>
+                            <th colspan=2 style="text-align: center; background-color: #bbbbbb;"><h4>Total {% trans %}Guía{% endtrans %}</h4></th> 
+                            <th style="text-align: right; background-color: #bbbbbb;"><h4>${{ gtotal }}</h4></th>
+                        </tr>
+                    </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endfor %} 
+        {% if account %}
+            Wire Intructions. <br><br>
+
+            Payments from USA. 
+
+            <table class="table table-striped table-bordered">
+            <thead>
+            <tr>
+            <th style="text-align:left">Bank</th><td>{{ account.bankname }}</td>
+            </tr>
+            <tr>
+            <th style="text-align:left">Account</th><td>{{ account.number }}</td>
+            </tr>
+            <tr>
+            <th style="text-align:left">E-mail</th><td>{{ account.email }}</td>
+            </tr>
+            <tr>
+            <th style="text-align:left">Aba</th><td>{{ account.rtn }}</td>
+            </tr>
+            <tr>
+            <th style="text-align:left">Name</th><td>{{ account.holdername }}</td>
+            </tr>
+            </thead>
+            <tfoot>
+            <tr>
+            <td colspan=2><h3>If you make the wire from another bank, should cover banking commission.</h3></td>
+            </tr>
+            </tfoot>
+            </table>
+        {% endif %}
+        Pagos from Peru. 
+
+            <table class="table table-striped">
+            <thead>
+            <tr>
+            <th style="text-align:left">Website</th>
+            <td>
+            {% set link='http://' ~ app.user.maincompany.url %}
+            <td><a href="{{ link }}"><h3 style="color:blue;">{{ app.user.maincompany.url }}</h3></a></td>
+            <td>Opción "Pagos"</td>
+            </tr>
+            </thead>
+            </table>
+{% else %} {# FORMATO PARA MULTIPLES GUIAS #}
+    {% set guide =  entity.guides|first %}
+<div class="row"> {# GRUPO 1 #}
+<div class="col-print-8">
+      &nbsp; &nbsp; &nbsp;
+        {% if entity.maincompany.logo %}
+        {% set name = companies_logos ~ entity.maincompany.logo %}
+    {% else %}
+        {% set name = companies_logos ~ 'default.png' %}
+    {% endif %}
+        <img src="{{ absolute_url(asset(name)) }}" alt="Logo" style="width:auto;height:auto;max-height:100px; max-width:200px;"><br>
+</div>
+
+<div class="col-print-4">
+{{ guide.agency.address }}<br />
+{{ guide.agency.city }}, {{ guide.agency.city.state }} {{ guide.agency.zip }}. {{ guide.agency.city.state.country }}<br />
+Ph. {{ guide.agency.phone }} <br />
+{{ guide.agency.maincompany.url }}<br />
+</div>
+</div>
+
+<br />
+<div class="row"> {# GRUPO 2 #}
+<div class="col-print-7">
+      <table class="table table-striped table-bordered" style="margin-left: 0.5cm;">
+	<thead>
+	<tr>
+	<th style="text-align:center"><h3>Cliente</h3></th>
+	</tr>
+	</thead>
+	<tbody>
+	<tr>
+	<td style="text-align:center">
+	<p>{{ entity.customer }}<br />
+	{{ entity.customer.adrdefault.address }}<br />
+	{{ entity.customer.adrdefault.city }}-{{ entity.customer.adrdefault.city.state }}, {{ entity.customer.adrdefault.zip }}. 		{{ entity.customer.adrdefault.city.state.country }}<br />
+	{{ entity.customer.email }}<br />
+	{% if entity.customer.adrdefault.mobile %}
+	Móvil:{{ entity.customer.adrdefault.mobile }}
+	</p>
+	{% endif %}
+	</td>
+	</tr>
+	</tbody>
+	</table>
+</div>
+
+<div class="col-print-5">
+<center>
+<h2>FACTURA</h2>
+<div id="demo"></div>
+<h3>{{ entity.number }}</h3><br />
+<h3>{{ entity.creationdate |date('M d, Y') }}</h3>
+</center>
+</div>
+</div>
+<br />
+
+{# TABLA DE PAQUETES CONTENIDOS EN LA GUIA #}
+<table class="table table-striped table-bordered">
+<thead>
+<tr>
+<th colspan=5>PAQUETES</th>
+</tr>
+<tr>
+<th>Guía</th><th>Servicio</th><th>Piezas</th><th>Volumen</th><th>Peso({% trans %}peso{% endtrans %})</th>
+</tr>
+</thead>
+<tbody>
+{% for guide in entity.guides %}
+<tr>
+<td>
+{{ guide.number }}
+</td>
+<td>
+{{ guide.shippingtype }}
+</td>
+<td>
+{{ guide.pieces }}
+</td>
+<td style="text-align: left;">
+{% set volcad = '' %}
+{% set pri = true %}
+{% if guide.masterec %}
+{% set listrec = [guide.masterec] %}
+{% else %}
+{% set listrec = guide.receipts %}
+{% endif %}
+{% for receipt in listrec %}
+	{% set vol = (receipt.length*receipt.width*receipt.height/guide.agency.maincompany.convertvol)|number_format(2, '.', ',') %}
+	{% set dimen = receipt.length~'X'~receipt.width~'X'~receipt.height %}
+	{% if pri %}
+		{% set volcad = dimen ~ '('~vol~'dimension'|trans ~ ')' %}
+		{% set pri = false %}
+	{% else %}
+		{% set volcad =  volcad ~ ',  ' ~ dimen ~ '('~vol~'dimension'|trans ~ ')' %}
+	{% endif %} 
+{% endfor %}
+<p>{{ volcad }}</p>
+</td>
+<td>
+{{ guide.realweight }}
+</td>
+</tr>
+{% endfor %}
+
+</tbody>
+</table> {# FIN DE TABLA DE PAQUETES CONTENIDOS EN LA GUIA #} 
+
+
+{# TABLA DE PAQUETES CONTENIDOS EN LA GUIA #}
+<table class="table table-striped table-bordered">
+<thead>
+<tr>
+<th colspan=9>SERVICIOS</th>	
+
+</tr>
+<tr> 
+<th>Guía</th><th>Flete</th><th>Impuestos</th><th>Seguro</th><th>O. cargos</th><th>Serv. Adic</th><th>Descuento</th>
+<th>Pago incial</th><th>Total</th>
+</tr>
+</thead>
+<tbody>
+{% set totalbill = 0.00 %}
+{% for guide in entity.guides %}
+<tr>
+<td>
+{{ guide.number }}
+</td>
+<td style="text-align:right;">
+{{ (guide.freight + guide.volfreight)|number_format(2, '.', ',') }}
+</td>
+<td style="text-align:right;">
+{{ guide.taxpaid }}
+</td>
+<td style="text-align:right;">
+{{ guide.insurancepaid }}
+</td>
+<td style="text-align:right;">
+{{ guide.otherfees }}
+</td>
+<td style="text-align:right;">
+{% set sserv = 0 %}
+{% for service in services if (service.guide == guide)  %}
+	{% set sserv = sserv + service.total %}
+{% endfor %}
+{{ sserv|number_format(2, '.', ',') }}
+</td>
+<td style="text-align:right;">
+{{ guide.discount }}
+</td>
+<td style="text-align:right;">
+{{ guide.downpayment }}
+</td>
+<td style="text-align:right;">
+{{ guide.totalpaid }}
+</td>
+</tr>
+{% set totalbill = totalbill + guide.totalpaid %}
+{% endfor %}
+
+</tbody>
+<tfoot>
+<th colspan=8><h3>Total pagado</h3></th>
+<th style="text-align:right;"><h3>{{ totalbill|number_format(2, '.', ',') }}</h3></th>
+</tfoot>
+</table> {# FIN DE TABLA DE PAQUETES CONTENIDOS EN LA GUIA #}
+
+<div class="row">
+<div class="col-print-5">
+<p style="margin-left: 0.5cm; padding-left: 0.1cm; ">Comment</p>
+
+<p style="margin-left: 0.5cm; padding-left: 0.1cm;width:80%; word-wrap:break-word; border-style:solid;">{{ termcond }}</p>
+
+<p style="margin-left: 0.5cm; padding-left: 0.1cm; ">{{ entity.status }}</p>
+
+</div>
+
+<div class="col-print-7">
+{% if account %}
+Wire Intructions. <br><br>
+
+Payments from USA. 
+
+<table class="table table-striped table-bordered">
+<thead>
+<tr>
+<th style="text-align:left">Bank</th><td>{{ account.bankname }}</td>
+</tr>
+<tr>
+<th style="text-align:left">Account</th><td>{{ account.number }}</td>
+</tr>
+<tr>
+<th style="text-align:left">E-mail</th><td>{{ account.email }}</td>
+</tr>
+<tr>
+<th style="text-align:left">Aba</th><td>{{ account.rtn }}</td>
+</tr>
+<tr>
+<th style="text-align:left">Name</th><td>{{ account.holdername }}</td>
+</tr>
+</thead>
+<tfoot>
+<tr>
+<td colspan=2><b>If you make the wire from another bank, should cover banking commission.</b></td>
+</tr>
+</tfoot>
+</table>
+{% endif %}
+
+Pagos from Peru. 
+
+            <table class="table table-striped">
+            <thead>
+            <tr>
+            <th style="text-align:left">Website</th>
+            <td>
+            {% set link='http://' ~ app.user.maincompany.url %}
+            <td><a href="{{ link }}"><h3 style="color:blue;">{{ app.user.maincompany.url }}</h3></a></td>
+            <td>Opción "Pagos"</td>
+            </tr>
+            </thead>
+            </table>
+</div>
+</div>
+
+
+{% endif %}
+{% endblock %}
+{% block javascripts %}
+
+<script type="text/javascript">
+function isChrome() {
+  var isChromium = window.chrome,
+    winNav = window.navigator,
+    vendorName = winNav.vendor,
+    isOpera = winNav.userAgent.indexOf("OPR") > -1,
+    isIEedge = winNav.userAgent.indexOf("Edge") > -1,
+    isIOSChrome = winNav.userAgent.match("CriOS");
+
+  if(isIOSChrome){
+    return true;
+  } else if(isChromium !== null && isChromium !== undefined && vendorName === "Google Inc." && isOpera == false && isIEedge == false) {
+    return true;
+  } else { 
+    return false;
+  }
+}
+    function goback() {
+        window.history.go(-1);
+    }
+    function doprint() {
+
+        if (isChrome()) {
+                // alert('El navegador is chrome...');
+                window.setTimeout(function(){goback();}, 1000); 
+                window.print();
+        } else {
+                window.print();
+                goback();
+        }
+    }
+
+    $(document).ready(function () {
+        var thecode= {{ entity.number|json_encode|raw }};
+        $("#demo").barcode(
+         thecode, // Value barcode (dependent on the type of barcode)
+                "code128", // type (string)
+                {barWidth: 2, barHeight: 50, showHRI: false}
+        );
+        //doprint();
+    });
+</script>
+
+{% endblock %} 
+
+
+

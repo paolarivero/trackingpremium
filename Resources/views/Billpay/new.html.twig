@@ -1,0 +1,129 @@
+{% extends app.user.pobox is null
+    ? '::newbase.html.twig' 
+    : '::newbase-public.html.twig' %}
+
+{% block title %}
+    <title>{{ nameform }}</title>
+{% endblock %}
+
+{% form_theme form 'form/fields.html.twig' %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>{{ nameform }} a factura {{ entity.bill.number }}</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            {% if app.user.pobox is null %}
+                <li><a href="{{ url('billpay_verified') }}">Pagos</a></li>
+            {% else %}
+            {% endif %}
+            <li class="active">{{ nameform }} </li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+            {% for flashMessage in app.session.flashbag.get('warning') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        {{ form_start(form, {attr: {novalidate: 'novalidate', 'id': 'billpay_type' }}) }}
+        <div class="block-flat">
+            <div class="header">
+                {% set deuda = entity.bill.total - entity.bill.balance %}
+                <div class="row">
+                    <div class="col-sm-6 col-md-6">
+                        <h3> Total Factura: {{ entity.bill.total }}</h3>
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                        <h3> Deuda actual: {{ deuda }}</h3>
+                    </div>
+                </div>
+                <h3>Datos del pago</h3>
+            </div>
+            <div class="content">
+                {{ form_row(form.paydate) }}
+                {{ form_row(form.paidtype) }}
+                {{ form_row(form.account) }}
+                {{ form_row(form.amount) }}	
+                {{ form_row(form.currency) }}
+                {{ form_row(form.conversion) }}
+                {{ form_row(form.note) }}
+                <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        <td>
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default" >Regresar</button>
+                        </td>
+                        <td style="text-align:right;">
+                            {{ form_row(form.submit, { 'attr': {'class': 'btn btn-primary'} }) }}
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+            </div>
+        </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        {% if new %}
+            var monto = Number('{{ entity.bill.total }}') - Number('{{ entity.bill.balance }}');
+            $('#billpay_type_amount').val(monto);
+        {% endif %}
+        
+        $('#billpay_type_paydate').datepicker();
+        //$("#billpay_type_paydate").val($.datepicker.formatDate('mm/dd/yy', new Date()));
+        // $('#billpay_type_currency').select2();
+        $('#billpay_type_currency').change(function(){
+            if ($('#billpay_type_currency').val() != "{{ currency_ref }}" ) {
+                $('#billpay_type_conversion').prop('disabled',false);
+            } else {
+                $('#billpay_type_conversion').val("1.00000000")
+                $('#billpay_type_conversion').prop('disabled',true);
+            }
+        });
+        $('#billpay_type_currency').change();
+        $('#billpay_type_submit').click(function(evt) {
+            var pagar = Number($('#billpay_type_amount').val());
+            var deuda = Number({{ entity.bill.total }}) - Number({{ entity.bill.balance }});
+            if ($('#billpay_type_currency').val() != "{{ currency_ref }}" ) {
+                pagar = pagar*Number($('#billpay_type_conversion').val());
+            }
+            
+            if (pagar > deuda) {
+                funalert('No puede pagar mas de la deuda actual de la factura (' + deuda + '$)');
+                return false;
+            }
+            
+            var saldo = Number('{{ entity.bill.customer.refunded }}');
+            var nametype = $("#billpay_type_paidtype option:selected").text();
+            if (nametype == 'Saldo del cliente') {
+                if (pagar > saldo) {
+                    funalert('El cliente no tiene saldo suficiente para el monto seleccionado (Saldo: ' + saldo + ')');
+                    return false;
+                }   
+            }
+            var dt = new Date();
+            var time = dt.getHours() + ":" + dt.getMinutes() + ":" + dt.getSeconds();
+            $('#billpay_type_clock').val(time);
+            $('#billpay_type_conversion').prop('disabled',false);
+            $('#billpay_type_amount').val(pagar);
+            return true;
+        });
+    });
+</script>
+{% endblock %}

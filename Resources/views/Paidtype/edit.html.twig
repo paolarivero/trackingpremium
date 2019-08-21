@@ -1,0 +1,103 @@
+{% extends '::newbase.html.twig' %}
+{% block title %}
+    <title>Editar Tipo de Pago</title>
+{% endblock %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Editar Tipo de Pago</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('paidtype') }}">Tipos de Pago</a></li>
+            <li class="active">Editar</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    
+    <div class="cl-mcont">
+        {{ form_start(edit_form, {'attr': {'novalidate': 'novalidate'}}) }}
+        <div class="block-flat">
+            <div class="header">
+                <h3>Datos</h3>
+            </div>
+            <div class="content">
+                <div class="row">
+                    <div class="col-sm-4 col-md-4">
+                        {{ form_row(edit_form.name) }}
+                    </div>
+                    <div class="col-sm-4 col-md-4">
+                        {{ form_row(edit_form.description) }}
+                    </div>
+                    <div class="col-sm-4 col-md-4"  style="text-align: center;">
+                        {{ form_row(edit_form.active, { 'attr': {'class': 'icheck'} }) }}
+                    </div>
+                </div>
+                <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        <td>
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default" >Regresar</button>
+                        </td>
+                        <td style="text-align:center;">
+                            <button type="button" class="btn btn-default btn-flat bdelete" data-toggle="modal" data-target="#deletepaid">Eliminar</button>
+                        </td>
+                        <td style="text-align:right;">
+                            {{ form_row(edit_form.submit) }}
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {{ form_end(edit_form) }}
+        
+        <!-- Modal -->
+        <div class="modal fade colored-header md-effect-9" id="deletepaid" role="dialog">
+            <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                <button id="closecancelbill" type="button" class="close" data-dismiss="modal">&times;</button>
+                <center> <h2 class="modal-title">Confirme la eliminación</h2></center>
+                </div>
+                <div class="modal-body">
+                <center>
+                    <h2>Desea eliminar el tipo de pago <b>"{{ entity.name }}"</b></h2><br>
+                    
+                    <button type="button" class="btn btn-info btn-lg gotodelete">Confirmar</button>
+                </center>
+                </div>
+                
+                <div class="modal-footer">
+                <button id="closedeletepaid" type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>     
+            </div>
+        </div>
+        
+    </div>
+</div>
+       
+        
+{% endblock %}
+
+{% block javascripts %}
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.gotodelete').click(function(e) {
+            e.preventDefault();
+            var url="{{ path('paidtype_delete', { 'id': entity.id }) }}";
+            // alert('VOY A ANULAR LA FACTURA: ' + url);
+            window.location.href = url;
+            return false;
+        });
+    });
+</script>
+
+{% endblock %}

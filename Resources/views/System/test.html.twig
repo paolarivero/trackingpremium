@@ -1,0 +1,261 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>Prueba de Tracking Premium System</title>
+{% endblock %}
+{% block body -%}
+    <div id="pcont" class="container-fluid"><!-- INI CONTAINER FLUID-->
+        <div class="cl-mcont"><!-- INI CL-MONT -->
+            <div class="stats_bar"><!-- INI STAT-BAR-->
+                <div data-step="2" data-intro="&lt;strong&gt;Beautiful Elements&lt;/strong&gt; &lt;br/&gt; If you are looking for a different UI, this is for you!." class="butpro butstyle"><!-- INI DATA-INTRO -->
+                    <div class="sub">
+                        <h2>CLIENTS</h2><span id="total_clientes">170</span>
+                    </div>
+                    <div class="stat">
+                            <span class="spk1">
+                                <canvas style="display: inline-block; width: 74px; height: 16px; vertical-align: top;" width="74" height="16">
+                                </canvas>
+                            </span>
+                    </div>
+                </div>
+                <div class="butpro butstyle">
+                    <div class="sub">
+                        <h2>Ventas</h2><span>$951,611</span>
+                    </div>
+                    <div class="stat"><span class="up"> 13,5%</span>
+                    </div>
+                </div>
+                <div class="butpro butstyle">
+                    <div class="sub">
+                        <h2>Warehouses</h2><span>125</span>
+                    </div>
+                    <div class="stat"><span class="down"> 20,7%</span>
+                    </div>
+                </div>
+                <div class="butpro butstyle">
+                    <div class="sub">
+                        <h2>Guias</h2><span>18</span>
+                    </div>
+                    <div class="stat"><span class="equal"> 0%</span>
+                    </div>
+                </div>
+                <div class="butpro butstyle">
+                    <div class="sub">
+                        <h2>Consolidados</h2><span>3</span>
+                    </div>
+                    <div class="stat"><span class="spk2"></span>
+                    </div>
+                </div>
+                <div class="butpro butstyle">
+                    <div class="sub">
+                        <h2>Facturas</h2><span>184</span>
+                    </div>
+                    <div class="stat"><span class="spk3"></span>
+                    </div>
+                </div>
+            </div><!-- END STAT-BAR-->
+            <div class="row dash-cols"><!-- INI ROW DASH-COLS-->
+                <div class="col-sm-6 col-md-6">
+                    <div class="block">
+                        <div class="header no-border">
+                            <h2>Ventas</h2>
+                        </div>
+                        <div data-step="3" data-intro="&lt;strong&gt;Unique Styled Plugins&lt;/strong&gt; &lt;br/&gt; We put love in every detail to give a great user experience!." class="content blue-chart">
+                            <div id="site_statistics" style="height:180px;">
+                            </div>
+                        </div>
+                        <div class="content">
+                            <div class="stat-data">
+                                <div class="stat-blue">
+                                    <h2>1,254</h2><span>Total Ventas Mensuales</span>
+                                </div>
+                            </div>
+                            <div class="stat-data">
+                                <div class="stat-number">
+                                    <div>
+                                        <h2>83</h2>
+                                    </div>
+                                    <div>Total guias<br><span>(Diarias)</span>
+                                    </div>
+                                </div>
+                                <div class="stat-number">
+                                    <div>
+                                        <h2>57</h2>
+                                    </div>
+                                    <div>Ventas<br><span>(Diarias)</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="clear">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-6">
+                    <div class="block">
+                        <div class="header no-border">
+                            <h2>Trayectoria de Carga</h2>
+                        </div>
+                        <div class="block-flat">
+                            <div id="world-map" style="height: 300px;" class="content">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- END ROW DASH-COLS-->
+            <div class="row dash-cols">
+                <div class="col-sm-6 col-md-6">
+                    <div class="block">
+                        <div class="header">
+                            <h2>Guias <span class="pull-right"></span></h2>
+                            <h3>Listado de ultimas 5 guias</h3>
+                        </div>
+                        <div class="content no-padding">
+                            <ul class="items">
+                                <li><i class="fa fa-file-text"></i>Venezuela<span class="pull-right value">$35</span><small>Maritimo</small></li>
+                                <li><i class="fa fa-file-text"></i>Costa Rica<span class="pull-right value">$35</span><small>Aereo</small></li>
+                                <li><i class="fa fa-file-text"></i>Venezuela<span class="pull-right value">$35</span><small>Maritimo</small></li>
+
+                        </div>
+                        <div class="total-data bg-blue"><a href="#" data-toggle="dropdown" class="dropdown-toggle">
+                            <h2>Total <b class="caret"></b><span class="pull-right">$25.3</span></h2></a>
+                                <ul class="dropdown-menu">
+                                    <li><a href="#">Print receipt</a></li>
+                                    <li><a href="#">Send invoice to...</a></li>
+                                    <li><a href="#">Payment</a></li>
+                                </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-6">
+                    <div class="block-flat pie-widget">
+                        <div class="content no-padding">
+                            <h4 class="no-margin">Top 5 de destino</h4>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <div id="ticket-chart" style="height:160px;">
+                                    </div>
+                                </div>
+                                <div class="col-sm-8">
+                                    <table class="no-borders no-strip padding-sm">
+                                        <tbody class="no-border-x no-border-y">
+                                        <tr>
+                                            <td style="width:15px;">
+                                                <div data-color="#649BF4" class="legend">
+                                                </div>
+                                            </td>
+                                            <td>Caracas, Venezuela</td>
+                                            <td class="text-right"><b>$3.500</b></td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div data-color="#19B698" class="legend">
+                                                </div>
+                                            </td>
+                                            <td>Merida, Venezuela</td>
+                                            <td class="text-right"><b>$3.500</b></td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div data-color="#BD3B47" class="legend">
+                                                </div>
+                                            </td>
+                                            <td>Valencia, Venezuela</td>
+                                            <td class="text-right"><b>$3.500</b></td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div data-color="#DD4444" class="legend">
+                                                </div>
+                                            </td>
+                                            <td>San Jose, Costa Rica</td>
+                                            <td class="text-right"><b>$3.500</b></td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div data-color="#FD9C35" class="legend">
+                                                </div>
+                                            </td>
+                                            <td>Managua, Nicaragua</td>
+                                            <td class="text-right"><b>$3.500</b></td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="row stats">
+                                <div class="col-sm-6">
+                                    <div class="spk4 pull-right">
+                                    </div>
+                                    <p>New Visitors</p>
+                                    <h5>146</h5>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="spk5 pull-right">
+                                    </div>
+                                    <p>Old Visitors</p>
+                                    <h5>146</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row dash-cols">
+                <div class="col-sm-6 col-md-6">
+                    <div class="widget-block photo white-box weather-box">
+                        <div class="col-md-6 padding photo">
+                            <h2 class="text-center">Monday</h2>
+                            <h1 class="day">10/12/2013</h1>
+                        </div>
+                        <div class="col-md-6 red-box">
+                            <div class="padding text-center">
+                                <canvas id="sun-icon" width="130" height="215"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-6 col-md-6">
+                    <ul class="timeline">
+                        <li><i class="fa fa-comment"></i><span class="date">5 Jan</span>
+                            <div class="content">
+                                <p><strong>John</strong> has called Shenlong with <strong>You</strong>.</p><small>A minute ago</small>
+                            </div>
+                        </li>
+                        <li><i class="fa fa-envelope green"></i><span class="date">5 Jan</span>
+                            <div class="content"><i class="fa fa-paperclip pull-right"></i>
+                                <p><strong>Bob</strong><br>This is a message for you in your birthday.</p><a href="{{ asset('assets/assets/img/gallery/img4.jpg') }}" class="image-zoom"><img src="{{ asset('assets/assets/img/gallery/img4.jpg') }}" style="height:64px;" class="img-thumbnail"></a><a href="{{ asset('assets/assets/img/gallery/img6.jpg') }}" class="image-zoom"><img src="{{ asset('assets/assets/img/gallery/img6.jpg') }}" style="height:64px;" class="img-thumbnail"></a>
+                            </div>
+                        </li>
+                        <li><i class="fa fa-file red"></i><span class="date">5 Jan</span>
+                            <div class="content">
+                                <p><strong>Michael</strong> has wrote on your wall:</p>
+                                <blockquote>
+                                    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</p><small>Some historic guy</small>
+                                </blockquote>
+                            </div>
+                        </li>
+                        <li><i class="fa fa-globe purple"></i><span class="date">5 Jan</span>
+                            <div class="content">
+                                <p><strong>María</strong> This is a message for you in your birthday.</p>
+                            </div>
+                        </li>
+                    </ul>
+                </div><!-- END DATA-INTRO -->
+            </div><!-- END STAT-BAR-->
+        </div> <!-- END CL-MONT -->
+    </div> <!-- END CONTAINER FLUID-->
+{% endblock %}
+
+{# ACA SE PUEDE PONER LAS INSTRUCCIONES JAVASCRIPT o JQUERY que sean REQUERIDAS EN ESTA VISTA
+#}
+{% block javascripts %}
+    <script type="text/javascript">
+      $(document).ready(function(){
+        console.log('HOLA');
+        // alert('Ayudame....');
+      });
+    </script>
+{% endblock %}
+
+

@@ -1,0 +1,171 @@
+{% extends '::layout-pdf.html.twig' %}
+
+{% block body %}
+
+<style>
+table { page-break-inside:auto }
+    tr    { page-break-inside:avoid; page-break-after:auto }
+    thead { display:table-header-group }
+    tfoot { display:table-footer-group; page-break-inside:avoid; page-break-after:auto }
+
+.mytable td,  .mytable th, .mytable thead{
+   border: 1px solid black;
+} 
+
+</style> 
+
+{# <div class="container"> #}
+<div class="row">
+    <div class="span4">
+        {% if entity.maincompany.logo %}
+        {% set name = companies_logos ~ entity.maincompany.logo %}
+    {% else %}
+        {% set name = companies_logos ~ 'default.png' %}
+    {% endif %}
+      <img src="{{ absolute_url(asset(name)) }}" alt="Logo" style="width:auto;height:auto;max-height:100px; max-width:100px;"><br>
+	{{ entity.agency.name }}<br>
+	{{ entity.agency.address }}<br>
+	{{ entity.agency.city }}, {{ entity.agency.city.state }} {{ entity.agency.zip }}. {{ entity.agency.city.state.country }}<br>
+	Ph. {{ entity.agency.phone }} <br>
+	Info: {{ entity.agency.email }}<br>	
+    </div>
+
+    <div class="span4" >
+	<div id="demo"></div><br>
+	<h3> {% trans %}Warehouses{% endtrans %} Número {{ entity.number }} </h3><br>
+        Fecha: {{ entity.creationdate|date('m/d/Y') }}<br>
+	Procesada Por: {{ entity.receiptdby }}  <br> 
+    </div>
+</div>
+{# </div> #}
+
+<table class="table mytable">
+<thead>
+	{# <tr>
+	<th colspan=2 style="text-align:center;"><h3> {% trans %}Warehouses{% endtrans %} Número {{ entity.number }} </h3></th>
+	</tr> #}
+	<tr>
+	<th><center>REMITENTE</center></th>
+	<th><center>DESTINATARIO</center></th>
+	</tr>
+</thead>
+<tbody>
+	<tr>
+	<td>{{entity.shipper.adrdefault.name }} {{entity.shipper.adrdefault.lastname }}<br> 
+	    {{entity.shipper.adrdefault.address }}<br> 
+	    {{entity.shipper.adrdefault.city }} {{entity.shipper.adrdefault.city.state }} {{entity.shipper.adrdefault.city.state.country }}<br>
+	    {% if entity.shipper.adrdefault.phone %}	    
+		Tel:{{ entity.shipper.adrdefault.phone }}<br>
+	    {% else %}
+		{% if entity.shipper.adrdefault.mobile %}	    
+			Tel:{{ entity.shipper.adrdefault.mobile }}<br>
+		{% endif %}
+	    {% endif %}
+	     Email: {{ entity.shipper.email }}<br>
+	</td>
+	<td>{{ entity.receiver.name }} {{ entity.receiver.lastname }}<br> {{ entity.receiver.address }}<br>
+	    {{ entity.receiver.city }} {{ entity.receiver.city.state }} {{ entity.receiver.city.state.country }}<br>
+	    {% if entity.receiver.phone %}
+		Tel:{{ entity.receiver.phone }}<br>
+	    {% else %}
+		{% if entity.receiver.mobile %}	    
+			Tel:{{ entity.receiver.mobile }}<br>
+		{% endif %}
+	    {% endif %}
+	    Email: {{ entity.receiver.customer.email }}<br>
+	</td>
+	</tr>
+</tbody>
+</table>
+   {% set dimfactor = entity.agency.maincompany.dimfactor %}
+  <table class="table mytable">
+	<thead>
+	<tr>
+	<th colspan=6 style="text-align:center;">PAQUETE(S)</th>
+	</tr>
+	<tr>
+	<th style="text-align:center;">LARGO</th>
+	<th style="text-align:center;">ANCHO</th>
+	<th style="text-align:center;">ALTO</th>
+	<th style="text-align:center;">PESO (Lb/Kg)</th>
+	<th style="text-align:center;">VOLUMEN (Cf)</th>
+	<th style="text-align:center;">PESO VOL (Lb)</th>
+	</tr>
+	</thead>	
+	<tbody>
+	{% set listrec = entity.receipts %}
+	{% set vtotal = 0.0 %}
+	{% set wtotal = 0.0 %}
+	{% set ptotal = 0.0 %}
+	{% for receipt in listrec %}
+	<tr>
+		
+			{% set volumen = receipt.length*receipt.width*receipt.height/1728 %}
+			{% set weidim = receipt.length*receipt.width*receipt.height/dimfactor %}
+			<td style="text-align:right;">{{ receipt.length }}</td>
+			<td style="text-align:right;">{{ receipt.width }}</td>
+			<td style="text-align:right;">{{ receipt.height }}</td>
+			{% set peso = receipt.weight %}
+			<td style="text-align:right;">{{ peso }}/{{ (peso*0.454)|number_format(2, '.', ',') }} </td>
+			<td style="text-align:right;">{{ volumen|number_format(2, '.', ',') }}</td>
+			<td style="text-align:right;">{{ weidim|number_format(2, '.', ',') }}</td>
+			{% set vtotal = vtotal + volumen %}
+			{% set wtotal = wtotal + weidim %}
+			{% set ptotal = ptotal + peso %}
+		
+	</tr>
+	{% endfor %}
+	{% if listrec|length > 1 %}
+	<tr>
+    	<td colspan=3 style="text-align:center;"><b>TOTALES </b></td> 
+	<td style="text-align:right;">{{ ptotal|number_format(2, '.', ',') }}/{{ (ptotal*0.454)|number_format(2, '.', ',') }}</td>
+	<td style="text-align:right;">{{ vtotal|number_format(2, '.', ',') }}</td>
+	<td style="text-align:right;">{{ wtotal|number_format(2, '.', ',') }}</td>
+    	</tr>	
+	{% endif %}
+	</tbody>
+    </table>
+
+<script type="text/javascript">
+    function isChrome() {
+        var isChromium = window.chrome,
+            winNav = window.navigator,
+            vendorName = winNav.vendor,
+            isOpera = winNav.userAgent.indexOf("OPR") > -1,
+            isIEedge = winNav.userAgent.indexOf("Edge") > -1,
+            isIOSChrome = winNav.userAgent.match("CriOS");
+
+        if(isIOSChrome){
+            return true;
+        } else if(isChromium !== null && isChromium !== undefined && vendorName === "Google Inc." && isOpera == false && isIEedge == false) {
+            return true;
+        } else { 
+            return false;
+        }
+    }
+    function goback() {
+        window.history.go(-1);
+    }
+    function doprint() {
+        if (isChrome()) {
+            // alert('El navegador is chrome...');
+            window.setTimeout(function(){goback();}, 1000); 
+            window.print();
+        } else {
+            window.print();
+            goback();
+        }
+    }
+    $(document).ready(function () {
+		var thecode= {{ entity.number|json_encode|raw }};
+		$("#demo").barcode(
+			thecode, // Value barcode (dependent on the type of barcode)
+			"code128", // type (string)
+			{ barWidth: 2, barHeight: 50, showHRI: false}
+		);
+		doprint();
+    });
+</script>
+{% endblock %} 
+
+

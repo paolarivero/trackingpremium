@@ -1,0 +1,15 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+    <h1>Nuevo Tipo de Envío</h1>
+
+    {{ form(form) }}
+
+        <ul class="record_actions">
+    <li>
+        <a href="{{ path('shippingtype') }}">
+            Regresar a la lista de Tipos de Envío
+        </a>
+    </li>
+</ul>
+{% endblock %}

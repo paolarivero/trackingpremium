@@ -1,0 +1,202 @@
+{% extends app.user is null
+    ? '::layout_min.html.twig'
+    : '::base-system.html.twig' %}
+    
+{% block title %}
+    <title>Tracking de {% trans %}Recibo{% endtrans %}</title>
+{% endblock %}
+{% form_theme form 'form/fields.html.twig' %}
+{% block body -%}
+<style>
+tr.noBorder th {
+  border: 0;
+}
+.grayscale {-webkit-filter: grayscale(100%); filter: grayscale(100%);}
+</style>
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Tracking de {% trans %}Recibo{% endtrans %}</h2>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        {{ form_start(form, {attr: {novalidate: 'novalidate'}}) }}
+        {% if (app.user is null) or (app.user.pobox is not null) %}
+            <div class="block-flat">
+                <div class="header">
+                    <h2>Rastrear paquete </h2>
+                </div>
+                <div class="content">
+                    {{ form_row(form.number) }}
+                    {{ form_row(form.search) }}
+                    <div id="mensaje" class="alert alert-warning alert-dismissible fade in" role="alert">
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h3 class="alert-heading">NO EXISTE EL PAQUETE<br></h3>
+                        <p><b>El número de {% trans %}Recibo{% endtrans %} <input style="text-align:center;color:red;" id="thenumber" type="text" readonly /> que está intentando rastrear no está registrado en el sistema<br></p>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            {% do form.number.setRendered %}
+            {% do form.search.setRendered %}
+        {% endif %}
+        {{ form_end(form) }}
+        
+        {% if receipt is not null %}
+            <div class="block-flat">
+                <div class="header">
+                    <h2>Datos de {% trans %}Recibo{% endtrans %} {{ receipt.number }}</h2>
+                </div>
+                <div class="content">
+                    <table id="recTable" class="table table-striped table-bordered dt-responsive" cellspacing="0" width="100%"> 
+                    <thead>
+                    <tr>
+                    <th>Agencia</th>
+                    <th>Track#</th>
+                    <th>Fecha</th>
+                    <th>Carrier</th>
+                    <th>Cantidad</th>
+                    <th>Referencia</th>
+                    <th>Descripción</th>
+                    <th>Dimensiones</th>
+                    <th>Peso</th>
+                    <th>Valor</th>
+                    </tr>	
+                    </thead>
+                        <tbody>
+                        <tr>
+                        <td>{{ receipt.agency }}</td>
+                        <td>{{ receipt.tracking }}</td>
+                        <td>{{ receipt.arrivedate|date('m/d/Y') }}</td>
+                        <td>{{ receipt.carrier }}</td>
+                        <td>{{ receipt.quantity }}</td>
+                        <td>{{ receipt.reference }}</td>
+                        <td>{{ receipt.description }}</td>
+                        <td>{{ receipt.length }}x{{ receipt.width }}x{{ receipt.height }}</td>
+                        <td>{{ receipt.weight }}</td>
+                        <td>{{ receipt.value }}</td>
+                        </tr>
+                    </tbody>
+                    </table>    
+                </div>
+            </div>
+            <div class="block-flat">
+                <div class="header">
+                    <h3>Status del {% trans %}Recibo{% endtrans %} {{ receipt.number }}</h3>
+                </div>
+                <div class="content">
+                    <table id="statusTable" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%" style="padding-top: 0px !important; margin-top: -40px !important;">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>{% trans %}Paso{% endtrans %}</th>
+                            <th>Porcentaje</th>
+                            <th>Lugar</th>
+                            <th>Comentario</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for move in receipt.liststatus %}
+                        <tr>
+                            <td>{{ move.date |date('d/m/Y H:i:s') }}</td>
+                            <td>{{ move.step.name }}</td>
+                            <td>{{ move.step.percentage }}</td>
+                            <td>{{ move.place }} ({{ move.place.state }})</td>
+                            <td>{{ move.comment }}</td>
+                        </tr>
+                        {% endfor %}
+                        {% if receipt.statuswhrec  and receipt.whrec is not null %}
+                            {% set whrec = receipt.whrec %}
+                            {% for move in whrec.liststatus %}
+                                <tr>
+                                    <td>{{ move.date |date('d/m/Y H:i:s') }}</td>
+                                    <td>{{ move.step.name }}</td>
+                                    <td>{{ move.step.percentage }}</td>
+                                    <td>{{ move.place }} ({{ move.place.state }})</td>
+                                    <td>{{ move.comment }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
+                        {% if receipt.statusguide  and receipt.guide is not null %}
+                            {% set guide = receipt.guide %}
+                            {% for move in guide.liststatus %}
+                                <tr>
+                                    <td>{{ move.date |date('d/m/Y H:i:s') }}</td>
+                                    <td>{{ move.step.name }}</td>
+                                    <td>{{ move.step.percentage }}</td>
+                                    <td>{{ move.place }} ({{ move.place.state }})</td>
+                                    <td>{{ move.comment }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
+                    </tbody>
+                    </table>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}
+{% block javascripts %}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        {% if entity is not null %}
+            var id = '{{ entity.id }}';
+        {% else %}
+            var id = null; 
+        {% endif %}
+        var number = $('#search_rec_number').val();
+        $('#thenumber').val(number);
+        {% if receipt is not null %}
+            $('#mensaje').hide();
+            var $thisRecTable=$('#recTable').DataTable({
+                "ordering": false,
+                "searching": false,
+                "info":     false,
+                "lengthChange": false,
+                "paginate": false,
+            });
+            $thisMovTable=$('#statusTable').DataTable({
+                "responvise": true,
+                "ordering": false,
+                "searching": false,
+                "info":     false,
+                "lengthChange": false,
+                "paginate": false,
+                "language": {
+                    "zeroRecords": "<div style=\"color:red;\">Lo siento no se encontraron Status</div>",
+                    },
+                "columnDefs": [
+                    { "type": 'date', "targets": 0 },
+                ],
+                "order": [[ 0, "desc" ]],
+            });
+        {% endif %}
+        $('#search_rec_search').click(function(){
+            var number = $('#search_rec_number').val();
+            if (number) {
+                window.location.href = "{{ url('receipt_find') }}?recnumber=" + number;
+            } else {
+                funalert('Debe suministar un número de guía');
+            }
+        });
+        {% if entity is not null %}
+            // alert('Si hay guía..');
+            var thecode= {{ entity.number|json_encode|raw }};
+            $("#demo").barcode(
+                thecode, // Value barcode (dependent on the type of barcode)
+                "code128", // type (string)
+                {showHRI: false}
+            );
+        {% endif %}
+        
+    });
+</script>
+{% endblock %}

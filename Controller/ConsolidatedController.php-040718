@@ -1,0 +1,917 @@
+<?php
+
+namespace NvCarga\Bundle\Controller;
+
+use Symfony\Component\Form\Extension\Core\ChoiceList\ObjectChoiceList;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use NvCarga\Bundle\Entity\Consolidated;
+use NvCarga\Bundle\Entity\Moveconsols;
+use NvCarga\Bundle\Entity\Guides;
+use NvCarga\Bundle\Entity\Moveguides;
+
+use NvCarga\Bundle\Form\ConsolidatedType;
+
+/**
+ * Consolidated controller.
+ *
+ * @Route("/consolidated")
+ */
+class ConsolidatedController extends Controller
+{
+
+    /**
+     * Lists all Consolidated entities.
+     *
+     * @Route("/index", name="consolidated")
+     * @Method("GET")
+     * @Template()
+     * @Security("has_role('ROLE_ADMIN_CONSOLIDATED') or has_role('ROLE_ADMIN') or has_role('ROLE_VIEW_CONSOLIDATED')")
+     */
+    public function indexAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+        $user = $this->getUser();
+        $maincompany = $user->getMaincompany();
+        $countryto = $user->getAgency()->getCity()->getstate()->getCountry();
+        if ($user->getAgency()->getType() == 'MASTER') {
+                $entities = $em->getRepository('NvCargaBundle:Consolidated')->findByMaincompany($maincompany);
+        } else {
+            $entities = $em->getRepository('NvCargaBundle:Consolidated')->findBy(['countryto'=>$countryto, 'maincompany'=>$maincompany]);
+        }
+
+        return array(
+            'entities' => $entities,
+        );
+    }
+
+   /**
+     * Lists a subset of  Consolidated entities.
+     *
+     * @Route("/indexlast", name="consolidated_last")
+     * @Method("GET")
+     * @Template()
+     * @Security("has_role('ROLE_ADMIN_CONSOLIDATED') or has_role('ROLE_ADMIN') or has_role('ROLE_VIEW_CONSOLIDATED')")
+     */
+    public function indexlastAction()
+    {
+	
+        $em = $this->getDoctrine()->getManager();
+        $limit = 10;
+        $user = $this->getUser();
+        $maincompany = $user->getMaincompany();
+        $countryto = $user->getAgency()->getCity()->getstate()->getCountry();
+        if ($user->getAgency()->getType() == 'MASTER') {
+                $entities = $em->getRepository('NvCargaBundle:Consolidated')->createQueryBuilder('c')
+                    ->where('c.maincompany = :maincompany')
+                    ->setParameters(array('maincompany' => $maincompany))
+                    ->orderBy('c.id', 'DESC')
+                    ->setMaxResults($limit)
+                    ->getQuery()
+                    ->getResult();
+        } else {
+            $entities = $em->getRepository('NvCargaBundle:Consolidated')->createQueryBuilder('c')
+                    ->where('c.countryto = :ct')
+                    ->andWhere('c.maincompany = :maincompany')
+                    ->orderBy('c.id', 'DESC')
+                    ->setMaxResults($limit)
+                    ->setParameters(array('maincompany' => $maincompany,'ct' => $countryto))
+                    ->getQuery()
+                    ->getResult();
+        }
+        return array(
+            'entities' => $entities,
+        );
+    }
+    /**
+     * Creates a new Consolidated entity.
+     *
+     * @Route("/create", name="consolidated_create")
+     * @Method("POST")
+     * @Template("NvCargaBundle:Consolidated:new.html.twig")
+     * @Security("has_role('ROLE_ADMIN_CONSOLIDATED') or has_role('ROLE_ADMIN')")
+     */
+    public function createAction(Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $userag = $this->getUser()->getAgency();
+        if ($userag->getType() != 'MASTER') {
+            throw $this->createNotFoundException('Acción permitida solamente en la agencia master');
+        }
+        $entity = new Consolidated();
+        $form = $this->createCreateForm($entity);
+        $user = $this->getUser();
+        $maincompany = $user->getMaincompany();
+        $maincompany = $this->getUser()->getMaincompany();
+        $countconsol= $maincompany->getCountconsolidates();
+        /*
+        $countconsol =  $em->getRepository('NvCargaBundle:Consolidated')->createQueryBuilder('r')
+                            ->select('count(r.id)')
+                            ->where('r.maincompany =:thecompany')
+                            ->setParameters(['thecompany'=>$maincompany])
+                            ->getQuery()
+                            ->getSingleScalarResult();
+        */
+        $flashBag = $this->get('session')->getFlashBag();
+        foreach ($flashBag->keys() as $type) {
+                $flashBag->set($type, array());
+        }
+        $plan = $maincompany->getPlan();
+        if (($plan->getConsolidates()) && ($countconsol >= $plan->getMaxconsolidates())) {
+            $translator = $this->get('translator');
+            $message = 'Ha llegado al número máximo de ' . $translator->trans('Consolidados')  .' permitidos. Para crear más debe actualizar su plan a uno superior.';
+            if ($this->isGranted('ROLE_ADMIN')) {
+                $message = $message . '<a href="' .  $this->generateUrl('loginmain') . '" > Actualizar ahora</a>';
+            }
+            $flashBag->add('notice',$message);
+            goto next;
+        }
+        $countconsol++;
+        $form->handleRequest($request);
+
+        if ($form->isValid()) {
+            $maincompany->setCountconsolidates($countconsol);
+            $office = $em->getRepository('NvCargaBundle:Office')->findOneByMaincompany($maincompany);
+            $sender = $entity->getSender();
+            $receiver = $entity->getReceiver();
+            $entity->setCountryto($receiver->getCountry());
+            $entity->setCountryfrom($sender->getCountry());
+            $entity->setOffice($office);
+            $goto = $entity->getCountryto();
+            $from = $entity->getCountryfrom();
+            $typeship = $entity->getShippingtype();
+            $agency = $entity->getAgency();
+            $consol = $em->getRepository('NvCargaBundle:Consolidated')->findBy(array('maincompany'=>$maincompany, 'isopen' => true,
+                        'sender' => $sender,
+                        'receiver' => $receiver,
+                        'agency' => $agency, 
+                        'countryto' => $goto,
+                        'countryfrom' => $from,
+                        'shippingtype' => $typeship));
+            // exit(\Doctrine\Common\Util\Debug::dump($consol));  
+            $translator = $this->get('translator');
+        
+            if ($consol) {
+                throw $this->createNotFoundException('Ya tiene un ' . $translator->trans('Consolidado') . ' abierto con esas opciones, debe cerrarlo para crear otro');
+            }
+	    
+            $entity->open();
+            $move = new Moveconsols();
+            
+            $movdate = new \DateTime();
+            $clock = $form['clock']->getData(); 
+            $rdate = substr($movdate->format('m/d/Y'),0,10) . 'T' . $clock;
+            $move->setMovdate(new \DateTime($rdate));
+            
+            $move->setConsolidated($entity);
+            $status = $em->getRepository('NvCargaBundle:Consolidatedstatus')->findOneByPosition(1);
+            $move->setStatus($status);
+            $comment = $translator->trans('Consolidado') .  ' creado en la agencia ' . $agency;
+            $move->setComment($comment);
+            $move->setPercentage(0);
+        
+            $entity->addMove($move);
+
+            $em->persist($move);
+            $entity->setMaincompany($maincompany);
+            
+            $format = $translator->trans('mconsoldate');
+            
+            
+            $prefix = $maincompany->getPrefixconsol();
+            $mydate = new \DateTime();
+            if ($format == ' ') {
+                $mid = '';
+            } else {
+                $mid = $mydate->format($format);
+            }
+            $hid =  $em->getRepository('NvCargaBundle:Consolidated')->createQueryBuilder('r')
+                            ->select('MAX(r.id)')
+                            ->where('r.maincompany =:thecompany')
+                            ->setParameters(['thecompany'=>$maincompany])
+                            ->getQuery()
+                            ->getSingleScalarResult();
+            $countconsol++;
+            $maincompany->setCountconsolidates($countconsol);
+            if ($hid > 0 ) {
+                $consolhigh =  $em->getRepository('NvCargaBundle:Consolidated')->find($hid);
+                $numberhigh = $consolhigh->getNumber();
+                $maxvalue = filter_var($numberhigh, FILTER_SANITIZE_NUMBER_INT);
+                $maxvalue = str_replace('-', '', $maxvalue);
+                $maxnumber = abs(intval($maxvalue)) + 1;
+            } else {
+                $maxnumber = 1;
+            }
+            $number = $prefix . $mid  .  $maxnumber;
+            // exit(\Doctrine\Common\Util\Debug::dump($number)); 
+            $entity->setNumber($number);
+            $em->persist($entity);
+            $em->flush();
+            return $this->redirect($this->generateUrl('consolidated'));
+        }
+
+        next:
+        return array(
+            'entity' => $entity,
+            'form'   => $form->createView(),
+        );
+    }
+
+    /**
+     * Creates a form to create a Consolidated entity.
+     *
+     * @param Consolidated $entity The entity
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createCreateForm(Consolidated $entity)
+    {
+        $form = $this->createForm(new ConsolidatedType($this->getUser()), $entity, array(
+            'action' => $this->generateUrl('consolidated_create'),
+            'method' => 'POST',
+        ));
+        $form->add('clock', 'hidden', array('mapped' => false));
+        $form->add('submit', 'submit', array('label' => 'Crear'));
+
+        return $form;
+    }
+
+    /**
+     * Displays a form to create a new Consolidated entity.
+     *
+     * @Route("/new", name="consolidated_new")
+     * @Method("GET")
+     * @Template()
+     * @Security("has_role('ROLE_ADMIN_CONSOLIDATED') or has_role('ROLE_ADMIN')")
+     */
+    public function newAction()
+    {
+        $entity = new Consolidated();
+        $maincompany = $this->getUser()->getMaincompany();
+        $em = $this->getDoctrine()->getManager();
+        $countconsol= $maincompany->getCountconsolidates();
+        $flashBag = $this->get('session')->getFlashBag();
+        foreach ($flashBag->keys() as $type) {
+                $flashBag->set($type, array());
+        }
+        /*
+        $countconsol =  $em->getRepository('NvCargaBundle:Consolidated')->createQueryBuilder('r')
+                            ->select('count(r.id)')
+                            ->where('r.maincompany =:thecompany')
+                            ->setParameters(['thecompany'=>$maincompany])
+                            ->getQuery()
+                            ->getSingleScalarResult();
+        */
+        $plan = $maincompany->getPlan();
+        if (($plan->getConsolidates()) && ($countconsol >= $plan->getMaxconsolidates())) {
+            $translator = $this->get('translator');
+            $message = 'Ha llegado al número máximo de ' . $translator->trans('Consolidados')  .' permitidos. Para crear más debe actualizar su plan a uno superior.';
+            if ($this->isGranted('ROLE_ADMIN')) {
+                $message = $message . '<a href="' .  $this->generateUrl('loginmain') . '" > Actualizar ahora</a>';
+            }
+            $flashBag->add('notice',$message);
+        }
+        
+        //$sender = $em->getRepository('NvCargaBundle:Company')->find(1);
+        //$receiver = $em->getRepository('NvCargaBundle:Company')->find(2);
+        /*
+        $entity->setSender($sender);
+        $entity->setReceiver($receiver);
+        */
+
+        $form   = $this->createCreateForm($entity);
+
+        return array(
+            'entity' => $entity,
+            'form'   => $form->createView(),
+        );
+    }
+
+    /**
+     * Finds and displays a Consolidated entity.
+     *
+     * @Route("/{id}/show", name="consolidated_show")
+     * @Method("GET")
+     * @Template()
+     * @Security("has_role('ROLE_ADMIN_CONSOLIDATED') or has_role('ROLE_ADMIN') or has_role('ROLE_VIEW_CONSOLIDATED')")
+     */
+    public function showAction($id)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $user = $this->getUser();
+        $maincompany = $user->getMaincompany();
+        $countryto = $user->getAgency()->getCity()->getstate()->getCountry();
+        $entity = $em->getRepository('NvCargaBundle:Consolidated')->findOneBy(['id'=>$id, 'maincompany'=>$maincompany]);
+	
+        $translator = $this->get('translator');
+        if (!$entity) {
+            throw $this->createNotFoundException('No existe el ' . $translator->trans('Consolidado'));
+        }
+        if (($user->getAgency()->getType() != 'MASTER') && ($entity->getCountryto() != $countryto)) {
+                throw $this->createNotFoundException('No tiene permiso para ver el ' . $translator->trans('Consolidado'));
+        } 
+        return array(
+            'entity'      => $entity,
+        );
+    }
+
+    /**
+     * Displays a form to edit an existing Consolidated entity.
+     *
+     * @Route("/{id}/edit", name="consolidated_edit")
+     * @Method("GET")
+     * @Template()
+     * @Security("has_role('ROLE_ADMIN_CONSOLIDATED') or has_role('ROLE_ADMIN')")
+     */
+    public function editAction($id)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $maincompany = $this->getUser()->getMaincompany();
+        $entity = $em->getRepository('NvCargaBundle:Consolidated')->findOneBy(['id'=>$id, 'maincompany'=>$maincompany]);
+        $translator = $this->get('translator');
+        if (!$entity) {
+            throw $this->createNotFoundException('No existe el ' . $translator->trans('Consolidado'));
+        }
+	
+        if (!$entity->getGuides()->isEmpty()) { 
+            throw $this->createNotFoundException('No se puede editar un ' . $translator->trans('Consolidado') . ' con ' .  $translator->trans('Guías'));
+        }
+        if (!$entity->getIsopen()) { 
+            throw $this->createNotFoundException('Debe estar abierto para editarse');
+        }	
+        $editForm = $this->createEditForm($entity);
+
+        return array(
+            'entity'      => $entity,
+            'edit_form'   => $editForm->createView(),
+            'accion' => 'Editar'
+        );
+    }
+
+    /**
+     * Displays a form to edit an existing Consolidated entity.
+     *
+     * @Route("/{id}/remove", name="consolidated_remove")
+     * @Template("NvCargaBundle:Consolidated:edit.html.twig")
+     * @Security("has_role('ROLE_ADMIN_CONSOLIDATED') or has_role('ROLE_ADMIN')")
+     */
+    public function removeAction(Request $request, $id)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $maincompany = $this->getUser()->getMaincompany();
+        $entity = $em->getRepository('NvCargaBundle:Consolidated')->findOneBy(['id'=>$id, 'maincompany'=>$maincompany]);
+
+        $translator = $this->get('translator');
+        if (!$entity) {
+            throw $this->createNotFoundException('No existe el ' . $translator->trans('Consolidado'));
+        }
+	
+        if (!$entity->getGuides()->isEmpty()) { 
+            throw $this->createNotFoundException('No se puede anular un ' . $translator->trans('Consolidado') . ' con ' .  $translator->trans('Guías'));
+        }
+        if (!$entity->getIsopen()) { 
+            throw $this->createNotFoundException('Debe estar abierto para anularse');
+        }	
+            
+        $editForm = $this->createRemoveForm($entity);
+        $editForm->handleRequest($request);
+
+        if ($editForm->isValid()) {
+            $moves = $em->getRepository('NvCargaBundle:Moveconsols')->findByConsolidated($entity);
+            foreach ($moves as $move) {
+                $em->remove($move);
+            }
+            $countconsol = $maincompany->getCountconsolidates();
+            $maincompany->setCountconsolidates($countconsol--);
+            $em->remove($entity);
+            $em->flush();
+
+            return $this->redirect($this->generateUrl('consolidated'));
+        }
+        return array(
+            'entity'      => $entity,
+            'edit_form'   => $editForm->createView(),
+            'accion' => 'Anular'
+        );
+    }
+
+    /**
+    * Creates a form to edit a Consolidated entity.
+    *
+    * @param Consolidated $entity The entity
+    *
+    * @return \Symfony\Component\Form\Form The form
+    */
+    private function createEditForm(Consolidated $entity)
+    {
+        $form = $this->createForm(new ConsolidatedType($this->getUser()), $entity, array(
+            'action' => $this->generateUrl('consolidated_update', array('id' => $entity->getId())),
+            'method' => 'PUT',
+        ));
+
+        $form->add('submit', 'submit', array('label' => 'Actualizar'));
+
+        return $form;
+    }
+
+    private function createRemoveForm(Consolidated $entity)
+    {
+        $form = $this->get('form.factory')->createNamedBuilder('nvcarga_bundle_consolidated', 'form', $entity, array())
+                        ->add('sender', null, array('label' => 'Remitente', 'disabled'=>true, 'read_only'=>true, 'data'=>$entity->getSender()))
+                        ->add('receiver', null, array('label' => 'Destinatario', 'disabled'=>true, 'read_only'=>true, 'data'=>$entity->getReceiver() ))
+                        ->add('shippingtype', null, array('label' => 'Tipo de envío', 'disabled'=>true, 'read_only'=>true, 'data'=>$entity->getShippingtype() ))
+                        ->add('agency', null, array('label' => 'Agencia ', 'disabled'=>true, 'read_only'=>true, 'data'=>$entity->getAgency() ))
+                        ->add('submit', 'submit', array('label' => 'Anular'))
+                        ->getForm();	
+        return $form;
+    }
+    /**
+     * Edits an existing Consolidated entity.
+     *
+     * @Route("/{id}/update", name="consolidated_update")
+     * @Method("PUT")
+     * @Template("NvCargaBundle:Consolidated:edit.html.twig")
+     * @Security("has_role('ROLE_ADMIN_CONSOLIDATED') or has_role('ROLE_ADMIN')")
+     */
+    public function updateAction(Request $request, $id)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $maincompany = $this->getUser()->getMaincompany();
+        $entity = $em->getRepository('NvCargaBundle:Consolidated')->findOneBy(['id'=>$id, 'maincompany'=>$maincompany]);
+
+        $translator = $this->get('translator');
+        if (!$entity) {
+            throw $this->createNotFoundException('No existe el ' . $translator->trans('Consolidado'));
+        }
+	
+        if (!$entity->getGuides()->isEmpty()) { 
+            throw $this->createNotFoundException('No se puede editar un ' . $translator->trans('Consolidado') . ' con ' .  $translator->trans('Guías'));
+        }
+        if (!$entity->getIsopen()) { 
+            throw $this->createNotFoundException('Debe estar abierto para editarse');
+        }
+
+        $editForm = $this->createEditForm($entity);
+        $editForm->handleRequest($request);
+
+        if ($editForm->isValid()) {
+            $sender = $entity->getSender();
+            $receiver = $entity->getReceiver();
+            $entity->setCountryto($receiver->getCountry());
+            $entity->setCountryfrom($sender->getCountry());
+            $em->flush();
+
+            return $this->redirect($this->generateUrl('consolidated_show', array('id' => $id)));
+        }
+
+        return array(
+            'entity'      => $entity,
+            'edit_form'   => $editForm->createView(),
+            'accion' => 'Editar'
+        );
+    }
+
+    /**
+     * Close a Consolidated entity.
+     *
+     * @Route("/{id}/close", name="consolidated_close")
+     * @Security("has_role('ROLE_ADMIN_CONSOLIDATED') or has_role('ROLE_ADMIN')")
+     */
+    public function closeAction(Request $request, $id)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $maincompany = $this->getUser()->getMaincompany();
+        $entity = $em->getRepository('NvCargaBundle:Consolidated')->findOneBy(['id'=>$id, 'maincompany'=>$maincompany]);
+        $translator = $this->get('translator');
+        if (!$entity) {
+                throw $this->createNotFoundException('No existe el ' . $translator->trans('Consolidado'));
+        }
+        
+        if ($entity->getGuides()->isEmpty()) { 
+            throw $this->createNotFoundException('No se puede cerrar un ' . $translator->trans('Consolidado') . ' sin ' .  $translator->trans('Guías'));
+        }
+        if (!$entity->getIsopen()) { 
+            throw $this->createNotFoundException('Ya está cerrado');
+        }
+        $entity->close();
+        $em->flush();	
+
+        return $this->redirect($this->generateUrl('consolidated_show', array('id' => $id)));
+    }
+    /**
+     * Add guides to Consolidated entity.
+     *
+     * @Route("/{id}/addguides", name="consolidated_addguides")
+     * @Template()
+     * @Security("has_role('ROLE_ADMIN_CONSOLIDATED') or has_role('ROLE_ADMIN')")
+     */
+    public function addguidesAction(Request $request, $id)
+    {
+        $userag = $this->getUser()->getAgency();
+        if ($userag->getType() != 'MASTER') {
+            throw $this->createNotFoundException('Esta acción solamente es permitida en la agencia master');
+        }
+        $em = $this->getDoctrine()->getManager();
+        $maincompany = $this->getUser()->getMaincompany();
+        $entity = $em->getRepository('NvCargaBundle:Consolidated')->findOneBy(['id'=>$id, 'maincompany'=>$maincompany]);
+
+
+        $translator = $this->get('translator');
+        if (!$entity) {
+            throw $this->createNotFoundException('No existe el ' . $translator->trans('Consolidado'));
+        }
+        $lastmove = $entity->getMoves()->last();
+        if (($lastmove->getStatus()->getPosition() != 1) || !($entity->getIsopen())) {
+            throw $this->createNotFoundException('El status  no permite agregar ' .  $translator->trans('Guías'));
+        } 
+	
+        $agency = $entity->getAgency();
+        $countryto = $entity->getCountryto();
+        $shiptype = $entity->getShippingtype();
+        $agencies = $em->getRepository('NvCargaBundle:Agency')->findBy(['maincompany'=>$maincompany]);
+        
+        $listguides = $em->getRepository('NvCargaBundle:Guide')->createQueryBuilder('g')
+                ->where('g.countryto = :ct')
+                ->andwhere('g.shippingtype = :st')
+                ->andwhere('g.consol IS NULL')
+                ->andWhere('g.maincompany = :maincompany')
+    			->setParameters(array('maincompany'=>$maincompany, //'ag' => $agency, 
+					      'ct' => $countryto, 'st'=>$shiptype ))
+    			->orderBy('g.number', 'ASC')
+    			->getQuery()
+                ->getResult();
+	
+        return array(
+            'entity'      => $entity,
+            'listguides' => $listguides,
+            'agencies' => $agencies,
+        );	
+    }
+   /**
+     * Creates a form to search Guide
+     *
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createSearchForm()
+    {
+        $translator = $this->get('translator');
+        $formBuilder = $this->get('form.factory')->createNamedBuilder('guide_search', 'form',  array())
+            ->add('guidenumber', 'text', array('label' => 'Número de ' . $translator->trans('Guía')))
+            ->add('search', 'button', array('label' => 'Buscar'))
+                ->getForm()
+            ;
+        return $formBuilder;
+    }
+    /**
+     * Add guides to Consolidated entity.
+     *
+     * @Route("/{id}/groupconsol", name="consolidated_groupconsol")
+     * @Template()
+     * @Security("has_role('ROLE_ADMIN_CONSOLIDATED') or has_role('ROLE_ADMIN')")
+     */
+    public function groupconsolAction(Request $request, $id)
+    {
+        $userag = $this->getUser()->getAgency();
+        if ($userag->getType() != 'MASTER') {
+            throw $this->createNotFoundException('Esta acción solamente es permitida en la agencia master');
+        }
+        $em = $this->getDoctrine()->getManager();
+        $maincompany = $this->getUser()->getMaincompany();
+        $entity = $em->getRepository('NvCargaBundle:Consolidated')->findOneBy(['id'=>$id, 'maincompany'=>$maincompany]);
+
+        $translator = $this->get('translator');
+        if (!$entity) {
+            throw $this->createNotFoundException('No existe el ' . $translator->trans('Consolidado'));
+        }
+        $lastmove = $entity->getMoves()->last();
+        if (($lastmove->getStatus()->getPosition() != 1) || !($entity->getIsopen())) {
+            throw $this->createNotFoundException('El status  no permite agregar ' .  $translator->trans('Guías'));
+        } 
+	
+        $agency = $entity->getAgency();
+        $countryto = $entity->getCountryto();
+        $shiptype = $entity->getShippingtype();
+        
+        $form = $this->createSearchForm();
+        return array(
+                'entity'      => $entity,
+                'form'   => $form->createView(),
+        );	
+    }
+    /**
+     * @Route("/guides", name="consolidated_guides")
+     * @Template()
+     * @Security("has_role('ROLE_ADMIN_CONSOLIDATED') or has_role('ROLE_ADMIN')")
+     */
+    public function guidesAction(Request $request)
+    {
+        $userag = $this->getUser()->getAgency();
+        if ($userag->getType() != 'MASTER') {
+            throw $this->createNotFoundException('Esta acción solo es permitida en la agencia master');
+        }
+        $list = $request->query->get('guidelist');
+        $idconsol = $request->query->get('idconsol');
+        if (!$idconsol) {
+            throw $this->createNotFoundException('Error en llamada del método');
+        }
+        $guidelist=json_decode($list);
+        $total=count($guidelist);
+        $em = $this->getDoctrine()->getManager();
+        $maincompany = $this->getUser()->getMaincompany();
+
+        $guides = $em->getRepository('NvCargaBundle:Guide')->findBy(['id'=>$guidelist, 'maincompany'=>$maincompany]);
+        // exit(\Doctrine\Common\Util\Debug::dump($guides)); 
+       
+        $consol = $em->getRepository('NvCargaBundle:Consolidated')->findOneBy(['id'=>$idconsol, 'maincompany'=>$maincompany]);
+        $translator = $this->get('translator');
+        if (!$consol) {
+                throw $this->createNotFoundException('No existe el ' . $translator->trans('Consolidado'));
+        }
+        $lastmove = $consol->getMoves()->last();
+        if (($lastmove->getStatus()->getPosition() != 1) || !($consol->getIsopen())) {
+            throw $this->createNotFoundException('El status  no permite agregar ' .  $translator->trans('Guías'));
+        } 
+	
+        // exit(\Doctrine\Common\Util\Debug::dump($consol)); 
+        if (count($guides) < 1 ) {
+            throw $this->createNotFoundException('No se encontraron ' . $translator->trans('Guías')  . ' para agregar');
+        }
+        $maincompany = $this->getUser()->getMaincompany();
+        $setfrom =  $maincompany->getEmail(); //$this->container->getParameter('mailer_user');
+        $fromname = 'Notificación de ' . $maincompany->getName(); //$this->container->getParameter('mailer_username');
+        foreach ($guides as $guide) {
+            $guide->setConsol($consol);
+            $consol->addGuide($guide);
+            $moveguide = new Moveguides($this->get('translator'), $this->get('mailer'), $setfrom, $fromname, $em, $this->getUser());
+            $moveguide->setMovdate(new \DateTime());
+            $moveguide->setGuide($guide);
+            $stamov = $em->getRepository('NvCargaBundle:Guidestatus')->findOneByName('Consolidada');
+            $moveguide->setStatus($stamov);
+            $company = $em->getRepository('NvCargaBundle:Localcompany')->findOneByName('Empresa');
+            $moveguide->setCompany($company);
+            $moveguide->setTrack(' ');
+            $moveguide->setPercentage(10);
+            $moveguide->setComment('Se agregó al ' . $translator->trans('Consolidado'));
+            $guide->addMove($moveguide); 
+            $moveguide->Sendemail();
+            $em->persist($moveguide);
+        }
+        $bag = $guides[0]->getBag();
+        if ($bag) {
+            $bag->setStatus("CONSOLIDADA");
+        }
+        $em->flush();	
+        return $this->redirect($this->generateUrl('consolidated_show', array('id' => $consol->getId())));
+	
+    }
+    /**
+     * Remove a Guide entity from consolidated.
+     *
+     * @Route("/remguide", name="consolidated_remguide")
+     * @Method("GET")
+     * @Template()
+     * @Security("has_role('ROLE_ADMIN_CONSOLIDATED') or has_role('ROLE_ADMIN')")
+     */
+    public function remguideAction(Request $request)
+    {
+        $em = $this->getDoctrine()->getManager();
+	
+        $translator = $this->get('translator');
+        $id = $request->query->get('guideid');
+        if (!$id) {
+            throw $this->createNotFoundException('Debe seleccionar ' . $translator->trans('Guía') . ' a remover');
+        }
+        $maincompany = $this->getUser()->getMaincompany();
+        $entity = $em->getRepository('NvCargaBundle:Guide')->findOneBy(['id'=>$id, 'maincompany'=>$maincompany]);
+
+        if (!$entity) {
+            throw $this->createNotFoundException('No existe ' . $translator->trans('Guía') . ' a remover');
+        }
+        $consol = $entity->getConsol();
+        if (!$consol) {
+            throw $this->createNotFoundException($translator->trans('Guía') . ' no está en un ' .  $translator->trans('Consolidado'));
+        }
+        $status = $consol->getMoves()->last()->getStatus()->getPosition();
+        if ((!$consol->getIsopen()) && ($status != 1)) {
+            throw $this->createNotFoundException('El status no permite remover');
+        }
+        $bag = $entity->getBag();
+        if ($bag) {
+            $listbag = $bag->getGuides();
+            foreach ( $listbag as $guide ) {
+                $consol->removeGuide($guide);
+                $guide->setConsol(null);
+                $lmguide = $guide->getMoves()->last();
+                $guide->removeMove($lmguide);
+                $lmguide->setGuide(null);
+                $em->remove($lmguide);	
+            }
+            $bag->setStatus("ENTREGADA");
+        } else  {
+            $consol->removeGuide($entity);
+            $entity->setConsol(null);
+            $lmguide = $entity->getMoves()->last();
+            $entity->removeMove($lmguide);
+            $lmguide->setGuide(null);
+            $em->remove($lmguide);
+        }
+        $em->flush();
+        return $this->redirect($this->generateUrl('consolidated_show', array('id' => $consol->getId())));
+    }
+    /**
+     * Close a Consolidated entity.
+     *
+     * @Route("/{id}/reopen", name="consolidated_reopen")
+     * @Security("has_role('ROLE_ADMIN_CONSOLIDATED') or has_role('ROLE_ADMIN')")
+     */
+    public function reopenAction(Request $request, $id)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $maincompany = $this->getUser()->getMaincompany();
+        $entity = $em->getRepository('NvCargaBundle:Consolidated')->findOneBy(['id'=>$id, 'maincompany'=>$maincompany]);
+        $translator = $this->get('translator');
+        if (!$entity) {
+            throw $this->createNotFoundException('No existe el ' . $translator->trans('Consolidado'));
+        }
+
+        if ($entity->getIsopen()) { 
+            throw $this->createNotFoundException('Está abierto');
+        }
+        $lastmove = $entity->getMoves()->last(); 
+        if ($lastmove->getStatus()->getPosition() != 1 ) {
+            throw $this->createNotFoundException('El status actual no permite reabrir');
+        }
+        $entity->open();
+        $em->flush();	
+
+        return $this->redirect($this->generateUrl('consolidated_show', array('id' => $id)));
+    }
+    /**
+     * Generate  a guide for printer
+     * 
+     * @Route("/{id}/print", name="consolidated_print")
+     * @Method("GET")
+     * @Template()
+     * @Security("has_role('ROLE_ADMIN_CONSOLIDATED') or has_role('ROLE_ADMIN') or has_role('ROLE_VIEW_CONSOLIDATED')")
+     */
+    public function printAction($id)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $user = $this->getUser();
+        $countryto = $user->getAgency()->getCity()->getState()->getCountry();
+        $maincompany = $this->getUser()->getMaincompany();
+        $entity = $em->getRepository('NvCargaBundle:Consolidated')->findOneBy(['id'=>$id, 'maincompany'=>$maincompany]);
+	
+        $translator = $this->get('translator');
+        if (!$entity) {
+            throw $this->createNotFoundException('No existe el ' . $translator->trans('Consolidado'));
+        }
+        if (($user->getAgency()->getType() != 'MASTER') && ($entity->getCountryto() != $countryto)) {
+        	throw $this->createNotFoundException('No tiene permiso para ver el ' . $translator->trans('Consolidado'));
+        } 
+        $viewoption = $this->getView('Consolidated', 'print');
+        
+        return  $this->render($viewoption,array(
+                'entity'   => $entity));
+        /*
+        return array(
+            'entity'      => $entity,
+        );
+        */
+       
+    }
+    /**
+     * Export to PDF
+     * 
+     * @Route("/{id}/printpdf", name="consolidated_printpdf")
+     * @Security("has_role('ROLE_ADMIN_CONSOLIDATED') or has_role('ROLE_ADMIN') or has_role('ROLE_VIEW_CONSOLIDATED')")
+     */
+    public function printfpdfAction($id)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $maincompany = $this->getUser()->getMaincompany();
+        $entity = $em->getRepository('NvCargaBundle:Consolidated')->findOneBy(['id'=>$id, 'maincompany'=>$maincompany]);
+        $user = $this->getUser();
+        $countryto = $user->getAgency()->getCity()->getstate()->getCountry();
+	
+
+        $translator = $this->get('translator');
+        if (!$entity) {
+            throw $this->createNotFoundException('No existe el ' . $translator->trans('Consolidado'));
+        }
+        if (($user->getAgency()->getType() != 'MASTER') && ($entity->getCountryto() != $countryto)) {
+                throw $this->createNotFoundException('No tiene permiso para imprimir el ' . $translator->trans('Consolidado'));
+        }
+        $viewoption = $this->getView('Consolidated', 'print');
+        $html = $this->renderView($viewoption, array('entity' => $entity));
+        // exit(\Doctrine\Common\Util\Debug::dump($html));
+        $number = $entity->getId(); 
+        $filename = sprintf('print-consol-%s.pdf', transliterator_transliterate('Any-Latin; Latin-ASCII; [\u0080-\u7fff] remove', $number));
+
+        return new Response(
+            $this->get('knp_snappy.pdf')->getOutputFromHtml($html, array(
+                'orientation' => 'portrait',
+                'margin-top'    => 10,
+                'margin-right'  => 12,
+                'margin-bottom' => 10,
+                'margin-left'   => 12, 
+                'enable-javascript' => true, 
+                'javascript-delay' => 1000, 
+                'no-stop-slow-scripts' => true, 
+                'no-background' => false, 
+                'lowquality' => false,
+                'encoding' => 'utf-8',
+                'images' => true,
+                'cookie' => array(),
+                'page-size' => 'A4',
+                'dpi' => 300,
+                'image-dpi' => 300,
+                'enable-external-links' => true,
+                'enable-internal-links' => true
+                )),
+                200,
+                [
+                    'Content-Type'        => 'application/pdf',
+                    'Content-Disposition' => sprintf('inline; filename="%s"', $filename),
+                ]
+        );
+    }
+    /**
+     * Export to PDF
+     * 
+     * @Route("/{id}/labelpdf", name="consolidated_labelpdf")
+     * @Security("has_role('ROLE_ADMIN_CONSOLIDATED') or has_role('ROLE_ADMIN') or has_role('ROLE_VIEW_CONSOLIDATED')")
+     */
+    public function labelpdfAction($id)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $maincompany = $this->getUser()->getMaincompany();
+        $entity = $em->getRepository('NvCargaBundle:Consolidated')->findOneBy(['id'=>$id, 'maincompany'=>$maincompany]);
+        $user = $this->getUser();
+        $countryto = $user->getAgency()->getCity()->getstate()->getCountry();
+        $translator = $this->get('translator');
+        if (!$entity) {
+            throw $this->createNotFoundException('No existe el ' . $translator->trans('Consolidado'));
+        }
+        if (($user->getAgency()->getType() != 'MASTER') && ($entity->getCountryto() != $countryto)) {
+                throw $this->createNotFoundException('No tiene permiso para ver la etiqueta del  ' . $translator->trans('Consolidado'));
+        }
+        $viewoption = $this->getView('Consolidated', 'label');
+        $html = $this->renderView($viewoption, array('entity' => $entity));
+        // exit(\Doctrine\Common\Util\Debug::dump($html));
+        $number = $entity->getId(); 
+        $filename = sprintf('label-consol-%s.pdf', transliterator_transliterate('Any-Latin; Latin-ASCII; [\u0080-\u7fff] remove', $number));
+
+        return new Response(
+            $this->get('knp_snappy.pdf')->getOutputFromHtml($html, array(
+                'orientation' => 'portrait',
+                'margin-top'    => 8,
+                'margin-right'  => 7,
+                'margin-bottom' => 8,
+                'margin-left'   => 7, 
+                'enable-javascript' => true, 
+                'javascript-delay' => 1000, 
+                'no-stop-slow-scripts' => true, 
+                'no-background' => false, 
+                'lowquality' => false,
+                'encoding' => 'utf-8',
+                'images' => true,
+                'cookie' => array(),
+                'page-size' => 'A7',
+                'dpi' => 300,
+                'image-dpi' => 300,
+                'enable-external-links' => true,
+                'enable-internal-links' => true
+                )),
+                200,
+                [
+                    'Content-Type'        => 'application/pdf',
+                    'Content-Disposition' => sprintf('inline; filename="%s"', $filename),
+                ]
+        );
+    }
+    public function getView($table, $type) {
+        $option = null;
+        $maincompany = $this->getUser()->getMaincompany();
+        //exit(\Doctrine\Common\Util\Debug::dump($maincompany->getFormat()));
+        if ($maincompany->getFormat()) {
+            $option = $maincompany->getFormat()->getGprint();
+        }
+        $viewoption = 'NvCargaBundle:' . $table . ':' . $type . $option . '.html.twig';
+        if (!$this->get('templating')->exists($viewoption) ) {
+            $viewoption = 'NvCargaBundle:' . $table . ':' . $type . '.html.twig';
+        }
+        return $viewoption;
+    }
+}

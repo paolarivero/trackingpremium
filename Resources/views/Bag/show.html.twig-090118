@@ -1,0 +1,123 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+
+<div class="widget">
+    <div class="widget-header"> <i class="icon-list-alt"></i>
+              <h3> <b>Bolsa</b> </h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+    <ul class="nav nav-tabs" id="tabs">
+        <li><a href="#opcion1" data-toggle="tab">Impresiones</a></li>
+	{% if ((entity.status == "LISTA") or (entity.status == "ENTREGADA")) and  (app.user.agency.type == "MASTER")  %}
+        	<li><a href="#opcion2" data-toggle="tab">Opciones</a></li>
+	{% endif %}
+	
+    </ul>
+    <!-- Tabs -->
+    <!-- Tab Content -->
+    <div class="tab-content">    
+        <!-- Repo -->
+        <div class="tab-pane active" id="opcion1">         
+          {# <h2>Lista de acciones opción 1</h2> #}
+                <!-- Repo Tabs --->
+                <div class="btn-group"> 
+ 			<button type="button" class="btn btn-success" onclick="location.href='{{ path('bag_print', { 'id': entity.id }) }}';">Imprimir</button> 
+  			<button type="button" class="btn btn-success"onclick="location.href='{{ path('bag_printpdf', { 'id': entity.id }) }}';">PDF</button>
+			<button type="button" class="btn btn-success" onclick="location.href='{{ path('bag_labelpdf', { 'id': entity.id }) }}';">Etiqueta</button>
+		</div>  
+        </div>
+
+        <div class="tab-pane" id="opcion2">         
+          {# <h2>Lista de acciones opción 2</h2> #}
+                <!-- Repo Tabs --->
+                <div class="btn-group"> 
+			{% if entity.status == "LISTA" %}
+				{% if app.user.agency.type == "MASTER" %}
+					<button type="button" class="btn btn-success" 
+					onclick="location.href='{{ path('bag_report', {'id': entity.id }) }}';">Recibir bolsa</button>
+				{% endif %}
+				<button type="button" class="btn btn-success" 
+				onclick="location.href='{{ path('bag_cancel', {'id': entity.id }) }}';">Anular bolsa</button>
+			{% endif %}
+			{% if (entity.status == "ENTREGADA") and (app.user.agency.type == "MASTER") %}
+ 				<button type="button" class="btn btn-success" 
+				onclick="location.href='{{ path('bag_toconsol', {'id': entity.id }) }}';">{% trans %}Consolidar{% endtrans %}</button>
+			{% endif %}
+		</div>  
+        </div>
+    </div>
+    {% set head = entity.guides|first %}
+
+    <table class="table table-striped table-bordered">
+                <thead>
+		<tr>
+                <th><h3>#Bolsa</h3></th>
+		<th><h3>País Origen</h3></th>
+		<th><h3>País Destino</h3></th>
+		<th><h3>Servicio</h3></th>
+		<th><h3>Fecha</h3></th>
+		<th><h3>Nro de {% trans %}Guías{% endtrans %}</h3></th>
+		</tr>	
+		</thead>
+       		<tbody>
+			<tr>
+			<td>{{ entity.number }}</td>
+			<td>{{ head.countryfrom }}</td>
+			<td>{{ head.countryto }}</td>
+			<td>{{ head.shippingtype }}</td>
+			<td>{{ entity.creationdate|date('Y-m-d H:i:s') }}</td>
+			<td>{{ entity.guides|length }}</td>
+			</tr>
+		</tbody>
+    </table>
+ 
+    <table class="table table-striped table-bordered">
+                <thead>
+		<tr>
+		<th colspan="6"><h3>CONTIENE</h3></th>
+		</tr>
+		<tr>
+                <th>Número</th>
+		<th>Peso</th>
+		<th>Volumen</th>
+		<th>Piezas</th>
+		<th>Valor</th>
+		</tr>	
+		</thead>
+       		<tbody>
+			{% for guide in entity.guides %}
+			<tr>
+				<td><a  class="btn btn-success" href="{{ path('guide_show', { 'id': guide.id }) }}">{{ guide.number }}</a></td>
+				<td>{{ guide.realweight }}</td>
+				{% set pri = true %}
+			<td>
+				{% set volcad = '' %}
+				{% if guide.masterec %}
+					{% set listrec = [guide.masterec] %}
+				{% else %}
+					{% set listrec = guide.receipts %}
+				{% endif %}
+				{% for receipt in listrec %}
+					{% set vol = (receipt.length*receipt.width*receipt.height/guide.agency.maincompany.convertvol)|number_format(2, '.', ',') %}
+					{% if pri %}
+						{% set volcad = volcad ~ vol ~ 'dimension'|trans %}
+						{% set pri = false %}
+					{% else %}
+						{% set volcad =  volcad ~ ',  ' ~ vol ~ 'dimension'|trans %}
+					{% endif %} 
+				{% endfor %}
+				{{ volcad }}
+			</td>
+				<td>{{ guide.pieces }}</td>
+				<td>{{ guide.declared }}</td>
+			</tr>
+			{% endfor %}
+			<tr>
+		</tbody>
+    </table>
+ 
+</div>
+</div>
+{% endblock %}

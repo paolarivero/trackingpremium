@@ -1,0 +1,51 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+
+<div class="widget">
+    <div class="widget-header"> <i class="icon-user-md"></i>
+              <h3> <b>Perfil de Usuario</b> </h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+    <div class="bodycontainer scrollable">
+
+    <table class="table table-striped table-bordered">
+        <tbody>
+            <tr>
+                <th>Nombre</th>
+                <td>{{ entity.name }}</td>
+            </tr>
+            <tr>
+                <th>Descripción</th>
+                <td>{{ entity.description }}</td>
+            </tr>
+            <tr>
+                <th>Roles</th>
+                <td>
+                {% for role in entity.roles %}
+                    {{ role.name }} {{ role.description }}<br>
+                {% endfor %}    
+                </td>
+            </tr>
+        </tbody>
+        <tfoot>
+        <tr>
+            <td style="text-align:center;">
+            <button type="button" class="btn btn-default" onclick="location.href='{{ path('profile_edit', { 'id': entity.id } ) }}';">Editar</button>
+            </td>
+            <td style="text-align:center;vertical-align: bottom;">
+            {{ form(delete_form) }}
+            </td>
+        <tr>
+         <tr>
+            <td colspan=2 style="text-align:center;">
+            <button type="button" onclick="location.href='{{ path('profile') }}';" class="btn btn-default btn-lg bback">Regresar</button>
+            </td>
+        </tr>
+        </tfoot>
+    </table>
+</div>
+</div>
+</div>
+{% endblock %}

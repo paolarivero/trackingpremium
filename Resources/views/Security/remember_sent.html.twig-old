@@ -1,0 +1,32 @@
+{# src/NvCarga/Bundle/Resources/views/Security/login_remember.html.twig #}
+{% extends '::layout_min.html.twig' %}
+
+{% block body -%}
+
+<div class="account-container">
+	{% for flashMessage in app.session.flashbag.get('info') %}
+
+	<div class="alert alert-danger">
+    		<strong><h2>{{ flashMessage }}</h2></strong>
+	</div>
+
+        {% endfor %}
+	<div class="content clearfix">
+			
+		        <center>
+				<img align="center" src="{{ asset('assets/img/logo_empresa_especial.png') }}" alt="logo-emp" style="height:140px;">
+			</center>
+			
+
+			<h3><br>Se ha enviado un correo electrónico a la dirección: 
+			<b> {{ email }} </b>  con una nueva clave<br></h3>		
+			
+			<center>					
+			<button class="button btn btn-primary btn-large" onclick="location.href='{{ path('login') }}';"><i class="icon-signin"></i> Entrar</button>
+			</center>
+		     
+	</div> <!-- /content -->
+	
+</div> <!-- /account-container -->
+
+{% endblock %}

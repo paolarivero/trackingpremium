@@ -1,0 +1,473 @@
+{% extends '::newbase.html.twig' %}
+{% block title %}
+    <title>Tracking Premium System</title>
+{% endblock %}
+
+{% block body -%}
+
+{% if app.user.pobox is not null %}
+	<script>window.location.href = "{{ path('pobox_menu', { 'id': app.user.pobox.id }) }}"</script>
+{% endif %}
+
+{% if app.user.stripeCustomer is not null %}
+	<script>window.location.href = "{{ path('subscriber_menu') }}"</script>
+{% endif %}
+
+{% if not (is_granted('ROLE_ADMIN')) and not (is_granted('ROLE_ADMIN_DASHBOARD')) %}
+    <script>window.location.href = "{{ path('system_menu') }}"</script>
+{% endif %}
+
+<div id="pcont" class="container-fluid">
+    <div class="cl-mcont">
+        <div class="stats_bar">
+            <div data-step="2" data-intro="&lt;strong&gt;Beautiful Elements&lt;/strong&gt; &lt;br/&gt; If you are looking for a different UI, this is for you!." class="butpro butstyle">
+                <div class="sub" title="Total de clientes registrados">
+                    <h2>CLIENTES</h2>
+                    <span id="total_clientes">{{ app.user.maincompany.countcustomers }}</span>
+                </div>
+                <div class="stat" title="Nuevos clientes por mes en los últimos 12 meses">
+                    <span class="spk1">
+                        <canvas style="display: inline-block; width: 74px; height: 16px; vertical-align: top;" width="74" height="16">
+                        </canvas>
+                    </span>
+                </div>
+            </div>
+
+            <div class="butpro butstyle">
+                <div class="sub" title="Ventas del 1 al {{ "now"|date('d') }} de {{ ("now"|date('F'))|trans }}" >
+                    <h2>Ventas</h2><span>${{ guicurrent.totalp }}</span>
+                </div>
+                {% if guicurrent.totalp != 0 %}
+                    {% set diffventas = ((guicurrent.totalp - guilast.totalp)*100/guicurrent.totalp)|number_format(2, '.', ',') %}
+                {% else %}
+                    {% set diffventas = -100.00 %}
+                {% endif %}
+                {% if diffventas > 0 %}
+                    {% set dventas = "up" %}
+                {% elseif diffventas < 0 %}
+                    {% set dventas = "down" %}
+                {% else %}
+                    {% set dventas = "equal" %}
+                {% endif %}
+                <div class="stat" title="Diferencia con el mismo periodo del mes anterior" ><span class="{{ dventas }}">{{ diffventas }}%</span>
+                </div>
+            </div>
+            <div class="butpro butstyle">
+                <div class="sub" title="{% trans %}Recibos{% endtrans %} del 1 al {{ "now"|date('d') }} de {{ ("now"|date('F'))|trans }}">
+                <h2>{% trans %}Recibos{% endtrans%}</h2><span>{{ recurrent.totalr }}</span>
+                </div>
+                {% if recurrent.totalr > 0 %}
+                    {% set diffrec = ((recurrent.totalr - relast.totalr)*100/recurrent.totalr)|number_format(2, '.', ',') %}
+                {% else %}
+                    {% set diffrec = -100.00 %}
+                {% endif %}
+                {% if diffrec > 0 %}
+                    {% set drec = "up" %}
+                {% elseif diffrec < 0 %}
+                    {% set drec = "down" %}
+                {% else %}
+                    {% set drec = "equal" %}
+                {% endif %}
+                <div class="stat" title="Diferencia con el mismo periodo del mes anterior"><span class="{{ drec }}"> {{ diffrec }}%</span></div>
+            </div>
+            <div class="butpro butstyle">
+                <div class="sub" title="{% trans %}Guías{% endtrans %} del 1 al {{ "now"|date('d') }} de {{ ("now"|date('F'))|trans }}">
+                <h2>{% trans %}Guías{% endtrans %}</h2><span>{{ guicurrent.totalg }}</span>
+                </div>
+                {% if guicurrent.totalg > 0 %}
+                    {% set diffguias = ((guicurrent.totalg - guilast.totalg)*100/guicurrent.totalg)|number_format(2, '.', ',') %}
+                {% else %}
+                    {% set diffguias = -100.00 %}
+                {% endif %}
+
+                {% if diffguias > 0 %}
+                    {% set dguias = "up" %}
+                {% elseif diffguias < 0 %}
+                    {% set dguias = "down" %}
+                {% else %}
+                    {% set dguias = "equal" %}
+                {% endif %}
+                <div class="stat" title="Diferencia con el mismo periodo del mes anterior"><span class="{{ dguias }}"> {{ diffguias }}%</span></div>
+            </div>
+            <div class="butpro butstyle">
+                {% set lastmon = conmon|last %}
+                <div class="sub" title="{% trans %}Consolidados{% endtrans %} del 1 al {{ "now"|date('d') }} de {{ ("now"|date('F'))|trans }}">
+                    <h2>{% trans %}Consolidados{% endtrans %}</h2><span>{{ lastmon.numcon }}</span>
+                </div>
+                <div class="stat"><span id="conmon"></span></div>
+            </div>
+            <div class="butpro butstyle">
+                {% set lastmon = facmon|last %}
+                <div class="sub" title="Facturas del 1 al {{ "now"|date('d') }} de {{ ("now"|date('F'))|trans }}">
+                    <h2>Facturas</h2><span>{{ lastmon.numfac }}</span>
+                </div>
+                <div class="stat"><span id="facmon"></span></div>
+            </div>
+        </div>
+
+        <div class="row dash-cols">
+            <div class="col-sm-6 col-md-6">
+                <div class="block">
+                    <div class="header no-border">
+                        <h2>Ventas últimos 30 días</h2>
+                    </div>
+                    <div data-step="3" data-intro="&lt;strong&gt;Unique Styled Plugins&lt;/strong&gt; &lt;br/&gt; We put love in every detail to give a great user experience!." class="content blue-chart">
+                        <div id="site_statistics" style="height:180px;">
+                        </div>
+                    </div>
+                    {% set ventas = 0 %}
+                    {% set guias = 0 %}
+                    {% for guide in guides %}
+                        {% set ventas = ventas + guide.totalp %}
+                        {% set guias = guias + guide.numg %}
+                    {% endfor %}
+                    <div class="content">
+                        <div class="stat-data">
+                            <div class="stat-blue">
+                                <h2>${{ ventas }}</h2>
+                                <span>Total Ventas</span>
+                            </div>
+                        </div>
+                        <div class="stat-data">
+                            <div class="stat-number">
+                                <div>
+                                    <h2>{{ guias }}</h2>
+                                </div>
+                                <div>Total {% trans %}Guías{% endtrans %}<br>{# <span>(Diarias)</span>#}
+                                </div>
+                            </div>
+                            <div class="stat-number">
+                             {% if guias > 0 %}
+                                {% set promguias =  (ventas/guias)|number_format(2, '.', ',') %}
+                             {% else %}
+                                {% set promguias =  0.0 %}
+                             {% endif %}
+                                <div>
+                                    <h2>${{ promguias }}</h2>
+                                </div>
+                                <div>Promedio por {% trans %}Guía{% endtrans %}<br>
+                                    {# <span>(Diarias)</span>#}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="clear">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-6">
+                <div class="block">
+                    <div class="header no-border">
+                        <h2>Trayectoria de Carga</h2>
+                    </div>
+                    <div class="block-flat">
+                        <div id="world-map1" style="height: 300px;" class="content">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row dash-cols">
+            <div class="col-sm-6 col-md-6">
+                <div class="block">
+                    <div class="header">
+                        <h2>{% trans %}Guías{% endtrans %} <span class="pull-right"></span></h2>
+                        <h3>5 últimas</h3>
+                    </div>
+                    <div class="content no-padding">
+                        <ul class="items">
+                        {% for guide in lastguides %}
+                            <li>
+                                <a href="{{ path('guide_show', {'id': guide.id }) }}"><i class="fa fa-file-text"></i>
+                                {{ guide.addressee.city.state.country }}<span class="pull-right value">${{ guide.totalpaid }}</span><small>{{ guide.shippingtype }}</small></a>
+                            </li>
+                        {% endfor %}
+                    </div>
+                    {#
+                    <div class="total-data bg-blue"><a href="#" data-toggle="dropdown" class="dropdown-toggle">
+                        <h2>Total <b class="caret"></b><span class="pull-right">$25.3</span></h2></a>
+                        <ul class="dropdown-menu">
+                        <li><a href="#">Print receipt</a></li>
+                        <li><a href="#">Send invoice to...</a></li>
+                        <li><a href="#">Payment</a></li>
+                        </ul>
+                    </div>
+                    #}
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-6">
+                <div class="block-flat pie-widget">
+                    <div class="content no-padding">
+                        <h4 class="no-margin">Top {{ cities|length }} de destino</h4>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div id="citiestop" style="height:160px;">
+                                </div>
+                            </div>
+                            <div class="col-sm-8">
+                                <table class="no-borders no-strip padding-sm">
+                                    <tbody class="no-border-x no-border-y">
+                                    {% for key,city in cities %}
+                                    <tr>
+                                        <td style="width:15px;">
+                                            <div data-color="#456789" id="color{{ key }}" class="legend"></div>
+                                        </td>
+                                        <td>{{ city.name }}, {{ city.state.country }}</td>
+                                        <td class="text-right"><b>${{ ctotal[key] }}</b></td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+{% block javascripts %}
+
+<script type="text/javascript">
+    function getRandomColor() {
+        var letters = '0123456789ABCDEF';
+        var color = '#';
+        for (var i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+    $(document).ready(function(){
+        var count = 0;
+        var puntos = [];
+
+        {% for consol in consols %}
+            var color = getRandomColor();
+            var px1 = parseFloat("{{ consol.sender.latitude }}");
+            var py1 = parseFloat("{{ consol.sender.longitude }}");
+            var px2 = parseFloat("{{ consol.receiver.latitude }}");
+            var py2 = parseFloat("{{ consol.receiver.longitude }}");
+            {% if consol.moves|length > 0 %}
+                {% set last = consol.moves|last %}
+                var porcen = parseFloat("{{ last.percentage }}")/100;
+            {% else %}
+                var porcen = 0.0;
+            {% endif %}
+            var px3 = (1-porcen)*px1 + porcen*px2;
+            var py3 = (1-porcen)*py1 + porcen*py2;
+            puntos[count++] = {latLng: [px3, py3], name: '{% trans %}Consolidado{% endtrans %} {{ consol.id }}', style: {fill: color,stroke:'rgba(255,255,255,0.7)',"stroke-width": 3}};
+        {% endfor %}
+        $('#world-map1').vectorMap({
+            map: 'world_mill_en',
+            backgroundColor: 'transparent',
+            regionStyle: {
+                initial: {
+                fill: '#38c3c1',
+                },
+                hover: {
+                "fill-opacity": 0.8
+                }
+            },
+            markerStyle:{
+                initial:{
+                    r: 5
+                },
+                hover: {
+                    r: 5,
+                    stroke: 'rgba(255,255,255,0.8)',
+                    "stroke-width": 4
+                }
+                },
+                markers: puntos
+        });
+        var thecusmon = [];
+        var themon = [];
+        count =0;
+        {% for mon in cusmon %}
+            themon[count] = {{ mon['month'] }};
+            thecusmon[count++] = {{ mon['numcus'] }};
+        {% endfor %}
+        // console.log(thecusmon + ':' + themon);
+        $(".spk1").sparkline(thecusmon, { type: 'bar', width: '80px', barColor: '#4A8CF7'});
+
+        function showTooltip(x, y, contents) {
+            $("<div id='tooltip'>" + contents + "</div>").css({
+            position: "absolute",
+            display: "none",
+            top: y + 5,
+            left: x + 5,
+            border: "1px solid #000",
+            padding: "5px",
+            'color':'#fff',
+            'border-radius':'2px',
+            'font-size':'11px',
+            "background-color": "#000",
+            opacity: 0.80
+            }).appendTo("body").fadeIn(200);
+        }
+        function randValue() {
+            return (Math.floor(Math.random() * (1 + 50 - 20))) + 10;
+        }
+        var pageviews = [
+        {% for key,guide in guides %}
+            [{{ key }}, {{ guide.numg }}],
+        {% endfor %}
+        ];
+
+
+
+        if ($('#site_statistics').size() != 0) {
+            $('#site_statistics_loading').hide();
+            $('#site_statistics_content').show();
+            var plot_statistics = $.plot($("#site_statistics"), [{
+            data: pageviews,
+            label: "Ventas"
+            }
+            ], {
+            series: {
+                lines: {
+                show: true,
+                lineWidth: 2,
+                fill: true,
+                fillColor: {
+                    colors: [{
+                    opacity: 0.2
+                    }, {
+                    opacity: 0.01
+                    }
+                    ]
+                }
+                },
+                points: {
+                show: true
+                },
+                shadowSize: 2
+            },
+            legend:{
+                show: false
+            },
+            grid: {
+            labelMargin: 10,
+                axisMargin: 500,
+                hoverable: true,
+                clickable: true,
+                tickColor: "rgba(255,255,255,0.22)",
+                borderWidth: 0
+            },
+            colors: ["#FFFFFF", "#4A8CF7", "#52e136"],
+            xaxis: {
+                ticks: [
+                    {% for key,guide in guides %}
+                        [{{ key }}, {{ guide.day }}],
+                    {% endfor %}
+                ],
+
+                /*
+                ticks: 11,
+                tickDecimals: 0
+                */
+            },
+            yaxis: {
+                ticks: 5,
+                tickDecimals: 0
+            }
+            });
+
+            var previousPoint = null;
+            $("#site_statistics").bind("plothover", function (event, pos, item) {
+                var str = "(" + pos.x.toFixed(2) + ", " + pos.y.toFixed(2) + ")";
+                if (item) {
+                    // console.log(item.series.xaxis.ticks);
+                    // console.log(item.datapoint);
+                    if (previousPoint != item.dataIndex) {
+                        previousPoint = item.dataIndex;
+                        $("#tooltip").remove();
+                        var x = item.series.xaxis.ticks[item.datapoint[0]].label, //x = item.datapoint[0].toFixed(0),
+                        y = item.datapoint[1].toFixed(0);
+                        showTooltip(item.pageX, item.pageY,
+                        item.series.label + " de " + x + " = " + y);
+                    }
+                } else {
+                    $("#tooltip").remove();
+                    previousPoint = null;
+                }
+            });
+        }
+        $("#conmon").sparkline(
+        [
+        {% for mon in conmon %}
+            {{ mon.numcon }},
+        {% endfor %}
+        ],
+        { type: 'discrete', width: '80', lineColor: '#4A8CF7',thresholdValue: 4,thresholdColor: '#ff0000'});
+        $("#facmon").sparkline(
+        [
+        {% for mon in facmon %}
+            {{ mon.numfac }},
+        {% endfor %}
+        ],
+        {
+            type: 'line',
+            lineColor: '#258FEC',
+            fillColor: '#4A8CF7',
+            spotColor: false,
+            width: '80px',
+            minSpotColor: false,
+            maxSpotColor: false,
+            highlightSpotColor: '#1e7ac6',
+            highlightLineColor: '#1e7ac6'
+        });
+        var data = [
+            {% for key,city in cities %}
+                { label: "{{ city.name }}", data: {{ ctotal[key] }}},
+            {% endfor %}
+        ];
+        var colors = [
+            {% for key,city in cities %}
+                getRandomColor(),
+            {% endfor %}
+        ];
+        for (var i=0;i<colors.length;i++) {
+            $('#color'+ i).attr("data-color", colors[i]);
+        }
+        $.plot('#citiestop', data, {
+            series: {
+            pie: {
+                show: true,
+                innerRadius: 0.5,
+                shadow:{
+                top: 5,
+                left: 15,
+                alpha:0.3
+                },
+                stroke:{
+                width:0
+                },
+                label: {
+                show: false
+                },
+                highlight:{
+                opacity: 0.08
+                }
+            }
+            },
+            grid: {
+            hoverable: true,
+            clickable: true
+            },
+            colors: colors,
+            legend: {
+            show: false
+            }
+        });
+        $("table td .legend").each(function(){
+            var el = $(this);
+            var color = el.data("color");
+            el.css("background",color);
+        });
+    });
+</script>
+{% endblock %}

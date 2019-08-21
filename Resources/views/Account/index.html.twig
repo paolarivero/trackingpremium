@@ -1,0 +1,172 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>Cuentas Bancarias</title>
+{% endblock %}
+
+{% block body -%}
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>
+                Lista de Cuentas Bancarias
+            </h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('account') }}">Cuentas Bancarias</a></li>
+            <li class="active">Listar</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="main-app">
+        <div class="head" >
+            <h3>Búsqueda</h3>
+            <input type="text" id="globalfilter" placeholder="Número/Banco" class="form-control" style="width: 30%;">
+        <div class="filters">
+            <p style="display:inline;" id="currentdate"></p>
+        </div>
+        <div class="block-flat" style=" padding-top: 0px;">
+            <div class="content" style=" padding-top: 0px;">
+                <div id="mydiv" style="width: 100%" >
+                    <table id="accountTable" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th>Número</th>
+                                <th>Banco</th>
+                                <th>Activa</th>
+                                <th>Titular</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for entity in entities %}
+                        <tr>
+                            <td><button type="button" class="btn btn-success btn-flat btn-sm" onclick="location.href='{{ path('account_show', { 'id': entity.id }) }}';">{{ entity.number }}</button></td>
+                            <td>{{ entity.bankname }}</td>
+                            <td>{% if entity.isactive %}
+                                    <input type="checkbox" checked="checked" class="icheck" disabled readonly >
+                                {% else %}
+                                    <input type="checkbox" disabled class="icheck" readonly >
+                                {% endif %}</td>
+                            <td>{{ entity.holdername }}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    <div style="margin-top:10px;">
+                    <table class="no-border">
+                        <tbody class="no-border-y">
+                            <tr>
+                            <td>
+                                <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-sm" >Regresar</button>
+                            </td>
+                            <td style="text-align:right;">
+                            {% if is_granted('ROLE_ADMIN') and (app.user.agency.type == 'MASTER')  %} 
+                                <buttom class="btn btn-primary btn-sm" title="Crear" onclick="location.href='{{ path('account_new') }}';">Crear cuenta</buttom>
+                            {% endif %}
+                            </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+{% block javascripts %}
+
+<script type="text/javascript">
+    function formatDate(date) {
+        var monthNames = [
+            "Enero", "Febrero", "Marzo",
+            "Abril", "Mayo", "Junio", "Julio",
+            "Agosto", "Septiembre", "Octubre",
+            "Noviembre", "Diciembre"
+        ];
+
+        var day = date.getDate();
+        var monthIndex = date.getMonth();
+        var year = date.getFullYear();
+
+        return day + ' de ' + monthNames[monthIndex] + ' ' + year;
+    }
+       function searchBis(str_search) {
+        var ret = $($.parseHTML(str_search)).text().toLowerCase();
+        return ret.indexOf($('#globalfilter').val().toLowerCase()) != -1;
+        }
+        $.fn.dataTable.ext.search.push(
+            function( settings, data, dataIndex ) {
+            if ($('#globalfilter').val().trim() != '') {
+                var ret0 = searchBis(data[0]);
+                var ret1 = searchBis(data[1]);
+                return ( ret0 || ret1 );
+            } else {
+                return true;
+            }
+
+        });
+    $(document).ready(function () {
+        $(".dataTables_filter input").val('');
+        document.getElementById("currentdate").innerHTML = formatDate(new Date());
+        var $thisAccountTable = $('#accountTable').DataTable({
+            "stateSave": false,
+            "columnDefs": [
+                    { "searchable": true, "targets": 0 },
+                    { "searchable": true, "targets": 1 },
+                    { "searchable": false, "targets": 2 },
+                    { "searchable": false, "targets": 3 },
+            ],
+            "order": [[ 0, "asc" ]],
+            "pageLength": 10,
+            "ordering": true,
+            "searching": true,
+            "info":     false,
+            "lengthChange": true,
+            "scrollX": true,
+            "lengthMenu": [[10, 20, 30, -1], [10, 20, 30, "Todas"]],
+            "language": {
+                "sSearch": "Buscar",
+                "lengthMenu": 'Mostrando  _MENU_  "Cuentas" por página',
+                "zeroRecords": "<div style=\"color:red;\">Lo siento no se encontraron Cuentas</div>",
+                "sinfo": "Mostrando _START_ a _END_ de _TOTAL_ Cuentas",
+                "infoEmpty": "No hay registros disponibles",
+                "infoFiltered": "(Filtradas de un total de _MAX_ )",
+                "searchPlaceholder": "Nombre",
+                "paginate" : {
+                    first:    '«',
+                    previous: '‹',
+                    next:     '›',
+                    last:     '»'
+                },
+            },
+            "sDom": '<"top"i>rt<"bottom"lp><"clear">',
+            "pagingType": "full_numbers",
+            "fnDrawCallback": function(oSettings) {
+                if ((oSettings._iDisplayLength >= oSettings.fnRecordsDisplay()) ||  (oSettings._iDisplayLength == -1)) {
+                    $(oSettings.nTableWrapper).find('.dataTables_paginate').hide();
+                } else {
+                    $(oSettings.nTableWrapper).find('.dataTables_paginate').show();
+                }
+            },
+        });
+        $('#globalfilter').on( 'keyup', function () {
+            $thisAccountTable.draw();
+        } );
+        $thisAccountTable.responsive.rebuild();
+        $thisAccountTable.responsive.recalc();
+        // $thisAccountTable.draw();
+        $( window ).resize(function() {
+            $thisAccountTable.responsive.rebuild();
+            $thisAccountTable.responsive.recalc();
+            // $thisAccountTable.draw();
+        });
+    });
+    
+</script>
+{% endblock %}

@@ -1,0 +1,216 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>Editar Status de {% trans %}Guía{% endtrans %}</title>
+{% endblock %}
+
+{% form_theme form 'form/fields.html.twig' %}
+{% block body -%}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Nuevo status  de {% trans %}Guía{% endtrans %}</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('guide') }}">{% trans %}Guías{% endtrans %}</a></li>
+            <li class="active"> Editar Status de {% trans %}Guía{% endtrans %}</li>
+            </ol>
+             {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+            {% for flashMessage in app.session.flashbag.get('warning') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        {{ form_start(form, {attr: {novalidate: 'novalidate', 'id': 'statusguide_type' }}) }}
+        <div class="block-flat">
+            <div class="header">
+                <h3>{% trans %}Guía{% endtrans %} {{ entity.guide.number }} </h3>
+            </div>
+            <div class="content">
+                {{ form_row(form.date) }}
+                {{ form_row(form.step) }}
+                <div class="row">
+                    <div class="col-sm-2 col-md-2">
+                        <label>Ciudad, Estado, País</label>
+                    </div>
+                    <div class="col-sm-10 col-md-10">
+                        <input type="hidden" id="citytrack" style="width:100%;" />
+                    </div>
+                </div>
+                <p style="margin-left: 20px;">No encuentra su ciudad agreguela al hacer clic en <a class="md-trigger" data-modal="agregar-ciudad"> "Agregar Ciudad"</a></p>
+                
+                {{ form_row(form.comment) }}
+                <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        <td>
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default" >Regresar</button>
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-danger btn-flat bcity" data-toggle="modal" data-target="#removestatus">Eliminar</button>
+                        </td>
+                        <td style="text-align:right;">
+                            {{ form_row(form.submit, { 'attr': {'class': 'btn btn-primary'} }) }}
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- Modal -->
+    <div id="removestatus" tabindex="-1" role="dialog" class="modal fade">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" data-dismiss="modal" aria-hidden="true" class="close">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center">
+                        <div class="i-circle danger"><i class="fa fa-times"></i></div>
+                            <p style="font-size:16px;">Confirme la eliminación del status</p>
+                        </div>
+                        <center>
+                        <button type="button" class="btn btn-info btn-flat gotoremove">Confirmar</button>
+                        </center>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <div class="text-center">
+                            <button id="closeremove" type="button" data-dismiss="modal" class="btn btn-default">Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- /.modal-content-->
+        </div><!-- /.modal-dialog-->
+    </div><!-- /.modal-->
+    <!-- Modal  Agregar ciudad-->
+    <div id="agregar-ciudad" class="md-modal colored-header custom-width md-effect-8">
+        <div class="md-content">
+            <div class="modal-header">
+                <h3>Agregar Ciudad</h3>
+                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close">×</button>
+            </div>
+            <div class="modal-body col-sm-12 col-md-12">
+                {{ form_row(form.country_track) }}
+                {{ form_row(form.state_track) }}
+                {{ form_row(form.cityname_track) }}
+            </div>
+            <div class="modal-footer">
+                <button type="button" data-dismiss="modal" class="btn btn-default btn-flat md-close canceladd">Cancelar</button>
+                <button type="button" data-dismiss="modal" class="btn btn-primary btn-flat md-close addcity">Agregar</button>
+            </div>
+        </div>
+    </div>
+    <!-- Modal  Agregar ciudad-->
+    {{ form_end(form)}}
+</div>
+
+{% endblock %}
+{% block javascripts %}
+<script type="text/javascript">
+    $(document).ready(function(){
+        $("#citytrack").select2({
+            placeholder: "Buscar Ciudad",
+            ajax: {
+                url: "{{ path('city_find') }}",
+                dataType: 'json',
+                delay: 250,
+                data: function (term) {
+                    return {
+                        q: term, //search term
+                    };
+                },
+                results: function (data) {
+                    return {
+                        results: data,
+                    };
+                },
+                cache: true
+                },
+             minimumInputLength: 2,
+             formatInputTooShort: function (input, min) { var n = min - input.length; return "Por favor ingrese  " + n + " carcater" + (n == 1? "" : "es") + " mas"; },
+             formatNoMatches: function () { return "No se encuentran resultados"; },
+        });
+        $('#citytrack').on("change", function(e) { 
+            var cityid = $('#citytrack').val();
+            $('#statusguide_type_cityid_track').val(cityid);
+            var complete = $('#citytrack').select2('data').text;
+            var ini1 = complete.lastIndexOf('(');
+            var ini2 = complete.lastIndexOf(',');
+            var end = complete.lastIndexOf(')');
+            var state_track = complete.substring(ini1+1,ini2);
+            var country_track = complete.substring(ini2+2,end);
+            // $('#statusguide_type_country_track').val('');
+            $('#statusguide_type_country_track option').map(function () {
+                if ($(this).text() == country_track) return this;
+            }).prop('selected', 'selected');
+            utilityLib.statesbyname('#statusguide_type_state_track', '#statusguide_type_country_track', state_track, "{{ url('select_states') }}"); 
+            $('#statusguide_type_cityname_track').val(complete.substring(0,ini1-1));
+        });
+        $('#statusguide_type_country_track').change(function(){
+           var val = "#statusguide_type_country_track";
+           utilityLib.statesbyname('#statusguide_type_state_track', val, '', "{{ url('select_states') }}");
+           return false;
+        });
+        $('#statusguide_type_state_track').change(function(){
+            // console.log('CAMBIO el estado');
+            $('#statusguide_type_cityid_track').val(0);
+            utilityLib.showCity('{{ form.vars.id }}','track');
+            return false;
+        });
+        $('#statusguide_type_cityname_track').change(function(){
+            $('#statusguide_type_cityid_track').val(0);
+            utilityLib.showCity('{{ form.vars.id }}','track');
+            return false;
+        });
+        {% if edition %}
+            $('#statusguide_type_cityname_track').val('{{ entity.place.name }}');
+            $('#statusguide_type_country_track').val({{ entity.place.state.country.id }});
+            $('#statusguide_type_state_track').val({{ entity.place.state.id }});
+            utilityLib.showCity('{{ form.vars.id }}','track');
+        {% endif %}
+        
+        $('#statusguide_type_date').datepicker();
+    
+        $('.canceladd').click(function(evt) {
+            $('#statusguide_type_cityname_track').val('');
+            $('#statusguide_type_country_track').val('');
+            $('#statusguide_type_state_track').val('');
+            $('#statusguide_type_cityname_track').change();
+            // console.log($('#statusguide_type_cityid_track').val());
+            $('#citytrack').select2('data', null);
+        });
+        $('#statusguide_type_submit').click(function(evt) {
+            // evt.preventDefault();
+            var cityid = $('#statusguide_type_cityid_track').val();
+            var country =  $('#statusguide_type_country_track').val();
+            var state =  $('#statusguide_type_state_track').val();
+            var name =  $('#statusguide_type_cityname_track').val();
+            //funalert('HOLA ' + cityid + ' ' + country + ' ' + state + ' ' + name);
+            if ((cityid == 0) && ((country < 1) || (state < 1) || (name == ''))) {
+                funalert('Debe seleccionar una ciudad..');
+                return false;
+            }
+            var dt = new Date();
+            var time = dt.getHours() + ":" + dt.getMinutes() + ":" + dt.getSeconds();
+            $('#statusguide_type_clock').val(time);
+            return true;
+        });
+        $('.gotoremove').click(function(e) {
+            e.preventDefault();
+            $("#closeremove").click();
+            var path = "{{ url('statusguide_remove', { 'id': entity.id }) }}";
+            //console.log(path);
+            window.location.href = path;
+            return false;
+        });
+    });
+</script>
+{% endblock %}

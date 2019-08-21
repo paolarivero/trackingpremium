@@ -1,0 +1,378 @@
+{% extends '::newbase.html.twig' %}
+
+{% block body -%}
+{% set guidelist = '["'~ entity.id ~'"]'%}
+
+
+
+<div id="pcont" class="container-fluid">
+  <div class="page-head">
+    <h2>Agregar {% trans %}Guías{% endtrans %} al {% trans %}Consolidado{% endtrans %} {{ entity.id }}</h2>
+    <ol class="breadcrumb">
+      <li><a href="#">Home</a></li>
+      <li><a href="#">Consolidado</a></li>
+      <li class="active">Listar</li>
+    </ol>
+  </div>
+
+  <div class="cl-mcont">
+    <div class="row">
+
+              <div style="margin-bottom: 10px;">
+              <h3>Búsqueda</h3>
+              <input type="text" id="globalfilter" placeholder="Número de Recibo/ Remitente/ Destinatario" class="form-control" style="margin-bottom: 10px;">
+
+
+
+              <button type="button" class="btn btn-default bconsol" data-toggle="modal" data-target="#consolguides">Agregar a {% trans %}Consolidado{% endtrans %}</button>
+              <button type="button" class="btn btn-default bmark">Marcar Todo</button>
+              <button type="button" class="btn btn-default bunmark">Desmarcar Todo</button>
+              <button type="button" class="btn btn-default bupdate" >Actualizar</button>
+              <button type="button" onClick="history.go(-1);return true;" class="btn btn-default bback" >Regresar</button>
+
+              </div>
+
+
+
+              <div class="block-flat" style=" padding-top: 0px;">
+                  <div class="content" style=" padding-top: 0px;">
+                      <div id="mydiv" >
+                          <table id="guideTable" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
+                              <thead>
+		                              <tr>
+                                    <th>Agregar</th>
+		                                 <th>Id</th>
+                                     <th>Número</th>
+		                                 <th>Remitente</th>
+		                                 <th>Destinatario</th>
+		                                 <th>Fecha</th>
+		                                 <th>Peso ({% trans %}peso{% endtrans %})</th>
+		                                 <th>Bolsa</th>
+
+		                                </tr>
+		                             </thead>
+       		<tbody>
+		{% for guide in listguides %}
+			<tr>
+      <td> <input type="checkbox" class="guidecheck" name="marcar" value="consol" checked> </td>
+			<td>{{ guide.id }}</td>
+			<td>{{ guide.number }}</td>
+			<td>{{ guide.sender }}</td>
+			<td>{{ guide.addressee.name }} {{ guide.addressee.lastname }}</td>
+			<td>{{ guide.creationdate|date('m/d/Y') }}</td>
+			<td>{{ guide.realweight }}</td>
+			{# <td>{{ guide.length }}X{{ guide.width }}X{{ guide.height }}</td> #}
+			{% if guide.bag is not null  %}
+				<td style="text-align:center;">{{ guide.bag.number }}</td>
+			{% else %}
+				<td style="text-align:center;">N/A</td>
+			{% endif %}
+
+			</tr>
+		{% endfor %}
+    </tbody>
+</table>
+</div>
+    <ul class="pagination pagination-sm pager" id="myPager1"></ul>
+
+
+
+</div>
+</div>
+
+<!-- Modal -->
+  <div class="modal fade" id="consolguides" role="dialog">
+    <div class="modal-dialog modal-lg">
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header" style="padding-bottom: 0px;"">
+          <button id="closeconsol" type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Confirme la inclusión de {% trans %}Guías{% endtrans %}</h4>
+        </div>
+
+        <div class="modal-body">
+		<table id="guideTable1" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
+                <thead>
+		<tr>
+		<th>Id</th>
+    <th>Número</th>
+		<th>Remitente</th>
+		<th>Destinatario</th>
+		<th>Fecha</th>
+		<th>Peso({% trans %}peso{% endtrans %})</th>
+		<th>Bolsa</th>
+		</tr>
+		</thead>
+       		<tbody>
+		</tbody>
+	       </table>
+        </div>
+
+        <div class="modal-footer">
+          <button id="closeconsol" type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+          <button type="button" class="btn btn-success btn-flat  gotoconsol">Confirmar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endblock %}
+  {% block javascripts %}
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+	var thisGuideTable=null;
+	var thisGuideTable1=null;
+	$('.bupdate').hide();
+	$('.bconsol').hide();
+
+	var tableRef = document.getElementById('guideTable').getElementsByTagName('tbody')[0];
+	var nf = tableRef.rows.length;
+	if ( nf > 0) {
+		$('.bupdate').show();
+		$('.bconsol').show();
+	}
+
+  thisGuideTable=$('#guideTable').DataTable({
+		"ordering": true,
+		"searching": true,
+		"info":     true,
+		"lengthChange": true,
+		"scrollX": true,
+		"pageLength": 20,
+		"lengthMenu": [[10, 15, 20, 25, 30, -1], [10, 15, 20, 25, 30, "Todas"]],
+		"columns": [ { "searchable": false }, null,  null, null, { "searchable": false }, { "searchable": false }, { "searchable": false }, { "searchable": false }],
+    "language": {
+        "sSearch": "Buscar",
+        "lengthMenu": 'Mostrando  _MENU_  "{% trans %}Guías{% endtrans %}" por página',
+        "zeroRecords": "<div style=\"color:red;\">Lo siento no se encontraron {% trans %}Guías{% endtrans %}</div>",
+        "sInfo": "Mostrando _START_ a _END_ de _TOTAL_ {% trans %}Guías{% endtrans %}",
+        "infoEmpty": "No hay registros disponibles",
+        "infoFiltered": "(Filtradas de un total de _MAX_ )",
+        "searchPlaceholder": "Número/Remitente/Destinatario",
+        "paginate" : {
+            first:    '«',
+            previous: '‹',
+            next:     '›',
+            last:     '»'
+        }
+    },
+		"pagingType": "full_numbers",
+    "sDom": '<"top"B>rt<"bottom"lp><"clear">',
+    "fnDrawCallback": function(oSettings) {
+            if ((oSettings._iDisplayLength >= oSettings.fnRecordsDisplay()) ||  (oSettings._iDisplayLength == -1)) {
+                $(oSettings.nTableWrapper).find('.dataTables_paginate').hide();
+            } else {
+                $(oSettings.nTableWrapper).find('.dataTables_paginate').show();
+            }
+    },
+	});
+
+  $('#globalfilter').on( 'keyup', function () {
+      thisGuideTable.draw();
+  } );
+
+  function searchBis(str_search) {
+      var ret = $($.parseHTML(str_search)).text().toLowerCase();
+      return ret.indexOf($('#globalfilter').val().toLowerCase()) != -1;
+  }
+  $.fn.dataTable.ext.search.push(
+      function( settings, data, dataIndex ) {
+
+      if ($('#globalfilter').val().trim() != '') {
+      var ret0 = searchBis(data[1]);
+
+      return ( ret0 );
+      } else {
+          return true;
+      }
+
+  });
+
+	$('.bupdate').click(function(e) {
+	        e.preventDefault();
+    		//var tableRef = document.getElementById('guideTable').getElementsByTagName('tbody')[0];
+		// var nf = tableRef.rows.length;
+		var data = thisGuideTable.rows().data();
+		var nf = data.length;
+		var todel = [];
+		var i=0;
+		thisGuideTable.$('tr').each(function(index,rowhtml){
+      			var checked= $('input[type="checkbox"]:checked',rowhtml).length;
+			// console.log(ii + ':' + checked);
+      			if (checked==1){
+				todel[i]=false;
+			} else {
+				todel[i]=true;
+			}
+			i++;
+		});
+		// console.log(todel);
+
+		for (i=nf-1; i >=0; i--) {
+			if (todel[i]) {
+				thisGuideTable.row(i).remove().draw( false );
+			}
+		}
+
+		var data = thisGuideTable.rows().data();
+		var nf = data.length;
+		if (nf == 0) {
+			thisGuideTable.clear();
+			thisGuideTable.draw();
+			// thisGuideTable.destroy();
+			$('.bupdate').hide();
+			$('.bconsol').hide();
+		}
+		return false;
+	});
+	$('.bmark').click(function(e) {
+		e.preventDefault();
+		var url = window.location.href;
+		window.location.href =  window.location.href;
+	});
+	$('.bunmark').click(function(e) {
+		e.preventDefault();
+		thisGuideTable.$('input').removeAttr( 'checked' );
+		// alert('desmarcaré todos...');
+	});
+	$('.bconsol').click(function(e) {
+	        e.preventDefault();
+		// var tableRef = document.getElementById('guideTable').getElementsByTagName('tbody')[0];
+		// var nf = tableRef.rows.length;
+		// var nf = thisGuideTable.rows().data().length;
+		// console.log('Tiene ' + nf + ' filas ');
+		/*
+		var tableRef1 = document.getElementById('guideTable1').getElementsByTagName('tbody')[0];
+		var nn = tableRef1.rows.length;
+		for (i=nn-1; i >= 0; i--) {
+			tableRef1.deleteRow(i);
+		}
+		if (thisGuideTable1) {
+			thisGuideTable1.clear().draw();
+			thisGuideTable1.destroy();
+		}
+		*/
+		var tableRef1 = document.getElementById('guideTable1').getElementsByTagName('tbody')[0];
+
+
+		var count=0;
+		var data = thisGuideTable.rows().data();
+		var ii=0;
+		thisGuideTable.$('tr').each(function(index,rowhtml){
+      			var checked= $('input[type="checkbox"]:checked',rowhtml).length;
+			// console.log(ii + ':' + checked);
+      			if (checked==1){
+				count++;
+				var id = data[ii][0];
+				var number = data[ii][1];
+				var sender = data[ii][2];
+				var addr = data[ii][3];
+				var tdate = data[ii][4];
+				var weight = data[ii][5];
+				var bag = data[ii][6];
+				// console.log(ii + ': ' + id + ' ' + number);
+				var newRow   = tableRef1.insertRow(tableRef1.rows.length);
+
+				var newCell0  = newRow.insertCell(0);
+				var newCell1  = newRow.insertCell(1);
+				var newCell2  = newRow.insertCell(2);
+				var newCell3  = newRow.insertCell(3);
+				var newCell4  = newRow.insertCell(4);
+				var newCell5  = newRow.insertCell(5);
+				var newCell6  = newRow.insertCell(6);
+
+				var newText0 = document.createTextNode(id);
+				newCell0.appendChild(newText0);
+				var newText1 = document.createTextNode(number);
+				newCell1.appendChild(newText1);
+				var newText2 = document.createTextNode(sender);
+				newCell2.appendChild(newText2);
+				var newText3 = document.createTextNode(addr);
+				newCell3.appendChild(newText3);
+				var newText4 = document.createTextNode(tdate);
+				newCell4.appendChild(newText4);
+				var newText5 = document.createTextNode(weight);
+				newCell5.appendChild(newText5);
+				var newText6 = document.createTextNode(bag);
+				newCell6.appendChild(newText6);
+			}
+			ii++;
+    		});
+
+		if (count == 0) {
+			alert('Debe escoger al menos 1 {% trans %}Guía{% endtrans %}');
+			$("#consolguides").modal().hide();
+		}
+		thisGuideTable1=$('#guideTable1').DataTable({
+		"ordering": false,
+		"searching": false,
+		"info":     false,
+		"lengthChange": false,
+		"scrollX": true,
+		"pageLength": 5,
+		"language": {
+			"sSearch": "Buscar",
+            		"lengthMenu": '<div class=\"menulen\">Mostrando</div> <div class=\"menulen2\"> _MENU_ </div> <div class=\"menulen\">{% trans %}Guías{% endtrans %}</div>',
+            		"zeroRecords": "<div style=\"color:red;\">Lo siento no se encontraron {% trans %}Guías{% endtrans %}</div>",
+			"sInfo": "Mostrando _START_ a _END_ de _TOTAL_ {% trans %}Guías{% endtrans %}",
+            		"infoEmpty": "No hay registros disponibles",
+            		"infoFiltered": "(Filtradas de un total de _MAX_ )",
+			"paginate" : {
+               				first:    '«',
+            				previous: '‹',
+            				next:     '›',
+            				last:     '»'
+       			}
+        	},
+		"pagingType": "full_numbers",
+		"fnDrawCallback": function(oSettings) {
+        		if (oSettings._iDisplayLength >= oSettings.fnRecordsDisplay()) {
+            			$(oSettings.nTableWrapper).find('.dataTables_paginate').hide();
+        		} else {
+				$(oSettings.nTableWrapper).find('.dataTables_paginate').show();
+			}
+    		},
+		});
+
+	});
+
+
+  thisGuideTable.responsive.rebuild();
+  thisGuideTable.responsive.recalc();
+  thisGuideTable.draw();
+  $( window ).resize(function() {
+      thisGuideTable.responsive.rebuild();
+      thisGuideTable.responsive.recalc();
+      thisGuideTable.draw();
+  });
+
+
+
+	$("#consolguides").on("hidden.bs.modal", function () {
+		thisGuideTable1.clear();
+		thisGuideTable1.destroy();
+	});
+	$('.gotoconsol').click(function(e) {
+	        e.preventDefault();
+		$("#closeconsol").click();
+   		var data1 = thisGuideTable1.rows().data();
+		var nf = data1.length;
+		var toconsol = [];
+    		for (i=0; i < nf; i++) {
+			var id = data1[i][0];
+			toconsol[i]=id;
+		}
+		var guidelist = JSON.stringify(toconsol);
+		nguides = toconsol.length;
+
+		if (nguides > 0 ) {
+			window.location.href = "{{ url('consolidated_guides') }}?guidelist=" + guidelist +"&idconsol={{ entity.id }}" ;
+		} else {
+			alert('Debe escoger al menos 1 {% trans %}Guía{% endtrans %}');
+		}
+		return false;
+	});
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends app.user.pobox is null
+    ? '::base.html.twig' 
+    : '::base-public.html.twig' %}
+
+{% block body -%}
+<div class="widget">
+    <div class="widget-header"> <i class="icon-user"></i>
+              <h3>Cambiar clave del usuario <b>"{{ theuser.username }}"</b></h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+    {{ form_start(edit_form, {'attr': {'novalidate': 'novalidate'}}) }}
+    <div class="bodycontainer scrollable">
+    <table class="table">
+    <tbody>
+	<tr>
+      	<td colspan=2>{{ form_row(edit_form.password) }}</td>
+	</tr>
+    </tbody>  
+    <tfoot>
+    	<tr>
+    	<td>{{ form_row(edit_form.submit) }}</td>
+    	<td style="text-align:right;"><button type="button" class="btn btn-default" onclick="location.href='{{ path('user') }}';">Regresar a lista</button></td>
+    	</tr>
+    </tfoot>
+	{{ form_end(edit_form) }}
+</div>
+</div>
+</div>
+{% endblock %}

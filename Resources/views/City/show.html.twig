@@ -1,0 +1,56 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+<div class="widget">
+    <div class="widget-header"> <i class="icon-list-alt"></i>
+              <h3> <b>Ciudad</b> &nbsp;&nbsp; 
+		<button type="button" class="btn btn-default" onclick="location.href='{{ path('city') }}';">Regresar a lista</button>
+	      </h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>Id</th>
+		<th>Nombre</th>
+		<th>Estado/Provincia</th>
+		<th>País</th>
+		<th>Número de clientes</th>
+            </tr>
+           <tr>
+                <td>{{ entity.id }}</td>
+		<td>{{ entity.name }}</td>
+		<td>{{ entity.state }}</td>
+		<td>{{ entity.state.country }}</td>
+		<td>{{ entity.customers|length }}</td>
+            </tr>            
+	    <tr>
+		<th colspan=5 style="text-align:center;">Lista de clientes en la ciudad</th>
+	    </tr>
+	    <tbody>
+            <tr>
+                <th>Id</th>
+		<th>Nombre y Apellido</th>
+		<th>Teléfono</th>
+		<th>Móvil</th>
+		<th>Email</th>
+            </tr>
+	    {% for customer in entity.customers %}
+	     <tr>
+		<td><a href="{{ path('customer_show', { 'id': customer.id }) }}">{{ customer.id }}</a></td>
+		<td>{{ customer.name }} {{ customer.lastname }}</td>
+		<td>{{ customer.mobile }} </td>
+		<td>{{ customer.phone }} </td>
+		<td>{{ customer.email }} </td>
+	     </tr>
+	    {% endfor %}
+	    </tbody>
+        </thead>
+	
+    </table>
+</div>
+</div>
+
+{% endblock %}

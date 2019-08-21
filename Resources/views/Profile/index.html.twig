@@ -1,0 +1,153 @@
+{% extends '::newbase.html.twig' %}
+{% block title %}
+    <title>Lista Perfiles</title>
+{% endblock %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Listar Perfiles</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('profile') }}">Perfiles</a></li>
+            <li class="active">Lista</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        <div class="block-flat">
+            <div class="header">
+                <h3>Búsqueda</h3>
+                <input type="text" id="globalfilter" placeholder="Nombre del perfil" class="form-control">
+            </div>
+            <div class="content">
+                <div class="filters">
+                    <p style="display:inline;" id="currentdate"></p>
+                </div>
+                <table id="profileTable" class="table hover table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%"> 
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Descripción</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for entity in entities %}
+                    <tr onclick="location.href='{{ path('profile_show', { 'id': entity.id }) }}';">
+                        <td><b>{{ entity.name }}</b></td>
+                        <td>{{ entity.description }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+                </table>
+                <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        <td>
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-flat" >Regresar</button>
+                        </td>
+                        <td style="text-align:right;">
+                            <button type="button" class="btn btn-default btn-flat" onclick="location.href='{{ path('profile_new') }}';">Crear nuevo</button>
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </di>
+</div>
+{% endblock %}
+{% block javascripts %}  
+
+<script type="text/javascript">
+    function formatDate(date) {
+        var monthNames = [
+            "Enero", "Febrero", "Marzo",
+            "Abril", "Mayo", "Junio", "Julio",
+            "Agosto", "Septiembre", "Octubre",
+            "Noviembre", "Diciembre"
+        ];
+
+        var day = date.getDate();
+        var monthIndex = date.getMonth();
+        var year = date.getFullYear();
+
+        return day + ' de ' + monthNames[monthIndex] + ' ' + year;
+    }
+    function searchBis(str_search) {
+        var ret = $($.parseHTML(str_search)).text().toLowerCase();
+        return ret.indexOf($('#globalfilter').val().toLowerCase()) != -1;
+    }
+    $.fn.dataTable.ext.search.push(
+        function( settings, data, dataIndex ) {
+     
+        if ($('#globalfilter').val().trim() != '') {
+            var ret0 = searchBis(data[0]);
+            return ( ret0 );
+        } else {
+            return true;
+        }
+        
+    });
+    $(document).ready(function () {
+        $(".clickable-row").click(function() {
+            window.location = $(this).data("href");
+        });
+        document.getElementById("currentdate").innerHTML = formatDate(new Date());
+        
+        $thisProfileTable=$('#profileTable').DataTable({
+            "ordering": true,
+            "responsive": true,
+            "searching": true,
+            "info":     false,
+            "lengthChange": true,
+            "scrollX": true,
+            "pageLength": 10,
+            "lengthMenu": [[10, 15, 20, 25, 30, -1], [10, 15, 20, 25, 30, "Todos"]],
+            "columns": [ null, null],
+            "language": {
+                "sSearch": "Buscar",
+                "lengthMenu": 'Mostrando  _MENU_  "Perfiles" por página',
+                        "zeroRecords": "<div style=\"color:red;\">Lo siento no se encontraron Perfiles</div>",
+                "sInfo": "Mostrando _START_ a _END_ de _TOTAL_ Perfiles",
+                        "infoEmpty": "No hay registros disponibles",
+                        "infoFiltered": "(Filtradas de un total de _MAX_ )",
+                "searchPlaceholder": "Número/Remitente/Destinatario",
+                "paginate" : {
+                                first:    '«',
+                                previous: '‹',
+                                next:     '›',
+                                last:     '»'
+                    }
+                },
+            
+            "pagingType": "full_numbers",
+            "sDom": '<"top"i>rt<"bottom"lp><"clear">',
+            "fnDrawCallback": function(oSettings) {
+                    if ((oSettings._iDisplayLength >= oSettings.fnRecordsDisplay()) ||  (oSettings._iDisplayLength == -1)) {
+                        $(oSettings.nTableWrapper).find('.dataTables_paginate').hide();
+                    } else {
+                        $(oSettings.nTableWrapper).find('.dataTables_paginate').show();
+                    }
+            },
+        });
+        
+        $('#globalfilter').on( 'keyup', function () {
+            $thisProfileTable.draw();
+        } );
+        $thisProfileTable.responsive.rebuild();
+        $thisProfileTable.responsive.recalc();
+        // $thisProfileTable.draw();
+        $( window ).resize(function() {
+            $thisProfileTable.responsive.rebuild();
+            $thisProfileTable.responsive.recalc();
+            // $thisProfileTable.draw();
+        });
+    });
+</script>
+{% endblock %}

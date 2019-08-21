@@ -1,0 +1,104 @@
+{% extends app.user.pobox is null
+    ? '::layout_min.html.twig' 
+    : '::base-public.html.twig' %}
+
+{% block body -%}
+<div class="widget">
+    <div class="widget-header"> <i class="fa fa-credit-card" aria-hidden="true"></i>
+              <h3>Reporte de pago efectuado</h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+	     <div class="bodycontainer scrollable">
+	     <table class="table table-striped table-bordered">
+                <thead>
+                  <tr>
+    			<th colspan=3><h4>Datos del pago</h4></th>
+		  </tr>
+                </thead>  
+       		<tbody>
+			<tr>
+    			<td>{{ form_row(form.name_customer) }}</td>
+			<td>{{ form_row(form.lastname_customer) }}</td>
+			<td>{{ form_row(form.email_customer) }}</td>
+			</tr>
+			<tr>
+    				
+				<td colspan=1>{{ form_row(form.guide) }}</td>
+				<td colspan=2>{{ form_row(form.account) }}</td>
+			</tr>
+			<tr> 
+				<td colspan=1>{{ form_row(form.paydate) }}</td>
+				<td colspan=2>{{ form_row(form.amount) }}</td>	
+			</tr>
+    			
+    	</tbody>
+        <tfoot>
+    	<tr>
+    	<td>{{ form_row(form.submit) }}</td>
+
+    	<td colspan=2 style="text-align:right;"><button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-lg bback" >Regresar</button></td>
+    	</tr>
+    </tfoot>
+    </table>
+    {{ form_end(form) }} 
+    {{ form_errors(form) }}
+</div>
+</div>
+</div>
+
+{% block javascript %}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+	$('#payment_type_guide').change(function(){
+		var val = $(this).val();
+		$.ajax({
+                type: "POST",
+                url: "{{ url('totalpaid_guide') }}?guide_id=" + val,
+                success: function(data) {
+		    if (data){       
+      			$('#payment_type_amount').val(data);
+    		    } else {
+			alert('No se encontró la {% trans %}Guía{% endtrans %}');
+		    }
+                }
+             
+	    	});
+	});
+	$('#payment_type_paydate').datepicker();
+	$("#payment_type_paydate").val($.datepicker.formatDate('mm/dd/yy', new Date()));
+	$("label.required").append('<span class="red-star" title="Campo Obligatorio"> *</span>');
+	var val = $('#payment_type_email_customer').val();
+	   if (val == '') {
+		alert('Debe asignar el email del cliente');
+	   } else {
+           $.ajax({
+                type: "POST",
+                url: "{{ url('select_guides') }}?customer_email=" + val,
+                success: function(data) {
+		    if (data){       
+      			var num = (data + '').length;
+			if (num == 0) {
+				alert('El cliente no tiene {% trans %}Guías{% endtrans %} registradas que pueda pagar');
+				$('#payment_type_submit').hide();
+			} else {
+				$('#payment_type_guide').html('');
+				$.each(data, function(k, v) {
+                        		$('#payment_type_guide').append('<option value="' + v + '">' + k + '</option>');
+                    		})
+				$('#payment_type_guide').change();
+			}
+    		    } else {
+			alert('No se encontraron {% trans %}Guías{% endtrans %}');
+		    }
+                }
+             
+	    });
+	    }
+
+    });
+</script>
+{% endblock %}
+{% endblock %}

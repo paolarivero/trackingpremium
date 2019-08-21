@@ -1,0 +1,49 @@
+{# src/NvCarga/Bundle/Resources/views/Security/timeout.html.twig #}
+{% extends '::layout_min.html.twig' %}
+
+{% block body -%}
+<script type="text/javascript">
+function closew() {
+	window.close();
+}
+
+function ingresar() {
+	window.location="{{ path('login') }}";
+}
+
+function CloseWindow()
+{
+    if (window.opener) {
+        var btn = document.createElement("BUTTON");
+	var tag = "Cerrar";
+	var t = document.createTextNode(tag);
+	btn.appendChild(t);
+	btn.onclick = (function(){return function() {closew()}})();
+	document.body.appendChild(btn);
+    } else {
+	var btn = document.createElement("BUTTON");
+	var tag = "Volver a ingresar";
+	var t = document.createTextNode(tag);
+	btn.appendChild(t);
+	btn.onclick = (function(){return function() {ingresar()}})();
+	document.body.appendChild(btn);
+    }  
+}
+</script>
+<center>
+	{% for flashMessage in app.session.flashbag.get('info') %}
+
+	<div class="alert alert-danger">
+    		<strong><h2>{{ flashMessage }}</h2></strong>
+	</div>
+
+        {% endfor %}
+	{# <h1><br>Desconectado por inactividad</h1>#}
+	<br>
+	<a  class="btn btn-success" href="{{ path('login') }}">Volver a ingresar</a>
+				
+	{# <script>CloseWindow()</script> #}
+</center>
+	
+
+{% endblock %}

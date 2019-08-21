@@ -1,0 +1,186 @@
+{% extends '::layout-pdf.html.twig' %}
+
+
+
+{% block body %}
+
+<style>
+table { page-break-inside:auto }
+    tr    { page-break-inside:avoid; page-break-after:auto }
+    thead { display:table-header-group }
+    tfoot { display:table-footer-group; page-break-inside:avoid; page-break-after:auto }
+
+.mytable td,  .mytable th, .mytable thead{
+   border: 1px solid black;
+} 
+
+</style> 
+
+{# <div class="container"> #}
+<div class="row">
+    <div class="span4">
+      <img src="{{ absolute_url(asset('assets/img/logo_empresa-print.png')) }}" alt="" style="width:auto;height:auto;max-height:100px; max-width:100px;"><br>
+	{{ entity.agency.name }}<br>
+	{{ entity.agency.address }}<br>
+	{{ entity.agency.city }}, {{ entity.agency.city.state }} {{ entity.agency.zip }}. {{ entity.agency.city.state.country }}<br>
+	Ph. {{ entity.agency.phone }} <br>
+	Email: {{ entity.agency.email }}<br>	
+    </div>
+
+    <div class="span4" >
+	<div id="demo"></div><br>
+	<h3> Guía Número {{ entity.number }} </h3><br>
+        Fecha: {{ entity.creationdate|date('m/d/Y') }}<br>
+	Servicio: {{ entity.shippingtype }}<br>
+	Procesada Por: {{ entity.processedby }}  <br> 
+    </div>
+</div>
+{# </div> #}
+
+<table class="table mytable">
+<thead>
+	{# <tr>
+	<th colspan=2 style="text-align:center;"><h3> Guía Número {{ entity.number }} </h3></th>
+	</tr> #}
+	<tr>
+	<th><center>REMITENTE</center></th>
+	<th><center>DESTINATARIO</center></th>
+	</tr>
+</thead>
+<tbody>
+	<tr>
+	<td>{{entity.sender.adrdefault.name }} {{entity.sender.adrdefault.lastname }}<br> 
+	    {{entity.sender.adrdefault.address }}<br> 
+	    {{entity.sender.adrdefault.city }} {{entity.sender.adrdefault.city.state }} {{entity.sender.adrdefault.city.state.country }}<br>
+	    {% if entity.sender.adrdefault.phone %}	    
+		Tel:{{ entity.sender.adrdefault.phone }}<br>
+	    {% else %}
+		{% if entity.sender.adrdefault.mobile %}	    
+			Tel:{{ entity.sender.adrdefault.mobile }}<br>
+		{% endif %}
+	    {% endif %}
+	     Email: {{ entity.sender.email }}<br>
+	</td>
+	<td>{{ entity.addressee.name }} {{ entity.addressee.lastname }}<br> {{ entity.addressee.address }}<br>
+	    {{ entity.addressee.city }} {{ entity.addressee.city.state }} {{ entity.addressee.city.state.country }}<br>
+	    {% if entity.addressee.phone %}
+		Tel:{{ entity.addressee.phone }}<br>
+	    {% else %}
+		{% if entity.addressee.mobile %}	    
+			Tel:{{ entity.addressee.mobile }}<br>
+		{% endif %}
+	    {% endif %}
+	    Email: {{ entity.addressee.customer.email }}<br>
+	</td>
+	</tr>
+</tbody>
+</table>
+   {% set dimfactor = entity.agency.maincompany.dimfactor %}
+  <table class="table mytable">
+	<thead>
+	<tr>
+	<th colspan=6 style="text-align:center;">PAQUETE(S)</th>
+	</tr>
+	<tr>
+	<th style="text-align:center;">LARGO</th>
+	<th style="text-align:center;">ANCHO</th>
+	<th style="text-align:center;">ALTO</th>
+	<th style="text-align:center;">PESO (Lb/Kg)</th>
+	<th style="text-align:center;">VOLUMEN (Cf)</th>
+	<th style="text-align:center;">PESO VOL (Lb)</th>
+	</tr>
+	</thead>	
+	<tbody>
+	{% if entity.masterec %}
+	{% set listrec = [entity.masterec] %}
+	{% else %}
+	{% set listrec = entity.receipts %}
+	{% endif %}
+	{% set vtotal = 0.0 %}
+	{% set wtotal = 0.0 %}
+	{% set ptotal = 0.0 %}
+	{% for receipt in listrec %}
+	<tr>
+		
+			{% set volumen = receipt.length*receipt.width*receipt.height/1728 %}
+			{% set weidim = receipt.length*receipt.width*receipt.height/dimfactor %}
+			<td style="text-align:right;">{{ receipt.length }}</td>
+			<td style="text-align:right;">{{ receipt.width }}</td>
+			<td style="text-align:right;">{{ receipt.height }}</td>
+			{% if (entity.tariff.measure == 'Lb') and (entity.roundmeasure == 'Individual' ) %}
+				{% set peso = receipt.weight|round(0, 'ceil') %}
+			{% else %}
+				{% set peso = receipt.weight %}
+			{% endif %}
+			<td style="text-align:right;">{{ peso }}/{{ (peso*0.454)|number_format(2, '.', ',') }} </td>
+			{% if (entity.tariff.measure == 'CF') and (entity.roundmeasure == 'Individual' ) %}
+				{% set volumen = volumen|round(0, 'ceil') %}
+			{% endif %}
+			<td style="text-align:right;">{{ volumen|number_format(2, '.', ',') }}</td>
+			<td style="text-align:right;">{{ weidim|number_format(2, '.', ',') }}</td>
+			{% set vtotal = vtotal + volumen %}
+			{% set wtotal = wtotal + weidim %}
+			{% set ptotal = ptotal + peso %}
+		
+	</tr>
+	{% endfor %}
+	{% if listrec|length > 1 %}
+	<tr>
+    	<td colspan=3 style="text-align:center;"><b>TOTALES </b></td> 
+	<td style="text-align:right;">{{ ptotal|number_format(2, '.', ',') }}/{{ (ptotal*0.454)|number_format(2, '.', ',') }}</td>
+	<td style="text-align:right;">{{ vtotal|number_format(2, '.', ',') }}</td>
+	<td style="text-align:right;">{{ wtotal|number_format(2, '.', ',') }}</td>
+    	</tr>	
+	{% endif %}
+
+	<tr>
+    	<td colspan=6>CONTIENE: {{ entity.contain }}</td>
+    	</tr>
+	</tbody>
+    </table>
+
+<table class="table">
+	<tbody>
+	<tr>
+	<th colspan=3></th>
+	<th><center>Piezas</center></th>
+	<th><center>Declarado</center></th>
+	</tr>
+	<tr>
+	<td colspan="3"> Processed by (Signature) NUEVO </td>
+	<td><center>{{ entity.pieces }}</center></td>
+	<td><center>${{ entity.declared }}</center></td>
+	</tr>
+	<tr>
+	<td colspan=3><div style="border: 2px solid black">
+           **NO SOMOS RESPONSABLES POR PERDIDA TOTAL Y/O PARCIAL SI LA 
+	MERCANCIA NO ESTA ASEGURADA MEDIANTE PREVIA REQUISICION. -LA EMPRESA NO SE 
+	HACE RESPONSABLE DE CUALQUIER PROBLEMA SI EL PROVEEDOR NO ENTREGA 
+	LA FACTURA. -EL TIEMPO DE ENTREGA ES UN ESTIMADO Y NO REPRESENTA 
+	PROMESA ALGUNA.-ES PROHIBIDO ENVIAR LIQUIDOS, CORROSIVOS, DINERO EN 
+	EFECTIVO, ARMAS DE FUEGO Y MATERIAL PORNOGRAFICO. -RASTREOS DE GUIAS
+	MEDIENTE NUESTRA PAGINA WEB {{ entity.agency.maincompany.url }}.
+         </div>
+	<center>{{ entity.agency.maincompany.url }}</center>
+	</td>
+	<td colspan=2 style="text-align: center;"><h3>Total Pagado: ${{ entity.totalpaid }}</h3>
+	</td>
+	</tr>
+	</tbody>
+</table>	
+
+<script type="text/javascript">
+    $(document).ready(function () {
+		var thecode= {{ entity.number|json_encode|raw }};
+		$("#demo").barcode(
+			thecode, // Value barcode (dependent on the type of barcode)
+			"code128", // type (string)
+			{ barWidth: 2, barHeight: 50, showHRI: false}
+		);
+		window.print();
+		history.go(-1);
+    });
+</script>
+{% endblock %} 
+
+

@@ -1,0 +1,190 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+<div class="widget-header"> <i class="icon-inbox"></i>
+    <h3> <b>Buscar Casillero </b>&nbsp;&nbsp;
+	</h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">    
+    {{ form_start(form, {attr: {novalidate: 'novalidate'}}) }}
+    <div class="bodycontainer scrollable">
+    <table class="table table-striped table-bordered">
+	<thead>
+		<tr>
+		<td>{{ form_row(form.namecustomer) }}</td>
+		<td>{{ form_row(form.lastnamecustomer) }}</td>
+		<td>{{ form_row(form.number) }}</td>
+		<td>{{ form_row(form.email) }}</td>
+		</tr>
+		<tr>
+		<td colspan=4 style="text-align:center;">{{ form_row(form.search) }}</td>
+		</tr>
+	</thead>
+        <tbody>
+
+        </tbody>
+    </table>
+
+    <table id="poboxTable" class="table table-striped table-sm" cellspacing="0" width="100%" >
+        <thead>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+    <ul class="pagination pagination-sm pager" id="myPager2"></ul>
+    </div>
+    {{ form_end(form) }}
+    </div>
+    </div>
+{% block javascript %}
+
+<script type="text/javascript" src="{{ asset('assets/js/jquery.dataTables.min.js') }}"></script>
+
+<script type="text/javascript">
+
+    function returnSelectPobox(vidpobox){
+	hostAddress= top.location.toString();
+	var n = hostAddress.lastIndexOf("/");
+	var base = hostAddress.substring(0,n);
+	// console.log(base);
+	var url = base + "/" + vidpobox + "/show";
+	// console.log(url); 
+	window.location = url;
+    }
+
+    $(document).ready(function () {
+	var $thisPoboxTable=null;
+	$('#pobox_type_search').click(function(){
+		//console.log('A buscar casilleros..');
+		var name= $('#pobox_type_namecustomer').val();
+		var lastname= $('#pobox_type_lastnamecustomer').val();
+		var number= $('#pobox_type_number').val();
+		var email= $('#pobox_type_email').val();
+		if (!(name) && !(lastname) && !(number) && !(email)) {
+			alert('Debe seleccionar algún criterio de búsqueda');
+		} else {
+			var cadena = "{{ url('pobox_find') }}?name=" + name + "&lastname=" + lastname + "&number=" + number + "&email=" + email;
+			// console.log(cadena);
+			$.ajax({
+                	type: "GET",
+                	url: cadena,
+                	success: function(data) {
+				if ($thisPoboxTable) {
+					$thisPoboxTable.clear();
+					$thisPoboxTable.destroy();
+				}
+				var tableHead = document.getElementById('poboxTable').getElementsByTagName('thead')[0];
+
+				var nh = tableHead.rows.length;
+				for (i=0; i < nh; i++) {
+					tableHead.deleteRow(0);
+				}
+				var newhead = tableHead.insertRow(0); 
+
+				var newH0  = newhead.insertCell(0);
+				var newH1  = newhead.insertCell(1);
+				var newH2  = newhead.insertCell(2);
+				var newH3  = newhead.insertCell(3);	
+				
+				var h0 = document.createElement("h4");
+				var h1 = document.createElement("h4");
+				var h2 = document.createElement("h4");
+				var h3 = document.createElement("h4");
+				
+				
+				var t0 = document.createTextNode("Número");
+				var t1 = document.createTextNode("Cliente");
+				var t2 = document.createTextNode("Email");
+				var t3 = document.createTextNode("Bodega");
+
+				h0.appendChild(t0);
+				h1.appendChild(t1);
+				h2.appendChild(t2);
+				h3.appendChild(t3);
+				
+				newH0.appendChild(h0);
+				newH1.appendChild(h1);
+				newH2.appendChild(h2);
+				newH3.appendChild(h3);
+				
+				var tableRef = document.getElementById('poboxTable').getElementsByTagName('tbody')[0];
+				var nf = tableRef.rows.length;
+				for (i=0; i < nf; i++) {
+					tableRef.deleteRow(0);
+				}
+				var nc = data.length;
+		
+				for (i = 0; i < nc; i++) {
+					var poboxid = data[i]['poboxid'];
+					var number = data[i]['number'];
+					var customer = data[i]['customer'];
+					var email = data[i]['email'];
+					var warehouse = data[i]['warehouse'];
+
+					var newRow   = tableRef.insertRow(tableRef.rows.length);
+	
+					var newCell0  = newRow.insertCell(0);
+					var newCell1  = newRow.insertCell(1);
+					var newCell2  = newRow.insertCell(2);
+					var newCell3  = newRow.insertCell(3);
+					var btn = document.createElement("input");       
+
+					var tag = number;
+    					btn.type = "button";
+    					btn.value = tag;
+					btn.onclick = (function(){ var vidpobox = poboxid; 	return function() 
+				  		{returnSelectPobox(vidpobox)}})();  
+
+		 			newCell0.appendChild(btn);
+					var newText1 = document.createTextNode(customer);
+					newCell1.appendChild(newText1);
+
+					var newText2 = document.createTextNode(email);
+					newCell2.appendChild(newText2);
+
+					var newText3 = document.createTextNode(warehouse);
+					newCell3.appendChild(newText3);
+				}
+				$thisPoboxTable=$('#poboxTable').DataTable({
+					searching: false,
+					"info":     false,
+					"lengthChange": false,
+					"scrollX": true,
+					pageLength: 10,
+					"pagingType": "full_numbers",
+					"fnDrawCallback": function(oSettings) {
+        					if (oSettings._iDisplayLength >= oSettings.fnRecordsDisplay()) {
+        		    				$(oSettings.nTableWrapper).find('.dataTables_paginate').hide();
+		
+        					} else {
+							$(oSettings.nTableWrapper).find('.dataTables_paginate').show();
+					
+						}
+    					},
+    					language: {				
+    		  				emptyTable: "<div style=\"color:red;\">No hay resultados</div>",
+        					paginate: {
+							first:      '<<',
+        						last:       '>>',
+        		    				previous: '<',
+        		    				next:     '>'
+        					},
+        					aria: {
+        		    				paginate: {
+        		        				previous: 'Anterior',
+        		        				next:     'Siguiente'
+        		    				}
+        					}	
+    					}
+				});
+			}
+			});
+		}
+
+	});
+	
+});
+</script>
+    {% endblock %}
+    {% endblock %}

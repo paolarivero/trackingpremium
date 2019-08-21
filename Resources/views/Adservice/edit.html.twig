@@ -1,0 +1,115 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>Editar Servicio</title>
+{% endblock %}
+
+{# Display the form #}
+
+{% form_theme edit_form 'form/fields.html.twig' %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Editar Servicio Adicional</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('adservice') }}">Servicios Adicionales</a></li>
+            <li class="active">Editar</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+
+        {{ form_start(edit_form, {attr: {novalidate: 'novalidate', 'id': 'adservice_type' }}) }}
+        <div class="block-flat">
+            <div class="header">
+                <div class="row">
+                    <div class="col-md-6 col-sm-6">
+                        <h3>Datos del Servicio</h3>
+                    </div>
+                     <div class="col-md-6 col-sm-6">
+                        {{ form_row(edit_form.isactive, { 'attr': {'class': 'icheck'} }) }}
+                    </div>
+                </div>
+            </div>
+            <div class="content">
+                {{ form_row(edit_form.name) }}
+                {{ form_row(edit_form.measure) }}
+                {{ form_row(edit_form.price) }}
+                {{ form_row(edit_form.brand) }}
+                {{ form_row(edit_form.description) }}
+                {{ form_row(edit_form.meDependof, { 'attr': {'class': 'icheck'} }) }}
+                
+                <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        <td>
+
+                        </td>
+                        <td style="text-align:right;">
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-flat" >Cancelar</button>
+                            {{ form_widget(edit_form.submit, { 'attr': {'class': 'btn btn-primary btn-flat'} }) }}
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>{# FIN CONTENT #}
+        </div> {# FIN BLOCK FLAT #}
+        {{ form_end(edit_form) }}
+    </div>
+</div>
+{% endblock %}
+{% block javascripts %}
+<script type="text/javascript">
+        $('#adservice_type_submit').click(function(evt) {
+            var services = $('input[name="adservice_type[meDependof][]"]:checked');
+            var count = services.length
+            var measure = $('#adservice_type_measure').val();
+            var price = $('#adservice_type_price').val();
+            // console.log(count + ' ' + measure + ' ' + price);
+            if (price <= 0) {
+                funalert('El precio/porcentaje debe ser mayor que cero (0)');
+                return false;
+            }
+            for (ii=0; ii < count; ii++) {
+                var id = services[ii].value;
+                var thisid = {{ entity.id }};
+                // console.log(ii + ' ' + id + ' ' + thisid );
+                if (id == thisid) {
+                    funalert('El servicio no puede depender de si mismo, debe quitar la dependencia de {{ entity.name }}');
+                    return false;
+                }
+            }
+            if ((measure != '%') && (count > 0)) {
+                funalert('Cuando un servicio depende de otro(s) la medida debe estar en porcentaje');
+                return false;
+            }
+            if ((measure == '%') && (price > 100)) {
+                funalert('El porcentaje debe ser menor que cien (100)');
+                return false;	
+            }
+            return true;
+        });
+        $('#adservice_type_meDependof').change(function(){
+            var services = $('input[name="adservice_type[meDependof][]"]:checked');
+            var count = services.length
+            for (ii=0; ii < count; ii++) {
+                var id = services[ii].value;
+                var thisid = {{ entity.id }};
+                // console.log(ii + ' ' + id + ' ' + thisid );
+                if (id == thisid) {
+                    funalert('El servicio no puede depender de si mismo, debe quitar la dependencia de {{ entity.name }}');
+                    return false;
+                }
+            }
+            return true;
+        });
+    });
+</script>
+{% endblock %}

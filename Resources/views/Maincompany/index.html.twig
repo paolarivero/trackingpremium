@@ -1,0 +1,248 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>Empresa</title>
+{% endblock %}
+
+{% block body -%}
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>
+            {% if app.user.username == 'trackingpremium' %}
+                Lista de Empresas
+            {% else %}
+                Empresa
+            {% endif %}
+            </h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('maincompany') }}">Empresa</a></li>
+            <li class="active">Listar</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="main-app">
+        
+        <div class="head" >
+        {% if app.user.username == 'trackingpremium' %}
+            <h3>Búsqueda</h3>
+            <input type="text" id="globalfilter" placeholder="Nombre" class="form-control" style="width: 30%;">
+        {% endif %}
+        
+        <div class="filters">
+            <p style="display:inline;" id="currentdate"></p>
+        </div>
+        <div class="block-flat" style=" padding-top: 0px;">
+            <div class="content" style=" padding-top: 0px;">
+                <div id="mydiv" style="width: 100%" >
+                    <table id="mainTable" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Acrónimo</th>
+                                <th>Url</th>
+                                <th>Email</th>
+                                {% if app.user.username == 'trackingpremium' %}
+                                    <th>Acción</th>
+                                {% endif %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for entity in entities %}
+                        <tr>
+                            <td><a href="{{ path('maincompany_show', { 'id': entity.id }) }}">{{ entity.name }}</a></td>
+                            <td>{{ entity.acronym }}</td>
+                            <td>{{ entity.url }}</td>
+                            <td>{{ entity.email }}</td>
+                            {% if entity.id > 1 %}
+                                {% if (app.user.username == 'trackingpremium') %}
+                                    {% if entity.inactive %}
+                                        {% set action='Activar' %}
+                                        {% set btntype='btn-success' %}
+                                    {% else %}
+                                        {% set action='Desactivar' %}
+                                        {% set btntype='btn-danger' %}
+                                    {% endif %}
+                                    <td><button type="button" class="btn {{ btntype }} btn-flat btn-sm bactive" data-toggle="modal" data-target="#switchactive" data-active="{{ action }}" data-name="{{ entity.name }}" data-id="{{ entity.id }}">{{ action }}</button></td>
+                                {% endif %}
+                            {% else %}
+                                <td></td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    <div style="margin-top:10px;">
+                    <table class="no-border">
+                        <tbody class="no-border-y">
+                            <tr>
+                            <td>
+                                <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-sm" >Regresar</button>
+                            </td>
+                            <td style="text-align:right;">
+                            {% if app.user.username == 'trackingpremium' %}
+                                <buttom class="btn btn-primary btn-sm" title="Crear" onclick="location.href='{{ path('maincompany_new') }}';">Crear empresa</buttom>
+                            {% endif %}
+                            </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" id="themain">
+        <!-- Modal -->
+        <div class="modal fade colored-header md-effect-9" id="switchactive" role="dialog">
+            <div class="modal-dialog modal-lg">
+                
+                <!-- Modal content-->
+                <div class="modal-header">
+                    <button id="closeactive" type="button" class="close" data-dismiss="modal">&times;</button>
+                    <center><h2 class="modal-title" id="activetitle"> </h2></center>
+                </div>
+                <div class="modal-content">
+                    <div class="modal-body">
+                        <center>
+                        <h2 id="activebody"></h2><br>
+                
+                        <button type="button" class="btn btn-info btn-lg gotoactive">Confirmar</button>
+                        </center>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="closeactive" type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>     
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+{% block javascripts %}
+
+<script type="text/javascript">
+    function formatDate(date) {
+        var monthNames = [
+            "Enero", "Febrero", "Marzo",
+            "Abril", "Mayo", "Junio", "Julio",
+            "Agosto", "Septiembre", "Octubre",
+            "Noviembre", "Diciembre"
+        ];
+
+        var day = date.getDate();
+        var monthIndex = date.getMonth();
+        var year = date.getFullYear();
+
+        return day + ' de ' + monthNames[monthIndex] + ' ' + year;
+    }
+    {% if app.user.username == 'trackingpremium' %}
+       function searchBis(str_search) {
+        var ret = $($.parseHTML(str_search)).text().toLowerCase();
+        return ret.indexOf($('#globalfilter').val().toLowerCase()) == 0;
+        }
+        $.fn.dataTable.ext.search.push(
+            function( settings, data, dataIndex ) {
+            if ($('#globalfilter').val().trim() != '') {
+                var ret0 = searchBis(data[0]);
+                return ( ret0 );
+            } else {
+                return true;
+            }
+
+        });
+    {% endif %}
+    
+    $(document).ready(function () {
+        $(".dataTables_filter input").val('');
+        document.getElementById("currentdate").innerHTML = formatDate(new Date());
+        var $thisMaintable = $('#mainTable').DataTable({
+        {% if app.user.username == 'trackingpremium' %}
+            "stateSave": false,
+            "columnDefs": [
+                    { "searchable": true, "targets": 0 },
+                    { "searchable": true, "targets": 1 },
+                    { "searchable": false, "targets": 2 },
+            ],
+            "order": [[ 0, "asc" ]],
+            "pageLength": 10,
+            "ordering": true,
+            "searching": true,
+            "info":     false,
+            "lengthChange": true,
+            "scrollX": true,
+            "lengthMenu": [[10, 20, 30, -1], [10, 20, 30, "Todas"]],
+            "language": {
+                "sSearch": "Buscar",
+                "lengthMenu": 'Mostrando  _MENU_  "Empresas" por página',
+                "zeroRecords": "<div style=\"color:red;\">Lo siento no se encontraron Empresas</div>",
+                "sinfo": "Mostrando _START_ a _END_ de _TOTAL_ Empresas",
+                "infoEmpty": "No hay registros disponibles",
+                "infoFiltered": "(Filtradas de un total de _MAX_ )",
+                "searchPlaceholder": "Nombre",
+                "paginate" : {
+                    first:    '«',
+                    previous: '‹',
+                    next:     '›',
+                    last:     '»'
+                },
+            },
+            "sDom": '<"top"i>rt<"bottom"lp><"clear">',
+            "pagingType": "full_numbers",
+            "fnDrawCallback": function(oSettings) {
+                if ((oSettings._iDisplayLength >= oSettings.fnRecordsDisplay()) ||  (oSettings._iDisplayLength == -1)) {
+                    $(oSettings.nTableWrapper).find('.dataTables_paginate').hide();
+                } else {
+                    $(oSettings.nTableWrapper).find('.dataTables_paginate').show();
+                }
+            },
+        {% else %}
+            "paging": false,
+            "ordering": false,
+            "lengthChange": false,
+            "searching": false,
+            "info": false,
+        {% endif %}
+        });
+        {% if app.user.username == 'trackingpremium' %}
+            $('#globalfilter').on( 'keyup', function () {
+                $thisMainTable.draw();
+            } );
+        {% endif %}
+        $thisMaintable.responsive.rebuild();
+        $thisMaintable.responsive.recalc();
+        // $thisMaintable.draw();
+        $( window ).resize(function() {
+            $thisMaintable.responsive.rebuild();
+            $thisMaintable.responsive.recalc();
+            // $thisMaintable.draw();
+        });
+        $('.bactive').click(function(e) {
+            e.preventDefault();
+            $('#findcustomer').prop('disabled',false);
+            var action = $(this).data('active');
+            var name = $(this).data('name');
+            var id = $(this).data('id');
+            document.getElementById("activetitle").innerHTML = action + ' Empresa';
+            document.getElementById("activebody").innerHTML = 'Desea ' + action + ' la empresa ' + name;
+            $('#themain').val(id);
+            return true;
+        });
+        $('.gotoactive').click(function(e) {
+            e.preventDefault();
+            $('#closeactive').click();
+            var id = $('#themain').val();
+            var url="{{ path('maincompany_active') }}" + "?theid=" + id;
+            // funalert('URL: ' + url);
+            window.location.href = url;
+            return false;
+        });
+    });
+    
+</script>
+{% endblock %}

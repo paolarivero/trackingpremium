@@ -1,0 +1,144 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+
+<div class="widget">
+    <div class="widget-header"> <i class="icon-list-alt"></i>
+              <h3> <b>Factura</b> </h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+    <ul class="nav nav-tabs" id="tabs">
+        <li><a href="#opcion1" data-toggle="tab">Impresiones</a></li>
+	<li><a href="#opcion2" data-toggle="tab">Acciones</a></li>
+    </ul>
+    <!-- Tabs -->
+    <!-- Tab Content -->
+    <div class="tab-content">    
+        <!-- Repo -->
+        <div class="tab-pane" id="opcion1">         
+          {# <h2>Lista de acciones opción 1</h2> #}
+                <!-- Repo Tabs --->
+                <div class="btn-group"> 
+ 			<button type="button" class="btn btn-success" 
+			onclick="location.href='{{ path('bill_print', {'id': entity.id }) }}';">Imprimir factura</button> 
+			<button type="button" class="btn btn-success"
+			onclick="location.href='{{ path('bill_printpdf', { 'id': entity.id }) }}';">Generar PDF</button>
+		</div>  
+        </div>
+	<div class="tab-pane" id="opcion2">         
+          {# <h2>Lista de acciones opción 2</h2> #}
+                <!-- Repo Tabs --->
+                <div class="btn-group"> 
+			<button type="button" class="btn btn-success" 
+			onclick="location.href='{{ path('bill_email', {'id': entity.id }) }}';">Enviar por email</button>
+			<button type="button" class="btn btn-success btn-lg bcancel" data-toggle="modal" data-target="#cancelbill">Cancelar</button>
+		</div>  
+        </div>
+    </div>
+    <br>
+    {% set total = 0 %}
+    {% for guide in entity.guides %}
+	{% set total = total + guide.totalpaid %}
+    {% endfor %}
+
+    <table class="table table-striped table-bordered">
+                <thead>
+		<tr>
+                <th><h4>#Factura</h4></th>
+		<th><h4>Cliente</h4></th>
+		<th><h4>Fecha</h4></th>
+		<th><h4>Tipo de pago</h4></th>
+		<th><h4>Nro de {% trans %}Guías{% endtrans %}</h4></th>
+		<th><h4>Monto total</h4></th>
+		</tr>	
+		</thead>
+       		<tbody>
+			<tr>
+			<td>{{ entity.number }}</td>
+			<td>{{ entity.customer }}</td>
+			<td>{{ entity.creationdate|date('Y-m-d H:i:s') }}</td>
+			<td>{{ entity.paidtype }}</td>
+			<td>{{ entity.guides|length }}</td>
+			<td>{{ total }}</td>
+			</tr>
+		</tbody>
+    </table>
+ 
+    <table class="table table-striped table-bordered">
+                <thead>
+		<tr>
+		<th colspan=5><h4>{% trans %}Guías{% endtrans %} con Factura</h4></th>
+		</tr>
+		<tr>
+                <th>#Guía</th>
+		<th>Peso</th>
+		{# <th>Volumen</th> #}
+		<th>Piezas</th>
+		<th>Valor</th>
+		<th>Monto</th>
+		</tr>	
+		</thead>
+       		<tbody>
+			{% for guide in entity.guides %}
+			<tr>
+				<td><a  class="btn btn-success" href="{{ path('guide_show', { 'id': guide.id }) }}">{{ guide.number }}</a></td>
+				<td>{{ guide.realweight }}</td>
+				{# <td>{{ guide.length }}X{{ guide.width }}X{{ guide.height }} </td> #}
+				<td>{{ guide.pieces }}</td>
+				<td>{{ guide.declared }}</td>
+				<td>{{ guide.totalpaid }}</td>
+			</tr>
+			{% endfor %}
+			<tr>
+		</tbody>
+    </table>
+
+<!-- Modal -->
+  <div class="modal fade" id="cancelbill" role="dialog">
+    <div class="modal-dialog modal-lg">
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button id="closecancelbill" type="button" class="close" data-dismiss="modal">&times;</button>
+          <h2 class="modal-title">Confirme la anulación de factura</h2>
+        </div>
+        <div class="modal-body">
+	      <table class="table">
+	      <thead>
+		<th colspan=2 style="text-align:center;color:red;"><h2>Desea cancelar la factura {{ entity.number }}</h2></th>
+	      </tehead>
+	      <tbody>
+		<tr>
+		<td><button type="button" class="btn btn-info btn-lg gotocancel">Confirmar</button><td>
+	        <td><button id="closecancelbill" type="button" class="btn btn-default" data-dismiss="modal">Regresar</button><td>
+		</tr>
+	      </tbody>
+	      </table>
+        </div>
+        
+        <div class="modal-footer">
+          <button id="closecancelbill" type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+        </div>
+      </div>     
+    </div>
+  </div>
+
+</div>
+</div>
+
+{% block javascript %}
+<script type="text/javascript">
+$(document).ready(function () {
+	$('.gotocancel').click(function(e) {
+	        e.preventDefault();
+		var url="{{ path('bill_cancel', { 'id': entity.id }) }}";
+		// alert('VOY A ANULAR LA FACTURA: ' + url);
+		window.location.href = url;
+		return false;
+    		
+	});
+});
+</script>
+{% endblock %}
+{% endblock %}

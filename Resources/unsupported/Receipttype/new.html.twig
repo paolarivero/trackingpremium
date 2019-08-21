@@ -1,0 +1,15 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+    <h1>Creación de tipo de recibo</h1>
+
+    {{ form(form) }}
+
+        <ul class="record_actions">
+    <li>
+        <a href="{{ path('receipttype') }}">
+            Regresar a la lista de tipos de recibo
+        </a>
+    </li>
+</ul>
+{% endblock %}

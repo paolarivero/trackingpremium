@@ -1,0 +1,15 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+    <h1>Crear un nuevo status para Agencias</h1>
+
+    {{ form(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+        <ul class="record_actions">
+    <li>
+        <a href="{{ path('agencystatus') }}">
+            Regresar a la lista
+        </a>
+    </li>
+</ul>
+{% endblock %}

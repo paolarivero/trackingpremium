@@ -1,0 +1,489 @@
+<?php
+// src/NvCarga/Bundle/Entity/Consolidated.php
+
+namespace NvCarga\Bundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use JMS\Serializer\Annotation\ExclusionPolicy;
+use JMS\Serializer\Annotation\Expose;
+use Symfony\Component\Validator\Constraints as Assert;
+
+/**
+ * @ORM\Entity
+ * @ORM\Table(name="consolidated")
+ * @ORM\HasLifecycleCallbacks()
+ * @ExclusionPolicy("all")
+ */
+class Consolidated
+{
+    /**
+     * @ORM\Id
+     * @ORM\Column(type="integer")
+     * @ORM\GeneratedValue(strategy="AUTO")
+     * @Expose
+     */
+    protected $id;
+    /**
+     * @ORM\Column(type="string", length=50, unique=false, nullable=false)
+     */
+    protected $number;
+    /**
+     * @ORM\Column(type="boolean")
+     * @Expose
+     */
+    protected $isopen;
+    /**
+     * @ORM\ManyToOne(targetEntity="Company")
+     * @ORM\JoinColumn(name="sender_id", referencedColumnName="id")
+     * @Expose
+     */
+    private $sender;
+    /**
+     * @ORM\ManyToOne(targetEntity="Company")
+     * @ORM\JoinColumn(name="receiver_id", referencedColumnName="id")
+     * @Expose
+     */
+    private $receiver;
+    /**
+     * @ORM\ManyToOne(targetEntity="Shippingtype")
+     * @ORM\JoinColumn(name="shippintype_id", referencedColumnName="id")
+     * @Expose
+     */
+    private $shippingtype;
+   /**
+     * @ORM\ManyToOne(targetEntity="Country")
+     * @ORM\JoinColumn(name="countryfrom_id", referencedColumnName="id")
+     * @Expose
+     */
+    private $countryfrom;
+    /**
+     * @ORM\ManyToOne(targetEntity="Country")
+     * @ORM\JoinColumn(name="countryto_id", referencedColumnName="id")
+     * @Expose
+     */
+    private $countryto;
+    /**
+     * @ORM\ManyToOne(targetEntity="Office")
+     * @ORM\JoinColumn(name="office_id", referencedColumnName="id")
+     */
+    private $office;
+   /**
+     * @ORM\ManyToOne(targetEntity="Agency")
+     * @ORM\JoinColumn(name="agency_id", referencedColumnName="id")
+     * @Expose
+     */
+    private $agency;
+   /**
+     * @ORM\OneToMany(targetEntity="Guide", mappedBy="consol")
+     */
+    protected $guides;
+    /**
+     * @ORM\OneToMany(targetEntity="Moveconsols", mappedBy="consolidated")
+    */
+    protected $moves;
+    /**
+     * @ORM\ManyToOne(targetEntity="Maincompany")
+     * @ORM\JoinColumn(name="maincompany_id", referencedColumnName="id")
+     */
+    protected $maincompany;
+    /**
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="Statusconsol", mappedBy="consol")
+     */
+    protected $liststatus;
+
+    public function __toString() {
+        // return (string) ($this->getId());
+        return (string) ($this->getNumber());
+    }
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->guides = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->moves = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->liststatus = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    public function open()
+    {
+	$this->isopen = true;
+	return $this;
+    }
+
+    public function close()
+    {
+	$this->isopen = false;
+	return $this;
+    }	
+    public function getIsopen()
+    {
+        return $this->isopen;
+    }
+    /**
+     * Get id
+     *
+     * @return integer
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set sender
+     *
+     * @param \NvCarga\Bundle\Entity\Company $sender
+     *
+     * @return Consolidated
+     */
+    public function setSender(\NvCarga\Bundle\Entity\Company $sender = null)
+    {
+        $this->sender = $sender;
+
+        return $this;
+    }
+
+    /**
+     * Get sender
+     *
+     * @return \NvCarga\Bundle\Entity\Company
+     */
+    public function getSender()
+    {
+        return $this->sender;
+    }
+
+    /**
+     * Set receiver
+     *
+     * @param \NvCarga\Bundle\Entity\Company $receiver
+     *
+     * @return Consolidated
+     */
+    public function setReceiver(\NvCarga\Bundle\Entity\Company $receiver = null)
+    {
+        $this->receiver = $receiver;
+
+        return $this;
+    }
+
+    /**
+     * Get receiver
+     *
+     * @return \NvCarga\Bundle\Entity\Company
+     */
+    public function getReceiver()
+    {
+        return $this->receiver;
+    }
+
+    /**
+     * Set shippingtype
+     *
+     * @param \NvCarga\Bundle\Entity\Shippingtype $shippingtype
+     *
+     * @return Consolidated
+     */
+    public function setShippingtype(\NvCarga\Bundle\Entity\Shippingtype $shippingtype = null)
+    {
+        $this->shippingtype = $shippingtype;
+
+        return $this;
+    }
+
+    /**
+     * Get shippingtype
+     *
+     * @return \NvCarga\Bundle\Entity\Shippingtype
+     */
+    public function getShippingtype()
+    {
+        return $this->shippingtype;
+    }
+
+    /**
+     * Set countryfrom
+     *
+     * @param \NvCarga\Bundle\Entity\Country $countryfrom
+     *
+     * @return Consolidated
+     */
+    public function setCountryfrom(\NvCarga\Bundle\Entity\Country $countryfrom = null)
+    {
+        $this->countryfrom = $countryfrom;
+
+        return $this;
+    }
+
+    /**
+     * Get countryfrom
+     *
+     * @return \NvCarga\Bundle\Entity\Country
+     */
+    public function getCountryfrom()
+    {
+        return $this->countryfrom;
+    }
+
+    /**
+     * Set countryto
+     *
+     * @param \NvCarga\Bundle\Entity\Country $countryto
+     *
+     * @return Consolidated
+     */
+    public function setCountryto(\NvCarga\Bundle\Entity\Country $countryto = null)
+    {
+        $this->countryto = $countryto;
+
+        return $this;
+    }
+
+    /**
+     * Get countryto
+     *
+     * @return \NvCarga\Bundle\Entity\Country
+     */
+    public function getCountryto()
+    {
+        return $this->countryto;
+    }
+
+    /**
+     * Set office
+     *
+     * @param \NvCarga\Bundle\Entity\Office $office
+     *
+     * @return Consolidated
+     */
+    public function setOffice(\NvCarga\Bundle\Entity\Office $office = null)
+    {
+        $this->office = $office;
+
+        return $this;
+    }
+
+    /**
+     * Get office
+     *
+     * @return \NvCarga\Bundle\Entity\Office
+     */
+    public function getOffice()
+    {
+        return $this->office;
+    }
+
+    /**
+     * Set agency
+     *
+     * @param \NvCarga\Bundle\Entity\Agency $agency
+     *
+     * @return Consolidated
+     */
+    public function setAgency(\NvCarga\Bundle\Entity\Agency $agency = null)
+    {
+        $this->agency = $agency;
+
+        return $this;
+    }
+
+    /**
+     * Get agency
+     *
+     * @return \NvCarga\Bundle\Entity\Agency
+     */
+    public function getAgency()
+    {
+        return $this->agency;
+    }
+
+    /**
+     * Add guide
+     *
+     * @param \NvCarga\Bundle\Entity\Guide $guide
+     *
+     * @return Consolidated
+     */
+    public function addGuide(\NvCarga\Bundle\Entity\Guide $guide)
+    {
+        $this->guides[] = $guide;
+
+        return $this;
+    }
+
+    /**
+     * Remove guide
+     *
+     * @param \NvCarga\Bundle\Entity\Guide $guide
+     */
+    public function removeGuide(\NvCarga\Bundle\Entity\Guide $guide)
+    {
+        $this->guides->removeElement($guide);
+    }
+
+    /**
+     * Get guides
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getGuides()
+    {
+        return $this->guides;
+    }
+
+    /**
+     * Set isopen
+     *
+     * @param boolean $isopen
+     *
+     * @return Consolidated
+     */
+    public function setIsopen($isopen)
+    {
+        $this->isopen = $isopen;
+
+        return $this;
+    }
+
+    /**
+     * Add move
+     *
+     * @param \NvCarga\Bundle\Entity\Moveconsols $move
+     *
+     * @return Consolidated
+     */
+    public function addMove(\NvCarga\Bundle\Entity\Moveconsols $move)
+    {
+        $this->moves[] = $move;
+
+        return $this;
+    }
+
+    /**
+     * Remove move
+     *
+     * @param \NvCarga\Bundle\Entity\Moveconsols $move
+     */
+    public function removeMove(\NvCarga\Bundle\Entity\Moveconsols $move)
+    {
+        $this->moves->removeElement($move);
+    }
+
+    /**
+     * Get moves
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getMoves()
+    {
+        return $this->moves;
+    }
+
+    /**
+     * Set number
+     *
+     * @param string $number
+     *
+     * @return Consolidated
+     */
+    public function setNumber($number)
+    {
+        $this->number = $number;
+
+        return $this;
+    }
+
+    /**
+     * Get number
+     *
+     * @return string
+     */
+    public function getNumber()
+    {
+        return $this->number;
+    }
+
+    /**
+     * Set maincompany
+     *
+     * @param \NvCarga\Bundle\Entity\Maincompany $maincompany
+     *
+     * @return Consolidated
+     */
+    public function setMaincompany(\NvCarga\Bundle\Entity\Maincompany $maincompany = null)
+    {
+        $this->maincompany = $maincompany;
+
+        return $this;
+    }
+
+    /**
+     * Get maincompany
+     *
+     * @return \NvCarga\Bundle\Entity\Maincompany
+     */
+    public function getMaincompany()
+    {
+        return $this->maincompany;
+    }
+
+    /**
+     * Add liststatus
+     *
+     * @param \NvCarga\Bundle\Entity\Statusconsol $liststatus
+     *
+     * @return Consolidated
+     */
+    public function addListstatus(\NvCarga\Bundle\Entity\Statusconsol $liststatus)
+    {
+        $this->liststatus[] = $liststatus;
+
+        return $this;
+    }
+
+    /**
+     * Remove liststatus
+     *
+     * @param \NvCarga\Bundle\Entity\Statusconsol $liststatus
+     */
+    public function removeListstatus(\NvCarga\Bundle\Entity\Statusconsol $liststatus)
+    {
+        $this->liststatus->removeElement($liststatus);
+    }
+
+    /**
+     * Get liststatus
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getListstatus()
+    {
+        return $this->liststatus;
+    }
+    public function getLaststatus()
+    {
+        $array1 = $this->liststatus;
+        $array2 = $this->moves;
+        $sort = array();
+        $newarray = array();
+        $count = 0;
+        foreach ($array1 as $status) {
+            $sort[$count] = $status->getDate();
+            $newarray[$count]['datetime'] = $status->getDate();
+            $newarray[$count]['status'] = $status->getStep()->getName();
+            $count++;
+        }
+        foreach ($array2 as $move) {
+            $sort[$count] = $move->getMovdate();
+            $newarray[$count]['datetime'] = $move->getMovdate();
+            $newarray[$count]['status'] = $move->getStatus()->getName();
+            $count++;
+        }
+        array_multisort($sort, SORT_DESC, $newarray);
+        $last = $newarray[0];
+        return $last['status'];
+    }
+}

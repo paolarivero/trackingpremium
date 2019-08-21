@@ -1,0 +1,274 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>Crear Empresa</title>
+{% endblock %}
+
+{# Display the form #}
+
+{% form_theme form 'form/fields.html.twig' %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Crear Empresa</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('maincompany') }}">Empresas</a></li>
+            <li class="active">Crear</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+
+        {{ form_start(form, {attr: {novalidate: 'novalidate', 'id': 'agency_type' }}) }}
+        <div class="block-flat">
+            <div class="header">
+                <h3>Datos de la empresa</h3>
+            </div>
+            <div class="content">
+                <div id="accordion1" class="panel-group accordion">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title"><a style="color: #555;" data-toggle="collapse" data-parent="#accordion1" href="#ac4-1" aria-expanded="false"><i class="fa fa-angle-right"></i>Básicos</a></h4>
+                        </div>
+                        <div id="ac4-1" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                {{ form_row(form.name) }} 
+                                {{ form_row(form.acronym) }} 
+                                {{ form_row(form.url) }}
+                                {{ form_row(form.billurl) }}
+                                {# {{ form_row(form.file) }} #}
+                                {{ form_row(form.email) }} 
+                                {{ form_row(form.homepage) }} 
+                                {{ form_row(form.dimfactor) }} 
+                                {{ form_row(form.iniguide) }} 
+                                {{ form_row(form.ininum) }} 
+                                {{ form_row(form.convertvol) }} 
+                                <div class="row">
+                                    <div class="col-sm-2 col-md-2">
+                                        {{ form_row(form.roundtotal) }} 
+                                    </div>
+                                    <div class="col-sm-5 col-md-5">
+                                        {{ form_row(form.roundvol) }}
+                                    </div>
+                                    <div class="col-sm-5 col-md-5">
+                                        {{ form_row(form.roundweight) }} 
+                                    </div>
+                                </div>
+                                {{ form_row(form.prefixguide) }} 
+                                {{ form_row(form.prefixpobox) }} 
+                                {{ form_row(form.prefixconsol) }} 
+                                <div class="row">
+                                    <div class="col-sm-4 col-md-4">
+                                        {{ form_row(form.companyname) }} 
+                                    </div>
+                                    <div class="col-sm-4 col-md-4">
+                                        {{ form_row(form.numbername) }} 
+                                    </div>
+                                    <div class="col-sm-4 col-md-4">
+                                        {{ form_row(form.customername) }} 
+                                    </div>
+                                </div>
+                                {{ form_row(form.poboxmsg)}} 
+                                {{ form_row(form.countries)}} 
+                                {{ form_row(form.plan)}} 
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                {#
+                <div id="accordion2" class="panel-group accordion">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title"><a style="color: #555;" data-toggle="collapse" data-parent="#accordion2" href="#ac4-2" aria-expanded="false"><i class="fa fa-angle-right"></i>Límites</a></h4>
+                        </div>
+                        <div id="ac4-2" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                {{ form_row(form.maxreceipts) }} 
+                                {{ form_row(form.maxwhrecs) }}
+                                {{ form_row(form.maxguides) }} 
+                                {{ form_row(form.maxconsolidates) }} 
+                                {{ form_row(form.maxagencies) }}
+                                {{ form_row(form.maxcustomers) }}
+                                {{ form_row(form.maxusers) }}
+                                {{ form_row(form.maxbills) }}
+                                {{ form_row(form.maxpoboxes) }}
+                                {{ form_row(form.maxbags) }}
+                                {{ form_row(form.maxaccounts) }}
+                                {{ form_row(form.maxalerts) }}
+                                {{ form_row(form.maxadservices) }}
+                                {{ form_row(form.maxcompanies) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                #}
+                <div id="accordion3" class="panel-group accordion">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title"><a style="color: #555;" data-toggle="collapse" data-parent="#accordion3" href="#ac4-3" aria-expanded="false"><i class="fa fa-angle-right"></i>Agencia</a></h4>
+                        </div>
+                        <div id="ac4-3" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                {{ form_row(form.agencyname) }}
+                                {{ form_row(form.address) }}
+                                {{ form_row(form.zip) }}
+                                <div class="form-group">
+                                    <div class="row">
+                                            <div class="col-md-2">
+                                                <label>Ciudad</label>
+                                            </div>
+                                            <div class="col-md-10">
+                                                <input type="hidden" id="cityagency" style="width:100%;" />
+                                            </div>
+                                    </div>
+                                </div>
+                                {#
+                                {{ form_row(form.cityname) }}
+                                {{ form_row(form.state) }}
+                                {{ form_row(form.country) }}
+                                #}
+                                {{ form_row(form.phone) }} 
+                                {{ form_row(form.fax) }}
+                                {{ form_row(form.agencyemail) }}
+                                {{ form_row(form.webmaster) }} 
+                                {{ form_row(form.manager) }}
+                                {{ form_row(form.guidecopies) }}
+                                {{ form_row(form.poboxs) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="accordion4" class="panel-group accordion">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title"><a style="color: #555;" data-toggle="collapse" data-parent="#accordion3" href="#ac4-4" aria-expanded="false"><i class="fa fa-angle-right"></i>Usuario</a></h4>
+                        </div>
+                        <div id="ac4-4" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                {{ form_row(form.username) }}	
+                                {{ form_row(form.useremail) }}
+                                {{ form_row(form.firstname) }}	
+                                {{ form_row(form.lastname) }}
+                                {{ form_row(form.password) }}	
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <table class="no-border">
+                <tbody class="no-border-y">
+                    <tr>
+                    <td>
+                        <button type="button" onClick="history.go(-1);return true;" class="btn btn-default" >Regresar</button>
+                    </td>
+                    <td style="text-align:right;">
+                        {{ form_row(form.submit, { 'attr': {'class': 'btn btn-primary'} }) }}
+                    </td>
+                    </tr>
+                </tbody>
+            </table>
+            {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block javascripts %}
+<script type="text/javascript">
+    
+    var thecountries = [];
+    
+    $(document).ready(function () {
+        
+        
+        $('input:checkbox[id="maincompany_type_countries_1"]:checked').each(function(){
+            $(this).prop('disabled',true);
+        });
+        
+        var count=0;
+        $('input:checkbox[id^="maincompany_type_countries_"]:checked').each(function(){
+            // console.log($(this).attr("id"));
+            thecountries[count++]=$(this).val();
+        });
+        var cityid = $('#maincompany_type_cityid').val();
+        // console.log(cityid);
+        if (cityid) {
+            $.ajax({
+                type: "GET",
+                url: "{{ url('city_findcity') }}?city_id=" + cityid,
+                success: function(data) {
+                    var theid = data['id'];
+                    var name = data['text'];
+                    if (theid > 0) {
+                        $('#cityagency').select2('data', {id: theid, text: name});
+                    }
+                },
+            });
+        }
+        $("#cityagency").select2({
+            placeholder: "Buscar Ciudad",
+            ajax: {
+                url: "{{ path('city_findbycountry') }}",
+                dataType: 'json',
+                delay: 250,
+                data: function (term) {
+                    return {
+                        q: term, //search term
+                        countries: JSON.stringify(thecountries),
+                    };
+                },
+                results: function (data) {
+                    return {
+                        results: data,
+                    };
+                },
+                cache: true
+                },
+             minimumInputLength: 2,
+             formatInputTooShort: function (input, min) { var n = min - input.length; return "Por favor ingrese  " + n + " carcater" + (n == 1? "" : "es") + " mas"; },
+             formatNoMatches: function () { return "No se encuentran resultados"; },
+        });
+        $('#cityagency').on("change", function(e) { 
+            var cityid = $('#cityagency').val();
+            $('#maincompany_type_cityid').val(cityid);
+            // console.log($('#maincompany_type_cityid').val());
+        });
+        
+        $('.checkcountries').on('ifChecked', function(event){
+            var value = event.target.value;
+            var count = thecountries.length;
+            thecountries[count] = value;
+        });
+        $('.checkcountries').on('ifUnchecked', function(event){
+            var rem = event.target.value;
+            thecountries = jQuery.grep(thecountries, function(value) {
+                return value != rem;
+            });
+        });
+        {% if entity.poboxmsg|length > 0 %}
+            var men = '{{ entity.poboxmsg|raw }}';
+            var men = men.replace(/<br>/g, "\n");
+            $('#maincompany_type_poboxmsg').val(men);
+        {% endif %}
+        
+        $('#maincompany_type_submit').click(function(evt) {
+            var men = $('#maincompany_type_poboxmsg').val();
+            var men = men.replace(/\n/g, "<br>");
+            $('#maincompany_type_poboxmsg').val(men);
+            $('input:checkbox[id="maincompany_type_countries_1"]:checked').each(function(){
+                $(this).prop('disabled',false);
+            });
+            return true;
+        });
+        $(":file").filestyle({buttonText: "Imagen(jpg/png)", buttonName: "btn-primary", placeholder: "no seleccionado"});
+    });
+</script>
+{% endblock %}

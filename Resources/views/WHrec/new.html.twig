@@ -1,0 +1,776 @@
+{% extends '::newbase.html.twig' %}
+{% block title %}
+    <title>{{ nameform }}</title>
+{% endblock %}
+
+{% form_theme form 'form/fields.html.twig' %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>{{ nameform }}</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('whrec_search') }}">{% trans %}Wharehouse{% endtrans %}</a></li>
+            <li class="active">{{ nameform }}</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger alert-white rounded">
+                    <button type="button" data-dismiss="alert" aria-hidden="true" class="close">×</button>
+                    <div class="icon">
+                        <i class="fa fa-warning"></i>
+                    </div>
+                    <strong>Alerta! </strong> {{ flashMessage|raw }} 
+                    </strong>
+                </div>
+            {% endfor %}
+            {% for flashMessage in app.session.flashbag.get('warning') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        {{ form_start(form, {attr: {novalidate: 'novalidate', 'id': 'whrec_type' }}) }}
+        <div class="row">
+            <div class="col-sm-6 col-md-6">{# Columna para REMITENTE #}
+                <div class="block-flat">
+                    <div class="header">
+                        <h3>Remitente</h3>
+                    </div>
+                    <div class="content">
+                        <button style="margin-top: 13px;" type="button" class="btn btn-primary bcustomer" data-toggle="modal" data-target="#customersearch" data-thecustomer="1" >Buscar</button>
+                        <button style="margin-top: 13px;" type="button" class="btn btn-success newsender">Agregar</button>
+                        <button style="margin-top: 13px;" type="button"   class="btn btn-basic clearsender" onclick="utilityLib.ClearRem('{{ form.vars.id }}');">Limpiar</button>
+                        
+                        <p id="displaysender"> </p>
+                        <hr>
+                        {{ form_row(form.noti_sender) }}
+                    </div>{# FIN CONTENT #}
+                </div> {# FIN BLOCK FLAT #}
+            </div> {# FIN DEL REMITENTE #}
+            <div class="col-sm-6 col-md-6">{# Columna para DESTINATARIO #}
+                <div class="block-flat">
+                    <div class="header">
+                        <h3>Destinatario</h3>
+                    </div>
+                    <div class="content">
+                        <button style="margin-top: 13px;" type="button" class="btn btn-primary bcustomer" data-toggle="modal" data-target="#customersearch" data-thecustomer="2" >Buscar</button>
+                        <button style="margin-top: 13px;" type="button" class="btn btn-success newaddr">Agregar</button>
+                        <button style="margin-top: 13px;" type="button"   class="btn btn-basic clearaddr" onclick="utilityLib.ClearDest('{{ form.vars.id }}');">Limpiar</button>
+                        
+                        <div style="margin-top: 13px;" id="opciones_remitente" class="btn-group" style="margin-bottom: 5px;margin-top: 4px;">
+                            <button type="button" class="btn btn-default">Del REMITENTE</button>
+                            <button type="button" data-toggle="dropdown" class="btn btn-default dropdown-toggle">
+                            <span class="caret"></span><span class="sr-only">Del REMITENTE</span></button>
+                            <ul role="menu" class="dropdown-menu">
+                                    <li><a  class="dirsender" data-toggle="modal" data-target="#customersearch" data-thecustomer="3">Buscar direcciones</a></li>
+                                    <li><a class="defaultsender">Usar predeterminada</a></li>
+                            </ul>
+                        </div>
+                        <p id="displayaddr"> </p>
+                        <hr>
+                        
+                        {{ form_row(form.noti_addr) }}
+                    </div>{# FIN CONTENT #}
+                </div> {# FIN BLOCK FLAT #}
+            </div> {# FIN DEL REMITENTE #}
+        </div>
+        <div class="block-flat">
+            <div class="content">
+                <h3>{{ form_row(form.note) }}</h3>
+             </div>
+        </div> 
+        
+        <div class="block-flat">
+            <div class="header">
+                <h3>Paquetes</h3>
+            </div>
+            
+            <div class="content">
+                {% if form.packages is defined %}
+                    {{ form_row(form.packages) }}
+                {% endif %}
+    
+                
+                <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        <td>
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default" >Cancelar</button>
+                        </td>
+                        <td style="text-align:right;">
+                            {{ form_row(form.submit, { 'attr': {'class': 'btn btn-primary'} }) }}
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+            </div>
+        </div>
+        <!-- Modal to add sender-->
+        <div class="modal fade colored-header md-effect-9" id="addsender" role="dialog">
+            <div class="modal-dialog modal-md">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button id="closeaddsender" type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h2 class="modal-title">Agregar Remitente
+                        </h2>
+                    </div>
+                    <div class="modal-body form">
+                        
+                        <div class="row" style="margin-top: 0px;">
+                            <div class="col-sm-12 col-lg-12" style="padding-left: 10px;padding-right: 10px; ">
+                                {{ form_widget(form.typecus_sender) }}
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top: 0px;">
+                            <div class="col-sm-12 col-lg-4" style="padding-left: 10px;padding-right: 10px; ">
+                                {{ form_label(form.name_sender) }}
+                                {{ form_widget(form.name_sender) }}
+                                {{ form_errors(form.name_sender) }}
+                            </div>
+                            <div class="col-sm-12 col-lg-4" style="padding-left: 10px;padding-right: 10px; ">
+                                {{ form_label(form.lastname_sender) }}
+                                {{ form_widget(form.lastname_sender) }}
+                                {{ form_errors(form.lastname_sender) }}
+                            </div>
+                            <div class="col-sm-12 col-lg-4" style="padding-left: 10px;padding-right: 10px; ">
+                                {{ form_label(form.email_sender) }}
+                                {{ form_widget(form.email_sender) }}
+                                {{ form_errors(form.email_sender) }}
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top: 0px;">
+                            <div class="col-sm-12 col-lg-12" style="padding-left: 10px;padding-right: 10px; ">
+                                {{ form_label(form.direccion_sender) }}
+                                {{ form_widget(form.direccion_sender) }}
+                                {{ form_errors(form.direccion_sender) }}
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top: 5px;">
+                            <div class="col-sm-12 col-lg-8" style="padding-left: 10px;padding-right: 10px; ">
+                                <input type="hidden" id="citysender" style="width:100%;" />
+                            </div>
+                            <div class="col-sm-12 col-lg-4" style="padding-left: 10px;padding-right: 10px; ">
+                                <input id="nofindcity_sender" type="checkbox" class="icheck"> No encuentro la ciudad</input>
+                            </div>
+                        </div>
+                        <div id="hidecity_sender" style="display:none">
+                            <div class="row" style="margin-top: 0px;">
+                                <div class="col-sm-12 col-lg-4" style="padding-left: 10px;padding-right: 10px; ">
+                                    {{ form_label(form.country_sender) }}
+                                    {{ form_widget(form.country_sender) }}
+                                    {{ form_errors(form.country_sender) }}
+                                </div>
+                                <div class="col-sm-12 col-lg-4" style="padding-left: 10px;padding-right: 10px; ">
+                                    {{ form_label(form.state_sender) }}
+                                    {{ form_widget(form.state_sender) }}
+                                    {{ form_errors(form.state_sender) }}
+                                </div>
+                                <div class="col-sm-12 col-lg-4" style="padding-left: 10px;padding-right: 10px; ">
+                                    {{ form_label(form.cityname_sender) }}
+                                    {{ form_widget(form.cityname_sender) }}
+                                    {{ form_errors(form.cityname_sender) }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top: 0px;">
+                            <div class="col-sm-12 col-lg-4" style="padding-left: 10px;padding-right: 10px; ">
+                                {{ form_label(form.zip_sender) }}
+                                {{ form_widget(form.zip_sender) }}
+                                {{ form_errors(form.zip_sender) }}
+                            </div>
+                            <div class="col-sm-12 col-lg-4" style="padding-left: 10px;padding-right: 10px; ">
+                                {{ form_label(form.phone_sender) }}
+                                {{ form_widget(form.phone_sender) }}
+                                {{ form_errors(form.phone_sender) }}
+                            </div>
+                            <div class="col-sm-12 col-lg-4" style="padding-left: 10px;padding-right: 10px; ">
+                                {{ form_label(form.mobile_sender) }}
+                                {{ form_widget(form.mobile_sender) }}
+                                {{ form_errors(form.mobile_sender) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-dismiss="modal" class="btn btn-default btn-flat md-close">Cancelar</button>
+                        <button type="button" id="gotoaddsender" class="btn btn-primary btn-flat">Procesar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Modal to add addr-->
+        <div class="modal fade colored-header md-effect-9" id="addaddr" role="dialog">
+            <div class="modal-dialog modal-md">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button id="closeaddaddr" type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h2 class="modal-title">Agregar Destinatario
+                        </h2>
+                    </div>
+                    <div class="modal-body form">
+                        
+                        <div class="row" style="margin-top: 0px;">
+                            <div class="col-sm-12 col-lg-12" style="padding-left: 10px;padding-right: 10px; ">
+                                {{ form_widget(form.typecus_addr) }}
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top: 0px;">
+                            <div class="col-sm-12 col-lg-4" style="padding-left: 10px;padding-right: 10px; ">
+                                {{ form_label(form.name_addr) }}
+                                {{ form_widget(form.name_addr) }}
+                                {{ form_errors(form.name_addr) }}
+                            </div>
+                            <div class="col-sm-12 col-lg-4" style="padding-left: 10px;padding-right: 10px; ">
+                                {{ form_label(form.lastname_addr) }}
+                                {{ form_widget(form.lastname_addr) }}
+                                {{ form_errors(form.lastname_addr) }}
+                            </div>
+                            <div class="col-sm-12 col-lg-4" style="padding-left: 10px;padding-right: 10px; ">
+                                {{ form_label(form.email_addr) }}
+                                {{ form_widget(form.email_addr) }}
+                                {{ form_errors(form.email_addr) }}
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top: 0px;">
+                            <div class="col-sm-12 col-lg-12" style="padding-left: 10px;padding-right: 10px; ">
+                                {{ form_label(form.direccion_addr) }}
+                                {{ form_widget(form.direccion_addr) }}
+                                {{ form_errors(form.direccion_addr) }}
+                            </div>
+                        </div>
+                        <div class="row" style="margin-top: 5px;">
+                            <div class="col-sm-12 col-lg-8" style="padding-left: 10px;padding-right: 10px; ">
+                                <input type="hidden" id="cityaddr" style="width:100%;" />
+                            </div>
+                            <div class="col-sm-12 col-lg-4" style="padding-left: 10px;padding-right: 10px; ">
+                                <input id="nofindcity_addr" type="checkbox" class="icheck"> No encuentro la ciudad</input>
+                            </div>
+                        </div>
+                        <div id="hidecity_addr" style="display:none">
+                            <div class="row" style="margin-top: 0px;">
+                                <div class="col-sm-12 col-lg-4" style="padding-left: 10px;padding-right: 10px; ">
+                                    {{ form_label(form.country_addr) }}
+                                    {{ form_widget(form.country_addr) }}
+                                    {{ form_errors(form.country_addr) }}
+                                </div>
+                                <div class="col-sm-12 col-lg-4" style="padding-left: 10px;padding-right: 10px; ">
+                                    {{ form_label(form.state_addr) }}
+                                    {{ form_widget(form.state_addr) }}
+                                    {{ form_errors(form.state_addr) }}
+                                </div>
+                                <div class="col-sm-12 col-lg-4" style="padding-left: 10px;padding-right: 10px; ">
+                                    {{ form_label(form.cityname_addr) }}
+                                    {{ form_widget(form.cityname_addr) }}
+                                    {{ form_errors(form.cityname_addr) }}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row" style="margin-top: 0px;">
+                            <div class="col-sm-12 col-lg-4" style="padding-left: 10px;padding-right: 10px; ">
+                                {{ form_label(form.zip_addr) }}
+                                {{ form_widget(form.zip_addr) }}
+                                {{ form_errors(form.zip_addr) }}
+                            </div>
+                            <div class="col-sm-12 col-lg-4" style="padding-left: 10px;padding-right: 10px; ">
+                                {{ form_label(form.phone_addr) }}
+                                {{ form_widget(form.phone_addr) }}
+                                {{ form_errors(form.phone_addr) }}
+                            </div>
+                            <div class="col-sm-12 col-lg-4" style="padding-left: 10px;padding-right: 10px; ">
+                                {{ form_label(form.mobile_addr) }}
+                                {{ form_widget(form.mobile_addr) }}
+                                {{ form_errors(form.mobile_addr) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" data-dismiss="modal" class="btn btn-default btn-flat md-close">Cancelar</button>
+                        <button type="button" id="gotoaddaddr" class="btn btn-primary btn-flat">Procesar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{ form_end(form) }}
+        
+        <!-- Modal --> {# BUSCAR CLIENTE #}
+        <div class="modal fade colored-header md-effect-9" id="customersearch" role="dialog">
+            <div class="modal-dialog modal-md">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button id="closemodalcus1" type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h2 class="modal-title" id="buscarcliente">Buscar Cliente
+                        </h2>
+                    </div>
+
+                    <div class="modal-body form">
+
+                        Buscar: <br><input style="display:inline; width:100%" type="text" placeholder="Nombre/Apellido/Casillero" id="findcustomer" onkeyup="utilityLib.SearchCustomer(event, '{{ form.vars.id }}', '{{ url('listcustomer') }}', '{{ url('select_states') }}')" autocomplete="off"  />
+
+                        <center>
+                        <div id="mensajeCus">
+                            <h3 style="color:red;" id="nohay">NO SE ENCONTRARON</h3>
+                        </div>
+                        </center>
+                        <div id="divTable">
+                        <table id="customerTable" class="row-border hover order-column" cellspacing="0" width="100%">
+                            <thead class="no-border-y">
+
+                            <tr>
+                                <th><b>Nombre</b></th>
+                                <th><b>Apellido</b></th>
+                                <th><b>Casillero</b></th>
+                                <th><b>Ciudad</b></th>
+                            </tr>
+
+                            </thead>
+                            <tbody class="no-border-y">
+                            </tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="closemodalcus1" data-dismiss="modal" class="btn btn-default btn-flat md-close">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div> {# FIN MODAL DE BUSCAR CLIENTES #}
+        
+        
+        
+    </div>
+</div>
+<input type="hidden" id="validemail_sender">
+<input type="hidden" id="validemail_addr">
+{% endblock %}
+
+{% block javascripts %}
+<script type="text/javascript">
+    function updatePack() {
+        var all = $('.list-packages').find('> div');
+        var npack = all.length;
+        var campos = new Array('arrivedate','carrier', 'height', 'length', 'width', 'weight', 'packtype', 'tracking', 'description', 'value', 'npack');
+        var tam = campos.length;
+        var target='';
+        
+        for (var ii=1; ii<npack; ii++) {
+            for (var jj=0; jj<tam;jj++) {
+                target = 'whrec_type_packages_' + ii + '_' + campos[jj];
+                $('label[for="' + target + '"]').hide();
+            }
+            target = 'whrec_type_packages_' + ii + '_position';
+            var x = document.getElementById(target);
+            x.type = 'hidden';
+        }
+        
+        for (var jj=0; jj<tam;jj++) {
+            target = 'whrec_type_packages_0_' + campos[jj];
+            $('label[for="' + target + '"]').show();
+        }
+        target = 'whrec_type_packages_0_position';
+        var x = document.getElementById(target);
+        x.type = 'text';
+    }
+    $(document).ready(function () {
+        $('.md-trigger').modalEffects();
+        
+        $('#whrec_type_typecus_sender_1').iCheck('check');
+        $('#whrec_type_typecus_sender_2').on('ifChecked', function(event){
+            $('#whrec_type_lastname_sender').val('');
+            $('#whrec_type_lastname_sender').prop('readonly', true);
+        });
+        $('#whrec_type_typecus_sender_1').on('ifChecked', function(event){
+            $('#whrec_type_lastname_sender').prop('readonly', false);
+        });
+        
+        $('#whrec_type_typecus_addr_1').iCheck('check');
+        $('#whrec_type_typecus_addr_2').on('ifChecked', function(event){
+            $('#whrec_type_lastname_addr').val('');
+            $('#whrec_type_lastname_addr').prop('readonly', true);
+        });
+        $('#whrec_type_typecus_addr_1').on('ifChecked', function(event){
+            $('#whrec_type_lastname_addr').prop('readonly', false);
+        });
+       
+        
+        $("#citysender").select2({
+            placeholder: "Buscar Ciudad",
+            ajax: {
+                url: "{{ path('city_find') }}",
+                dataType: 'json',
+                delay: 250,
+                data: function (term) {
+                    return {
+                        q: term, //search term
+                    };
+                },
+                results: function (data) {
+                    return {
+                        results: data,
+                    };
+                },
+                cache: true
+                },
+             minimumInputLength: 2,
+             formatInputTooShort: function (input, min) { var n = min - input.length; return "Por favor ingrese  " + n + " carcater" + (n == 1? "" : "es") + " mas"; },
+             formatNoMatches: function () { return "No se encuentran resultados"; },
+             
+        });
+        $('#citysender').on("change", function(e) { 
+            var cityid = $('#citysender').val();
+            $('#whrec_type_cityid_sender').val(cityid);
+            var complete = $('#citysender').select2('data').text;
+            var ini1 = complete.lastIndexOf('(');
+            var ini2 = complete.lastIndexOf(',');
+            var end = complete.lastIndexOf(')');
+            var state = complete.substring(ini1+1,ini2);
+            var country = complete.substring(ini2+2,end);
+            // $('#whrec_type_country_sender').val('');
+            $('#whrec_type_country_sender option').map(function () {
+                if ($(this).text() == country) return this;
+            }).prop('selected', 'selected');
+             utilityLib.statesbyname('#whrec_type_state_sender', '#whrec_type_country_sender', state, "{{ url('select_states') }}"); 
+            $('#whrec_type_cityname_sender').val(complete.substring(0,ini1-1));
+        });
+        
+        $("#cityaddr").select2({
+            placeholder: "Buscar Ciudad",
+            ajax: {
+                url: "{{ path('city_find') }}",
+                dataType: 'json',
+                delay: 250,
+                data: function (term) {
+                    return {
+                        q: term, //search term
+                    };
+                },
+                results: function (data) {
+                    return {
+                        results: data,
+                    };
+                },
+                cache: true
+                },
+             minimumInputLength: 2,
+             formatInputTooShort: function (input, min) { var n = min - input.length; return "Por favor ingrese  " + n + " carcater" + (n == 1? "" : "es") + " mas"; },
+             formatNoMatches: function () { return "No se encuentran resultados"; },
+             
+        });
+        
+        $('#cityaddr').on("change", function(e) { 
+            var cityid = $('#cityaddr').val();
+            $('#whrec_type_cityid_addr').val(cityid);
+            var complete = $('#cityaddr').select2('data').text;
+            var ini1 = complete.lastIndexOf('(');
+            var ini2 = complete.lastIndexOf(',');
+            var end = complete.lastIndexOf(')');
+            var state = complete.substring(ini1+1,ini2);
+            var country = complete.substring(ini2+2,end);
+            // $('#whrec_type_country_addr').val('');
+            $('#whrec_type_country_addr option').map(function () {
+                if ($(this).text() == country) return this;
+            }).prop('selected', 'selected');
+             utilityLib.statesbyname('#whrec_type_state_addr', '#whrec_type_country_addr', state, "{{ url('select_states') }}"); 
+            $('#whrec_type_cityname_addr').val(complete.substring(0,ini1-1));
+        });
+        
+        $('.list-packages').collection({
+            add_at_the_end: false,
+            allow_up: false,
+            allow_down: false,
+            min: 1,
+            add: '<a id="newpack"></a>',
+            after_add: function (collection, element) {
+                var all = $('.list-packages').find('> div');
+                var npack = all.length;
+                for (var ii=0; ii<npack; ii++) {
+                    var thiselem = all[ii];
+                    if (element[0] == thiselem) {
+                        var pos=ii;
+                        break;
+                    }
+                }
+                $('#whrec_type_packages_'+ pos +'_arrivedate').datepicker();
+                $('#whrec_type_packages_'+ pos +'_arrivedate').val($.datepicker.formatDate('mm/dd/yy', new Date()));
+                updatePack();
+            },
+            after_remove: function (collection, element) {
+                $('#newpack').hide();
+                updatePack();
+            },
+        });
+        updatePack();
+        $('#newpack').hide();
+
+
+        $('#whrec_type_packages').change(function() {
+            $('#newpack').hide();
+        });
+        /*
+        var npack = $('.list-packages').find('> div').length;
+
+        for (var i=0; i< npack; i++) {
+            $('#whrec_type_packages_'+ i +'_arrivedate').datepicker();
+        }
+        */
+        var $thisCusTable=null;
+        $('.bcustomer').click(function(e) {
+            e.preventDefault();
+            $('#findcustomer').prop('disabled',false);
+            var thecustomer = $(this).data('thecustomer');
+            if (thecustomer == 1) {
+                document.getElementById('buscarcliente').innerHTML = "Buscar Remitente";
+                document.getElementById('nohay').innerHTML = "No se encontraron remitentes";
+            } else {
+                document.getElementById('buscarcliente').innerHTML = "Buscar Destinatario";
+                document.getElementById('nohay').innerHTML = "No se encontraron destinatarios";
+            }
+            $('#whrec_type_selcustomer').val(thecustomer);
+            $('#findcustomer').val('');
+            $('#divTable').hide();
+            $('#mensajeCus').hide();
+            return true;
+        });
+        $('#whrec_type_submit').click(function(evt) {
+            var dt = new Date();
+            var time = dt.getHours() + ":" + dt.getMinutes() + ":" + dt.getSeconds();
+            $('#whrec_type_clock').val(time);
+            
+            var bultos = $('#whrec_type_npack').val();
+            if (!bultos) {
+                $('#whrec_type_npack').val(1);
+            }
+            var customer = 'addr';
+            $('[id*="' + customer + '"]').prop('disabled', false);
+            $('#city' + customer).select2('enable', true);
+            customer = 'sender';
+            $('[id*="' + customer + '"]').prop('disabled', false);
+            $('#city' + customer).select2('enable', true);
+            /*
+            var citysender = $('#whrec_type_cityname_sender').val();
+            var statesender = $('#whrec_type_state_sender').val();
+            var cityaddr = $('#whrec_type_cityname_addr').val();
+            var stateaddr = $('#whrec_type_state_addr').val();
+
+            if ((!citysender) || (!statesender)) {
+                funalert('Debe seleccionar la ciudad del Remitente');
+                return false;
+            }
+            if ((!cityaddr) || (!stateaddr)) {
+                funalert('Debe seleccionar la ciudad del Destinatario');
+                return false;
+            }
+            */
+            var formcontent = $('#whrec_type').serializeArray();
+            for (var x = 0; x < formcontent.length; x++) {
+                if (formcontent[x].name.indexOf("carrier") >= 0) {
+                    var carrier = formcontent[x].value;
+                    var track = formcontent[x+1].value;
+                    // console.log('Tracking: ' +  track + '. Carrier: ' + carrier);
+                    if ((track) && (carrier)) {
+                        $.ajax({
+                            url: "{{ url('alert_search') }}?tracking=" + track + "&carrier=" + carrier,
+                            success: function(data) {
+                                if (data['id'] != 0) {
+                                    var mensaje = 'El paquete con el tracking: ' + track + ' y el carrier: ' + data['carrier'] + ' tiene una alerta de casillero ' + data['pobox'] + '. Verificar!!!!';
+                                    funalert(mensaje);
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+            return true;
+        });
+        $('#whrec_type_country_sender').change(function(){
+           var val = "#whrec_type_country_sender";
+            utilityLib.statesbyname('#whrec_type_state_sender', val, '', "{{ url('select_states') }}");
+           return false;
+        });
+        $('#whrec_type_country_addr').change(function(){
+            var val = "#whrec_type_country_addr";
+             utilityLib.statesbyname('#whrec_type_state_addr', val, '', "{{ url('select_states') }}");
+            return false;
+        });
+        $('#whrec_type_state_sender').change(function(){
+            // console.log('CAMBIO el estado');
+            $('#whrec_type_cityid_sender').val(0);
+            utilityLib.showCity('{{ form.vars.id }}','sender');
+            return false;
+        });
+        $('#whrec_type_state_addr').change(function(){
+            $('#whrec_type_cityid_addr').val(0);
+            utilityLib.showCity('{{ form.vars.id }}','addr');
+            return false;
+        });
+        utilityLib.showCity('{{ form.vars.id }}','addr');
+        utilityLib.showCity('{{ form.vars.id }}','sender');
+        {% if edition %}
+            $('#whrec_type_edition').val(1);
+            {% set rem = entity.shipper %}
+            {% set des = entity.receiver %}
+            $('#whrec_type_selcustomer').val(1); 
+            utilityLib.returnSelectCustomer('{{ form.vars.id }}', {{ rem.id }}, '{{ rem.adrdefault.name }}', 
+            '{{ rem.adrdefault.lastname }}', '{{ rem.type.name }}', '{{ rem.adrdefault.address|e('js') }}', {{ rem.adrdefault.city.id }}, '{{ rem.adrdefault.city.name }}' , 
+            '{{ rem.adrdefault.city.state.name }}', '{{ rem.adrdefault.city.state.country.name }}', 
+            '{{ rem.adrdefault.phone }}', '{{ rem.adrdefault.mobile }}', '{{ rem.adrdefault.barrio }}', '{{ rem.email }}', '{{ rem.adrdefault.zip }}', '{{ url('select_states') }}');    
+            $('#whrec_type_selcustomer').val(2); 
+            utilityLib.returnSelectCustomer('{{ form.vars.id }}', {{ des.id }},'{{ des.name }}', 
+            '{{ des.lastname }}', '{{ des.customer.type.name }}','{{ des.address|e('js') }}', {{ des.city.id }}, '{{ des.city.name }}' , 
+            '{{ des.city.state.name }}', '{{ des.city.state.country.name }}', 
+            '{{ des.phone }}', '{{ des.mobile }}', '{{ des.barrio }}', '{{ des.customer.email }}', '{{ des.zip }}', '{{ url('select_states') }}'); 
+            utilityLib.edit('{{ form.vars.id }}','addr');
+            utilityLib.edit('{{ form.vars.id }}','sender');
+        {% endif %}
+        {% if readonly is defined %}
+            {% if readonly %}
+                $("input[id*=_addr]").prop('disabled',true);
+                $("#cityaddr").select2('enable',false);
+                $("select[id*=_addr]").prop('disabled',true);
+                $("input[id*=_sender]").prop('disabled',true);
+                $("#citysender").select2('enable',false);
+                $("select[id*=_sender]").prop('disabled',true);
+                $("button[id*=sender]").hide();
+                $("button[id*=addr]").hide();
+            {% endif %}
+        {% endif %}
+        // console.log('Sender: ' + $('#whrec_type_disabled_sender').val());
+        if ($('#whrec_type_disabled_sender').val() == 1) {
+            // console.log('Sender: disabled');
+            utilityLib.noedit('{{ form.vars.id }}', 'sender');
+        }
+        // console.log('Addr: ' + $('#whrec_type_disabled_addr').val());
+        if ($('#whrec_type_disabled_addr').val() == 1) {
+            // console.log('Addr: disabled');
+            utilityLib.noedit('{{ form.vars.id }}','addr');
+        }
+        if ($('#whrec_type_id_sender').val() == 0 ) {
+            $('#opciones_remitente').hide();
+        }
+        
+        // INICIO NUEVA VERSION
+        $('#nofindcity_addr').on('ifChecked', function(event){
+            $('#hidecity_addr').show();
+        });
+        $('#nofindcity_addr').on('ifUnchecked', function(event){
+            $('#hidecity_addr').hide();
+        });
+        $('#nofindcity_sender').on('ifChecked', function(event){
+            $('#hidecity_sender').show();
+        });
+        $('#nofindcity_sender').on('ifUnchecked', function(event){
+            $('#hidecity_sender').hide();
+        });
+        if ($('#displayaddr').text() == '') {
+            utilityLib.displayCustomer('{{ form.vars.id }}', '','addr');
+        }
+        if ($('#displaysender').text() == '') {
+            utilityLib.displayCustomer('{{ form.vars.id }}', '','sender');
+        }
+        $('.newsender').click(function(e) {
+            e.preventDefault();
+            $('#nofindcity_sender').iCheck('uncheck');
+            $('#nofindcity_sender').iCheck('update');
+            $('.clearsender').click();
+            utilityLib.edit('{{ form.vars.id }}', 'sender');
+            $('#opciones_remitente').hide();
+            $('#addsender').modal('show');
+            return true;
+        });
+        $('#validemail_sender').val(1);
+        $('#whrec_type_email_sender').change(function() {
+            var email = $('#whrec_type_email_sender').val();
+            if (email.length > 0) {
+                var output = utilityLib.checkEmail(email, 'validemail_sender', "{{ url('customer_byemail') }}");
+            } else {
+                $('#validemail_sender').val(1);
+            }
+        });
+        $('#gotoaddsender').click(function(e) {
+            if ($('#validemail_sender').val() == 1 ) {
+                var output=utilityLib.newCustomer('sender', '{{ form.vars.id }}', "{{ url('select_states') }}", "{{ url('customer_add') }}");
+                if (output) {
+                    $('#addsender').modal('toggle');
+                } else {
+                    return false;
+                }
+            } else {
+                var email =  $('#whrec_type_email_sender').val();
+                var mensaje = 'El email ' + email + ' no es válido.';
+                funalert(mensaje);
+                return false;
+            }
+            return true;
+        });
+        $('.newaddr').click(function(e) {
+            e.preventDefault();
+            $('#nofindcity_addr').iCheck('uncheck');
+            $('#nofindcity_addr').iCheck('update');
+            $('.clearaddr').click();
+            utilityLib.edit('{{ form.vars.id }}','addr');
+            $('#addaddr').modal('show');
+            return true;
+        });
+        $('#validemail_addr').val(1);
+        $('#whrec_type_email_addr').change(function() {
+            var email = $('#whrec_type_email_addr').val();
+            if (email.length > 0) {
+                var output = utilityLib.checkEmail(email, 'validemail_addr', "{{ url('customer_byemail') }}");
+            } else {
+                $('#validemail_addr').val(1);
+            }
+        });
+        $('#gotoaddaddr').click(function(e) {
+            if ($('#validemail_addr').val() == 1 ) {
+                var output=utilityLib.newCustomer('addr', '{{ form.vars.id }}', "{{ url('select_states') }}", "{{ url('customer_add') }}");
+                if (output) {
+                    $('#addaddr').modal('toggle');
+                } else {
+                    return false;
+                }
+            } else {
+                var email =  $('#whrec_type_email_addr').val();
+                var mensaje = 'El email ' + email + ' no es válido.';
+                funalert(mensaje);
+                return false;
+            }
+            return true;
+        });
+        // FIN NUEVA VERSION
+        
+        $('.dirsender').click(function(e) {
+            e.preventDefault();
+            var thecustomer = $(this).data('thecustomer');
+            $('#whrec_type_selcustomer').val(thecustomer);
+            var name = $('#whrec_type_name_sender').val();
+            var lastname = $('#whrec_type_lastname_sender').val();
+            $('#findcustomer').val(name + ' ' + lastname);
+            $('#findcustomer').prop('disabled',true);
+            utilityLib.SearchCustomer(e, '{{ form.vars.id }}', '{{ url('listcustomer') }}', '{{ url('select_states') }}');
+            // $('#divTable').hide();
+            $('#mensajeCus').hide();
+            var customer = 'addr';
+            utilityLib.noedit(customer);
+            $('.edit' + customer).prop('disabled', false);
+            $('.clear' + customer).prop('disabled', false);
+            return true;
+        });
+        $('.defaultsender').click(function(e) {
+            e.preventDefault();
+            $('#whrec_type_selcustomer').val(2);
+            utilityLib.defaultSender('{{ form.vars.id }}', '{{ url('defaultsender') }}','{{ url('select_states') }}');
+            var customer = 'addr';
+            utilityLib.noedit(customer);
+            $('.edit' + customer).prop('disabled', false);
+            $('.clear' + customer).prop('disabled', false);
+            return true;
+        });
+    });
+</script>
+{% endblock %}

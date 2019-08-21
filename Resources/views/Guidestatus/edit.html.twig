@@ -1,0 +1,76 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+<style>
+label1 {
+  display: inline-block;
+}
+</style>
+<div class="widget">
+    <div class="widget-header"> <i class="icon-asterisk"></i>
+              <h3>Editar status de {% trans %}Guía{% endtrans %}</h3> 
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+ 
+{{ form_start(edit_form, {attr: {novalidate: 'novalidate'}}) }}
+
+{% set laststatus = status|last %}
+{% set poslast = laststatus.position + 1 %}
+<table class="table table-striped table-bordered">
+	<tbody>
+	<tr>
+	<td>{{ form_row(edit_form.name) }}</td>
+	<td>{{ form_row(edit_form.address) }}</td>
+	</tr>	
+	<tr>
+	<td>{{ form_row(edit_form.latitude) }}</td>
+	<td>{{ form_row(edit_form.longitude) }}</td>
+	</tr>
+	<tr>
+	<td>{{ form_row(edit_form.country) }}</td>
+	<td>{{ form_row(edit_form.emailnoti) }}</td>
+	</tr>
+	<tr>
+	<td colspan=2> <b><h4>Posición en los movimientos: </h4></b>
+	{% set previus = 0 %}
+	{% for statu in status %} 
+		{% if statu.isinherited  and  previus %}
+		<input type="radio" class="radio" name="position" value="{{ statu.position }}" id="{{ statu.position }}" disabled="disabled"  />
+    <label1 for="{{ statu.position }}"><font color="red">{{ statu.name }}</font></label1>
+		{% else %}
+		<input type="radio" class="radio" name="position" value="{{ statu.position }}" id="{{ statu.position }}" />
+    <label1 for="{{ statu.position }}">{{ statu.name }}</label1>
+		{% endif %}
+		{% set previus = statu.isinherited %}
+	{% endfor %}
+	<input type="radio"  checked="checked" class="radio" name="position" value="{{ poslast }}" id="{{ poslast }} />
+    <label1 for="{{ poslast }}"></label1> </td>
+	
+	</tr>
+	</tbody>
+	<tfoot>
+	<tr>
+	<td>{{ form_row(edit_form.submit) }}</td>
+	<td><button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-lg bback" >Regresar</button></td>
+	</tr>
+	</tfoot>
+</table>
+</div>
+</div>
+{{ form_end(edit_form) }}
+
+<script type="text/javascript">
+$(document).ready(function () {
+	var pos = $('input[name=position]:checked').val();
+	$('#guidestatus_type_thepos').val(pos);
+	//console.log($('#guidestatus_type_thepos').val());
+	$('input[name=position]').change(function () {
+	   var pos = $('input[name=position]:checked').val();
+	   $('#guidestatus_type_thepos').val(pos);
+	   //console.log($('#guidestatus_type_thepos').val());
+	});
+});
+    
+</script>
+{% endblock %}

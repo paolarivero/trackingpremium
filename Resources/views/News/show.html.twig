@@ -1,0 +1,41 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+    <h1>Noticia</h1>
+
+    <table class="record_properties">
+        <tbody>
+{#            <tr>
+                <th>Id</th>
+                <td>{{ entity.id }}</td>
+            </tr>
+#}
+            <tr>
+                <th>Título</th>
+                <td>{{ entity.title }}</td>
+            </tr>
+            <tr>
+                <th>Contenido</th>
+                <td>{{ entity.content }}</td>
+            </tr>
+            <tr>
+                <th>Fecha</th>
+                <td>{{ entity.creationdate|date('Y-m-d H:i:s') }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+        <ul class="record_actions">
+    <li>
+        <a href="{{ path('news') }}">
+            Regresar a la lista de noticias
+        </a>
+    </li>
+    <li>
+        <a href="{{ path('news_edit', { 'id': entity.id }) }}">
+            Editar
+        </a>
+    </li>
+    <li>{{ form(delete_form) }}</li>
+</ul>
+{% endblock %}

@@ -1,0 +1,461 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>Editar Factura</title>
+{% endblock %}
+
+{% block body -%}
+<style>
+    td {
+        white-space: nowrap;
+    }
+ 
+    td.wrapok {
+        white-space:normal;
+    }
+    
+</style>
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Editar Factura {{ entity.number }}</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('bill_index') }}">Facturas</a></li>
+            <li class="active"> Editar</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        <div class="block-flat">
+            <div class="header">
+               <h3>Información de la Factura {{ entity.number }} </h3>
+            </div>
+            <div class="content">
+                <div class="row">
+                    <div class="col-md-6 col-sm-6">
+                        <b>
+                        <i class="fa fa-user"></i> Cliente: {{ entity.customer }}<BR>
+                        <i class="fa fa-calendar-check-o"></i> Fecha: {{ entity.creationdate|date('m/d/Y') }}<BR>
+                        </b>
+                    </div>
+                    <div class="col-md-6 col-sm-6">
+                        <b>
+                        <i class="fa fa-plus-square-o"></i> Nro de {% trans %}Guías{% endtrans %}: {{ entity.guides|length }}<br>
+                        <i class="fa fa-bar-chart"></i> Monto: {{ entity.total }}<br>
+                        </b>
+                    </div>
+                </div>
+                <div class="row" style="margin-top:-10px">
+                    <h4>
+                    <b>Vencimiento:<br></b>
+                    <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetime">
+                        <span class="input-group-addon btn btn-primary"><span class="glyphicon glyphicon-th"></span></span>
+                        <input id="expdate" size="16" type="text" value="" class="form-control">
+                    </div>
+                    </h4>
+                </div>
+            </div>
+
+        </div>
+        <div class="block-flat">
+            <div class="header">
+                <h3>Agregar {% trans %}Guías{% endtrans %} </h3>
+            </div>
+
+            <div class="content">
+                <input id="check-all" type="checkbox" name="checkall" class="icheck checkall"><span> Todas</span>
+                <p style="display:inline; margin: 5px;"> </p>
+                <input id="check-none" type="checkbox" name="checknone" class="icheck checknone"><span> Ninguno</span>
+                <div id="mydiv" style="width:70%">
+                    <table id="guideTable" class="table table-striped table-bordered dt-responsive" cellspacing="0" width="100%">
+                    <thead>
+                    <tr>	
+                        <th>ID</th>
+                        <th>Facturar</th>
+                        <th>Número</th>
+                        <th>Remitente</th>
+                        <th>Destinatario</th>
+                        <th>Fecha</th>
+                        <th>Peso({% trans %}peso{% endtrans %})</th>
+                        <th>Volumen</th>
+                        <th>Monto($)</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for thisguide in guides %}
+                    <tr>
+                        <td>{{ thisguide.id }}</td>
+                        <td style="text-align:center;"><input type="checkbox" name="agrupar" value="bill" class="icheck checkclass"></td>
+                        <td><button type="button" class="btn btn-info btn-xs" onclick="location.href='{{ path('guide_show', { 'id': thisguide.id }) }}';">{{ thisguide.number }}</button></td>
+                        <td>{{ thisguide.sender }}</td>
+                        <td>{{ thisguide.addressee.name }} {{ thisguide.addressee.lastname }}</td>
+                        <td>{{ thisguide.creationdate|date('m/d/Y') }}</td>
+                        <td style="text-align:right">{{ thisguide.realweight }}</td>
+                        <td>
+                            {% set pri = true %}
+                            {% set volcad = '' %}
+                            {% if thisguide.masterec %}
+                                {% set listrec = [thisguide.masterec] %}
+                            {% else %}
+                                {% set listrec = thisguide.receipts %}
+                            {% endif %}
+                            {% for receipt in listrec %}
+                                {% set vol = (receipt.length*receipt.width*receipt.height/thisguide.agency.maincompany.convertvol)|number_format(2, '.', ',') %}
+                                {% set dimen = receipt.length~'X'~receipt.width~'X'~receipt.height %}
+                                {% if pri %}
+                                    {% set volcad = dimen ~ '('~vol~'dimension'|trans ~')' %}
+                                    {% set pri = false %}
+                                {% else %}
+                                    {% set volcad =  volcad ~ ',  ' ~ dimen ~ '('~vol~'dimension'|trans ~')' %}
+                                {% endif %} 
+                            {% endfor %}
+                            {{ volcad }}
+                        </td>
+                        <td style="text-align:right">{{ thisguide.totalpaid }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <div class="block-flat">
+            <div class="header">
+                <h3>Excluir {% trans %}Guías{% endtrans %} de Factura </h3>
+            </div>
+            
+            <div class="content">
+                <div id="mydiv2" style="width:70%">
+                    <input id="check-allbill" type="checkbox" name="checkallbill" class="icheck checkallbill"><span> Todas</span>
+                    <p style="display:inline; margin: 5px;"> </p>
+                    <input id="check-nonebill" type="checkbox" name="checknonebill" class="icheck checknonebill"><span> Ninguno</span>
+                    
+                    <table id="billGuides" class="table table-striped table-bordered dt-responsive" cellspacing="0" width="100%">
+                    <thead>
+                    <tr>	
+                        <th>ID</th>
+                        <th>Excluir</th>
+                        <th>Número</th>
+                        <th>Remitente</th>
+                        <th>Destinatario</th>
+                        <th>Fecha</th>
+                        <th>Peso({% trans %}peso{% endtrans %})</th>
+                        <th>Volumen</th>
+                        <th>Monto($)</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for thisguide in entity.guides %}
+                    <tr>
+                        <td>{{ thisguide.id }}</td>
+                        <td style="text-align:center;"><input type="checkbox" name="agrupar" value="bill" class="icheck checkclassbill"></td>
+                        <td><button type="button" class="btn btn-info btn-xs" onclick="location.href='{{ path('guide_show', { 'id': thisguide.id }) }}';">{{ thisguide.number }}</button></td>
+                        <td>{{ thisguide.sender }}</td>
+                        <td>{{ thisguide.addressee.name }} {{ thisguide.addressee.lastname }}</td>
+                        <td>{{ thisguide.creationdate|date('m/d/Y') }}</td>
+                        <td style="text-align:right">{{ thisguide.realweight }}</td>
+                       <td>
+                            {% set pri = true %}
+                            {% set volcad = '' %}
+                            {% if thisguide.masterec %}
+                                {% set listrec = [thisguide.masterec] %}
+                            {% else %}
+                                {% set listrec = thisguide.receipts %}
+                            {% endif %}
+                            {% for receipt in listrec %}
+                                {% set vol = (receipt.length*receipt.width*receipt.height/thisguide.agency.maincompany.convertvol)|number_format(2, '.', ',') %}
+                                {% set dimen = receipt.length~'X'~receipt.width~'X'~receipt.height %}
+                                {% if pri %}
+                                    {% set volcad = dimen ~ '('~vol~'dimension'|trans ~')' %}
+                                    {% set pri = false %}
+                                {% else %}
+                                    {% set volcad =  volcad ~ ',  ' ~ dimen ~ '('~vol~'dimension'|trans ~')' %}
+                                {% endif %} 
+                            {% endfor %}
+                            {{ volcad }}
+                        </td>
+                        <td style="text-align:right">{{ thisguide.totalpaid }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <table class="no-border">
+                        <tbody class="no-border-y">
+                            <tr>
+                            <td>
+                                <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-flat" >Regresar</button>
+                            </td>
+                            <td style="text-align:right;">
+                                <button type="button" class="btn btn-info btn-flat gotobill">Actualizar</button>
+                            </td>
+                            </tr>
+                        </tbody>
+                    </table>
+    </div>
+</div>
+
+{% endblock %}
+{% block javascripts %}
+<script type="text/javascript">
+    $(document).ready(function(){
+        $('#expdate').val('{{ entity.expdate|date('m/d/Y') }}');
+        $("#paidtype").val("{{ entity.paidtype.id }}").change();
+        $("#status").val("{{ entity.status }}").change();
+        {% if entity.status == "COBRADA" %}
+            $("#status").prop('disabled',true);
+        {% endif %}
+        
+        $thisGuideTable=$('#guideTable').DataTable({
+            "ordering": true,
+            "searching": false,
+            "info":     false,
+            "lengthChange": true,
+            "lengthMenu": [[5, 10, 20, 30, -1], [5, 10, 20, 30, "Todas"]],
+            "pageLength": 5,
+            "columnDefs": [
+                    {
+                        "targets": [ 0 ],
+                        "visible": false,
+                        "searchable": false,
+                    },
+                    {
+                        "targets": [ 7 ],
+                        class:"wrapok",
+                    },
+                    { "type": 'date', "targets": 5 },
+            ],
+            "order": [[ 5, "desc" ]],
+            "language": {
+                "sSearch": "Buscar",
+                "lengthMenu": 'Mostrando  _MENU_  "{% trans %}Guías{% endtrans %}" por página',
+                "zeroRecords": "<div style=\"color:red;\">Lo siento no se encontraron {% trans %}Guías{% endtrans %}</div>",
+                "sInfo": "Mostrando _START_ a _END_ de _TOTAL_ {% trans %}Guías{% endtrans %}",
+                "infoEmpty": "No hay registros disponibles",
+                "infoFiltered": "(Filtradas de un total de _MAX_ )",
+                "searchPlaceholder": "Número/Remitente/Destinatario",
+                "paginate" : {
+                    first:    '«',
+                    previous: '‹',
+                    next:     '›',
+                    last:     '»'
+                }
+            },
+            "pagingType": "full_numbers",
+            "sDom": '<"top"i>rt<"bottom"lp><"clear">',
+            "fnDrawCallback": function(oSettings) {
+                if ((oSettings._iDisplayLength >= oSettings.fnRecordsDisplay()) ||  (oSettings._iDisplayLength == -1)) {
+                    $(oSettings.nTableWrapper).find('.dataTables_paginate').hide();
+                } else {
+                    $(oSettings.nTableWrapper).find('.dataTables_paginate').show();
+                }
+            },
+        });
+        
+        $thisBillGuides=$('#billGuides').DataTable({
+            "ordering": false,
+            "searching": false,
+            "info":     false,
+            "lengthChange": true,
+            "lengthMenu": [[5, 10, 20, 30, -1], [5, 10, 20, 30, "Todas"]],
+            "pageLength": 5,
+            "columnDefs": [
+                    {
+                        "targets": [ 0 ],
+                        "visible": false,
+                        "searchable": false,
+                    },
+                    {
+                        "targets": [ 7 ],
+                        class:"wrapok",
+                    },
+            ],
+            "language": {
+                "sSearch": "Buscar",
+                "lengthMenu": 'Mostrando  _MENU_  "{% trans %}Guías{% endtrans %}" por página',
+                "zeroRecords": "<div style=\"color:red;\">Lo siento no se encontraron {% trans %}Guías{% endtrans %}</div>",
+                "sInfo": "Mostrando _START_ a _END_ de _TOTAL_ {% trans %}Guías{% endtrans %}",
+                "infoEmpty": "No hay registros disponibles",
+                "infoFiltered": "(Filtradas de un total de _MAX_ )",
+                "searchPlaceholder": "Número/Remitente/Destinatario",
+                "paginate" : {
+                    first:    '«',
+                    previous: '‹',
+                    next:     '›',
+                    last:     '»'
+                }
+            },
+            "pagingType": "full_numbers",
+            "sDom": '<"top"i>rt<"bottom"lp><"clear">',
+            "fnDrawCallback": function(oSettings) {
+                if ((oSettings._iDisplayLength >= oSettings.fnRecordsDisplay()) ||  (oSettings._iDisplayLength == -1)) {
+                    $(oSettings.nTableWrapper).find('.dataTables_paginate').hide();
+                } else {
+                    $(oSettings.nTableWrapper).find('.dataTables_paginate').show();
+                }
+            },
+        });
+        
+        $('#check-all').on('ifChecked', function(event){
+            $('#check-none').iCheck('uncheck');
+            $('#check-none').iCheck('update');
+            
+            var info = $thisGuideTable.page.info();
+            var page = info['page'];
+            var length = info['length'];
+            
+            $thisGuideTable.page.len( -1 ).draw();
+            
+            $('.checkclass').iCheck('check');
+            $('.checkclass').iCheck('update');
+            
+            $thisGuideTable.page.len(length);
+            $thisGuideTable.page(page).draw(false);
+        });
+        $('#check-none').on('ifChecked', function(event){
+            $('#check-all').iCheck('uncheck');
+            $('#check-all').iCheck('update');
+            
+            var info = $thisGuideTable.page.info();
+            var page = info['page'];
+            var length = info['length'];
+            
+            $thisGuideTable.page.len( -1 ).draw();
+            
+            $('.checkclass').iCheck('uncheck');
+            $('.checkclass').iCheck('update');
+            
+            $thisGuideTable.page.len(length);
+            $thisGuideTable.page(page).draw(false);
+        });
+        $('.checkclass').on('ifChecked', function(event){
+            $('#check-none').iCheck('uncheck');
+            $('#check-none').iCheck('update');
+        });
+        $('.checkclass').on('ifUnchecked', function(event){
+            $('#check-all').iCheck('uncheck');
+            $('#check-all').iCheck('update');
+        });
+        
+        $('#check-allbill').on('ifChecked', function(event){
+            $('#check-nonebill').iCheck('uncheck');
+            $('#check-nonebill').iCheck('update');
+            
+            var info = $thisBillGuides.page.info();
+            var page = info['page'];
+            var length = info['length'];
+            
+            $thisBillGuides.page.len( -1 ).draw();
+            
+            $('.checkclassbill').iCheck('check');
+            $('.checkclassbill').iCheck('update');
+            
+            $thisBillGuides.page.len(length);
+            $thisBillGuides.page(page).draw(false);
+        });
+        $('#check-nonebill').on('ifChecked', function(event){
+            $('#check-allbill').iCheck('uncheck');
+            $('#check-allbill').iCheck('update');
+            
+            var info = $thisBillGuides.page.info();
+            var page = info['page'];
+            var length = info['length'];
+            
+            $thisBillGuides.page.len( -1 ).draw();
+            
+            $('.checkclass').iCheck('uncheck');
+            $('.checkclass').iCheck('update');
+            
+            $thisBillGuides.page.len(length);
+            $thisBillGuides.page(page).draw(false);
+        });
+        $('.checkclassbill').on('ifChecked', function(event){
+            $('#check-nonebill').iCheck('uncheck');
+            $('#check-nonebill').iCheck('update');
+        });
+        $('.checkclassbill').on('ifUnchecked', function(event){
+            $('#check-allbill').iCheck('uncheck');
+            $('#check-allbill').iCheck('update');
+        });
+        $('#mydiv').width("100%");
+        $thisGuideTable.responsive.rebuild();
+        $thisGuideTable.responsive.recalc();
+        // $thisGuideTable.draw();
+        
+        $('#mydiv2').width("100%");
+        $thisBillGuides.responsive.rebuild();
+        $thisBillGuides.responsive.recalc();
+        // $thisBillGuides.draw();
+        
+        $( window ).resize(function() {
+            $thisGuideTable.responsive.rebuild();
+            $thisGuideTable.responsive.recalc();
+            // $thisGuideTable.draw();
+            
+            $thisBillGuides.responsive.rebuild();
+            $thisBillGuides.responsive.recalc();
+            // $thisBillGuides.draw();
+        
+        });
+        $('.gotobill').click(function(e) {
+            e.preventDefault();
+            var tobill = [];
+            var unbill = [];
+            
+            var cin=0;
+            var paidtype = $('#paidtype').val();
+            var status = $('#status').val();
+            var totalRecords =$('#guideTable').DataTable().page.info().recordsTotal;
+            var expdate = $('#expdate').val();
+            if (!expdate) {
+                funalert('Debe seleccionar la fecha de vencimiento');
+                return false;
+            }
+            
+            if (totalRecords > 0) {
+                $thisGuideTable.$('tr').each(function(index,rowhtml){
+                    var checked = $('input[type="checkbox"]:checked',rowhtml).length;
+                    var data = $thisGuideTable.row(rowhtml).data();
+                    // console.log(ii + ':' + checked);
+                    if (checked==1) {
+                        tobill[cin++]=data[0];
+                    } 
+                });
+            }
+            var cout = 0;
+            $thisBillGuides.$('tr').each(function(index,rowhtml) {
+                var checked = $('input[type="checkbox"]:checked',rowhtml).length;
+                var data = $thisBillGuides.row(rowhtml).data();
+                // console.log(ii + ':' + checked);
+                if (checked==1) {
+                    unbill[cout++]=data[0];
+                } 
+            });
+            
+            var guidein = JSON.stringify(tobill);
+            var guideout = JSON.stringify(unbill);
+            nin = tobill.length;
+            nout = unbill.length;
+            /*
+            var url = "{{ path('bill_update', {'id': entity.id }) }}?guidein=" + guidein + "&guideout=" + guideout +  "&paidtype=" + paidtype + "&status=" + status + '&expdate=' + expdate;
+            */
+            var url = "{{ path('bill_update', {'id': entity.id }) }}?guidein=" + guidein + "&guideout=" + guideout + '&expdate=' + expdate;
+            //funalert(url);
+            //return false;
+            if ((nin > 0 ) || (nout != {{ entity.guides|length }})) {
+                window.location.href = url;
+            } else {
+                funalert('La factura debe tener al menos 1 {% trans %}Guía{% endtrans %}');
+            }
+            return false;	
+        }); 
+    });
+</script>
+{% endblock %}

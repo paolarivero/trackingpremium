@@ -1,0 +1,129 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+<div class="widget">
+    <div class="widget-header"> <i class="icon-list-alt"></i>
+              <h3>Crear bolsas para {% trans %}Guías{% endtrans %} de la agencia  {{ gagency.agency }}</h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+    <div class="bodycontainer scrollable">
+
+    {% set gagency = allgroup|first|first %}
+    {% set makebag = 0 %}
+    {% if 'peso'|trans == 'Lb' %}
+		{% set conwei = 0.454 %}
+	{% else %}
+		{% set conwei = 1/0.454 %}
+	{% endif %}
+	{% if 'dimension'|trans == 'CF' %}
+		{% set convol = 1/35.3147 %}
+	{% else %}
+		{% set convol =  35.3147 %}
+    {% endif %}
+    {% for key, group in allgroup %}
+	{% set fguide = group|first %}
+        {% set sizegroup = group |length %}
+	{% if sizegroup > 1 %}
+	   {% set makebag = 1 %}
+    <table id="guideTable{{ key }}" class="table table-striped table-bordered">
+                <thead>
+		<tr>
+		<th colspan=2><h4>Servicio : {{ fguide.shippingtype }} </h4></th>
+		<th colspan=2><h4>País destino: {{ fguide.countryto }} </h4></th>
+		<th colspan=2><h4>Número de {% trans %}Guías{% endtrans %} {{ group|length }} </h4></th>
+		</tr>
+		<tr>
+		<th style="display:none;"><h4>ID</h4></th>	
+                <th><h4>Número</h4></th>	
+		<th><h4>Fecha</h4></th>
+		<th><h4>Piezas</h4></th>
+		<th><h4>Peso ({% trans %}peso{% endtrans %}/{% trans %}altpeso{% endtrans %})</h4></th>
+		<th><h4>Volumen ({% trans %}dimension{% endtrans %})</h4></th>
+		<th><h4>Agrupar</h4></th>
+		</tr>	
+		</thead>
+       		<tbody>
+		{% for entity in group %}
+			<tr>
+			<td style="display:none;">{{ entity.id }}</td>
+			<td><a  class="btn btn-success" href="{{ path('guide_show', { 'id': entity.id }) }}">{{ entity.number }}</a></td>
+			<td>{{ entity.creationdate|date('m/d/Y') }}</td>
+			<td>{{ entity.pieces }}</td>
+			<td>{{ entity.realweight }}/{{ (entity.realweight*conwei)|number_format(2, '.', ',') }}</td>
+			{% set pri = true %}
+			<td>
+				{% set volcad = '' %}
+				{% if guide.masterec %}
+					{% set listrec = [entity.masterec] %}
+				{% else %}
+					{% set listrec = entity.receipts %}
+				{% endif %}
+				{% for receipt in listrec %}
+					{% set vol = (receipt.length*receipt.width*receipt.height/entity.agency.maincompany.convertvol)|number_format(2, '.', ',') %}
+					{% if pri %}
+						{% set volcad = volcad ~ vol %}
+						{% set pri = false %}
+					{% else %}
+						{% set volcad =  volcad ~ ',  ' ~ vol  %}
+					{% endif %} 
+				{% endfor %}
+				{{ volcad }}
+			</td>
+			<td style="text-align:center;"><input type="checkbox" name="agrupar" value="bag" checked></td>
+			</tr>
+		{% endfor %}
+		</tbody>
+		<tfoot>
+		<tr>
+		<td colspan=3><button type="button" class="btn btn-default btn-lg gotocreate" data-thetable="{{ key }}">Crear bolsa</button><td>
+		<td colspan=4 style="text-align:right;"><button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-lg bback" >Regresar</button></td>
+		</tr>
+		</tfoot>
+    </table>
+	{% endif %}
+    {% endfor %}
+    {% if makebag == 0 %}
+	<h2>No hay {% trans %}Guías{% endtrans %} que puedan agruparse en una bolsa</h2><br>
+	<button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-lg bback" >Regresar</button>
+    {% endif %}
+</div>
+</div>
+</div>
+{% block javascript %}
+
+<script type="text/javascript" src="{{ asset('assets/js/jquery.dataTables.min.js') }}"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+	$('.gotocreate').click(function(e) {
+	        e.preventDefault();
+		var thetable = 'guideTable' + $(this).data('thetable');
+		
+   		var tableRef = document.getElementById(thetable).getElementsByTagName('tbody')[0];
+		var nf = tableRef.rows.length;
+		var tobag = [];
+		var count=0;
+    		for (i=0; i < nf; i++) {
+			var id = tableRef.rows[i].cells[0].childNodes[0].nodeValue;
+			var mark = tableRef.rows[i].cells[6].childNodes[0];
+			// console.log(mark.checked + ' ' + id);
+			if (mark.checked) {
+				tobag[count++]=id;
+			}
+		}
+		var guidelist = JSON.stringify(tobag);
+		nguides = tobag.length;
+		// console.log(guidelist);
+		if (nguides > 1 ) {
+			window.location.href = "{{ url('guide_tobag') }}?guidelist=" + guidelist;
+		} else {
+			alert('Debe seleccionar al menos dos {% trans %}Guías{% endtrans %} para crear una bolsa');
+		}
+		return false;
+    		
+	});
+    });
+</script>
+{% endblock %}
+
+{% endblock %}

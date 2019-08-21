@@ -1,0 +1,77 @@
+{# src/NvCarga/Bundle/Resources/views/Security/login.html.twig #}
+{% extends '::layout_login.html.twig' %}
+
+{% block body -%}
+<div id="cl-wrapper" class="sign-up-container">
+    <div class="middle-sign-up">
+        <div class="block-flat">
+            <div class="header">
+                <h3 class="text-center"><img src="{{ asset('assets/assets/img/logo.png') }}" alt="logo" class="logo-img"></h3>
+            </div>
+            <div>
+                <form style="margin-bottom: 0px !important;" action="{{ path('register_company_check') }}" parsley-validate="" novalidate class="form-horizontal">
+                <div class="content">
+                    <h5 class="title text-center"><strong style="font-weight: 400;">Crear cuenta sistema</strong></h5>
+                    <div class="form-group">
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <button type="button" class="btn btn-block btn-trans btn-facebook bg btn-rad"><i class="fa fa-facebook"></i> Continuar con Facebook</button>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="form-group">
+                        <div class="col-sm-12">
+                            <div class="input-group"><span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                <input type="text" name="nick" data-parsley-trigger="change" data-parsley-errors-container="#nick-error" required="" placeholder="Nombre" class="form-control">
+                            </div>
+                            <div id="nick-error">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-sm-12">
+                            <div class="input-group"><span class="input-group-addon"><i class="fa fa-user"></i></span>
+                                <input type="text" name="nick" data-parsley-trigger="change" data-parsley-errors-container="#nick-error" required="" placeholder="Apellido" class="form-control">
+                            </div>
+                            <div id="nick-error">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-sm-12">
+                            <div class="input-group"><span class="input-group-addon"><i class="fa fa-envelope"></i></span>
+                                <input type="email" name="email" data-parsley-trigger="change" data-parsley-errors-container="#email-error" required="" placeholder="Correo electrónico" class="form-control">
+                            </div>
+                            <div id="email-error">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-6 col-xs-6">
+                            <div class="input-group"><span class="input-group-addon"><i class="fa fa-lock"></i></span>
+                                <input id="pass1" type="password" data-parsley-errors-container="#password-error" placeholder="Password" required="" class="form-control">
+                            </div>
+                            <div id="password-error">
+                            </div>
+                        </div>
+                        <div class="col-sm-6 col-xs-6">
+                            <div class="input-group"><span class="input-group-addon"><i class="fa fa-lock"></i></span>
+                                <input parsley-equalto="#pass1" type="password" data-parsley-errors-container="#confirmation-error" required="" placeholder="Confirm Password" class="form-control">
+                            </div>
+                            <div id="confirmation-error">
+                            </div>
+                        </div>
+                    </div>
+                    <p class="spacer">Al hacer clic en "Crear cuenta", aceptas nuestros <a href="#">Términos</a><a href="#"> y condiciones</a> y Política de privacidad</p>
+                    <button type="submit" class="btn btn-block btn-success btn-rad btn-lg">Crear Cuenta</button>
+                    <p class="spacer">¿Ya tienes una cuenta? <a style="color: #555; font-weight: 500;" href="{{ path('login_company') }}">Iniciar sesión</a> </p>
+                </div>
+                </form>
+            </div>
+        </div>
+        <div class="text-center out-links"><a href="#">© 2018 Trackingpremium</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

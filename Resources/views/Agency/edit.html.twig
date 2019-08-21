@@ -1,0 +1,145 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>Crear Agencia</title>
+{% endblock %}
+
+{# Display the form #}
+
+{% form_theme edit_form 'form/fields.html.twig' %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Crear Agencia</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('agency') }}">Agencias</a></li>
+            <li class="active">Crear</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+
+        {{ form_start(edit_form, {attr: {novalidate: 'novalidate', 'id': 'agency_type' }}) }}
+        <div class="block-flat">
+            <div class="header">
+                <h3>Datos de la agencia</h3>
+            </div>
+            <div class="content">
+                {{ form_row(edit_form.name) }}
+                {{ form_row(edit_form.address) }}
+                {{ form_row(edit_form.zip) }}
+                <div class="form-group">
+                    <div class="row">
+                            <div class="col-md-2">
+                                <label>Ciudad</label>
+                            </div>
+                            <div class="col-md-10">
+                                <input type="hidden" id="cityagency" style="width:100%;" />
+                            </div>
+                    </div>
+                </div>
+                {{ form_row(edit_form.cityname) }}
+                {{ form_row(edit_form.phone) }}
+                {{ form_row(edit_form.fax) }}
+                {{ form_row(edit_form.email) }}
+                {{ form_row(edit_form.webmaster) }}
+                {{ form_row(edit_form.manager) }}
+                <div class="row">
+                    <div class="col-sm-4 col-md-4">
+                        {{ form_row(edit_form.poboxs, { 'attr': {'class': 'icheck'} }) }}
+                    </div>
+                    <div class="col-sm-4 col-md-4">
+                        {{ form_row(edit_form.guidecopies, { 'attr': {'class': 'icheck'} }) }}
+                    </div>
+                    <div class="col-sm-4 col-md-4">
+                        {{ form_row(edit_form.sharecustomer, { 'attr': {'class': 'icheck'} }) }}
+                    </div>
+                </div>
+                
+                
+                <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        <td>
+
+                        </td>
+                        <td style="text-align:right;">
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-flat" >Cancelar</button>
+                            {{ form_widget(edit_form.submit, { 'attr': {'class': 'btn btn-primary btn-flat'} }) }}
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>{# FIN CONTENT #}
+        </div> {# FIN BLOCK FLAT #}
+        {{ form_end(edit_form) }}
+    </div>
+</div>
+{% endblock %}
+{% block javascripts %}
+<script type="text/javascript">
+    
+   
+    
+    $(document).ready(function () {
+        $('#agency_type_cityid').val({{ entity.city.id }});
+        var cityname = "{{ entity.city.name }} ({{ entity.city.state.name }}, {{ entity.city.state.country.name }})";
+        $('#agency_type_cityname').val(cityname);
+        
+        $("#cityagency").select2({
+            placeholder: "Buscar Ciudad",
+            ajax: {
+                url: "{{ path('city_find') }}",
+                dataType: 'json',
+                delay: 250,
+                data: function (term) {
+                    return {
+                        q: term, //search term
+                    };
+                },
+                results: function (data) {
+                    return {
+                        results: data,
+                    };
+                },
+                cache: true
+                },
+             minimumInputLength: 2,
+             formatInputTooShort: function (input, min) { var n = min - input.length; return "Por favor ingrese  " + n + " carcater" + (n == 1? "" : "es") + " mas"; },
+             formatNoMatches: function () { return "No se encuentran resultados"; },
+
+        });
+
+        $('#cityagency').on("change", function(e) {
+            var cityid = $('#cityagency').val();
+            $('#agency_type_cityid').val(cityid);
+            var cityname = $('#cityagency').select2('data').text;
+            $('#agency_type_cityname').val(cityname);
+        });
+        var citySID = $("#agency_type_cityid").val();
+        var citySname = $("#agency_type_cityname").val();
+        if (citySID && citySname) {
+            // console.log('Hola:  ' +  citySID + ' ' + citySname);
+            $('#cityagency').select2('data', {id: citySID, text: citySname});
+        }
+        $('#agency_type_type_1').iCheck('check');
+        $('#agency_type_type_2').on('ifChecked', function(event){
+            $('#agency_type_lastname').val('');
+            $('#agency_type_lastname').prop('readonly', true);
+        });
+        $('#agency_type_type_1').on('ifChecked', function(event){
+            $('#agency_type_lastname').prop('readonly', false);
+        });
+        $('#agency_type_email_first, #agency_type_email_second').change(function() {
+            $('#guide_type_id').val(0);
+        });
+    });
+</script>
+{% endblock %}

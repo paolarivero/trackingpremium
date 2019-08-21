@@ -1,0 +1,15 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+    <h1>Creación de nuevo Rol</h1>
+
+    {{ form(form) }}
+
+        <ul class="record_actions">
+    <li>
+        <a href="{{ path('role') }}">
+            Regresar a la lista de roles
+        </a>
+    </li>
+</ul>
+{% endblock %}

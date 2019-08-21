@@ -1,0 +1,118 @@
+{% extends '::layout-pdf.html.twig' %}
+
+{% block body %}
+<style>
+
+html *
+{
+   font-size: 0.95em !important;
+   color: #000 !important;
+   font-family: Arial !important;
+   line-height: 1.2;
+   -webkit-print-color-adjust: exact; 
+}
+
+.table {
+    border-collapse: collapse;
+}
+
+.table, th, td {
+   
+   border: 1px solid black;
+}
+
+.table th{
+   text-align: center;
+   background-color: #eeeeee;
+}
+
+.table td {
+    text-align: center;
+    background-color: #ffffff; 
+}
+
+</style>
+
+<div class="row"> 
+<div class="span2">
+      <center>
+      {% if entity.maincompany.logo %}
+        {% set name = companies_logos ~ entity.maincompany.logo %}
+    {% else %}
+        {% set name = companies_logos ~ 'default.png' %}
+    {% endif %}
+      <img src="{{ absolute_url(asset(name)) }}" alt="Logo" style="height:80px;width:80px"><br>
+     </center>
+</div>
+<div class="span3">
+	<center>
+	{{ entity.agency.name }}<br>
+	{{ entity.agency.address }}<br>
+	{{ entity.agency.city }}, {{ entity.agency.city.state }} {{ entity.agency.zip }}. {{ entity.agency.city.state.country }}<br>
+	Ph. {{ entity.agency.phone }} <br>
+	{{ entity.agency.maincompany.url }}<br>
+	{{ entity.agency.email }}<br>
+	</center>	
+</div>
+</div>
+
+<center>
+<br>
+<h2>{% trans %}Consolidado{% endtrans %}</h2>
+<h2><div id="demo"></div></h2>
+<h2>{{ entity.number }}</h2><br>
+</center>
+</div>
+</div>
+<br>
+
+{% set head = entity.guides|first %}
+<table class="table">
+                <thead>
+		<tr>
+                <th><h3>Número</h3></th>
+		<th><h3>País Origen</h3></th>
+		<th><h3>País Destino</h3></th>
+		</tr>	
+		</thead>
+       		<tbody>
+			<tr>
+			<td>{{ entity.number }}</td>
+			<td>{{ entity.countryfrom }}</td>
+			<td>{{ entity.countryto }}</td>
+			</tr>
+		</tbody>
+</table>
+{% set head = entity.guides|first %}
+<table class="table">
+                <thead>
+		<tr>
+		<th><h3>Servicio</h3></th>
+		<th><h3>Fecha</h3></th>
+		<th><h3>Nro de {% trans %}Guías{% endtrans %}</h3></th>
+		</tr>	
+		</thead>
+       		<tbody>
+			<tr>
+			<td>{{ entity.shippingtype }}</td>
+			<td>{{ entity.creationdate|date('m/d/Y') }}</td>
+			<td>{{ entity.guides|length }}</td>
+			</tr>
+		</tbody>
+</table>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+		var thecode=  '{{ entity.number }}'; //String("0000000" + {{ entity.id }}).slice(-7);
+		$("#demo").barcode(
+			thecode, // Value barcode (dependent on the type of barcode)
+			"code128", // type (string)
+			{ barWidth: 3, barHeight: 70, showHRI: false}
+		);
+		// window.print();
+		// history.go(-1);
+    });
+</script>
+{% endblock %} 
+
+

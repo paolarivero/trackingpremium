@@ -1,0 +1,15 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+    <h1>Nueva noticia</h1>
+
+    {{ form(form) }}
+
+        <ul class="record_actions">
+    <li>
+        <a href="{{ path('news') }}">
+            Regresar a la lista de noticias
+        </a>
+    </li>
+</ul>
+{% endblock %}

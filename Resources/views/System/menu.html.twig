@@ -1,0 +1,353 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>Tracking Premium System</title>
+{% endblock %}
+
+{# Display the form #}
+
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Bienvenid@ a {{ app.user.maincompany.name }}</h2>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        <div class="block-flat">
+            <div class="header">
+                <h3>Usuario {{ app.user.name }}  {{ app.user.lastname }}</h3>
+            </div>
+            <div class="content">
+                <div class="row">
+                    <div class="col-sm-6 col-md-6">
+                        
+                          Username:  {{ app.user.username }}<BR>
+                        
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                         Email: {{ app.user.email }}<BR>
+                        
+                    </div>
+                </div>
+            </div>{# FIN CONTENT #}
+        </div> {# FIN BLOCK FLAT #}
+        <div class="block-flat">
+            <div class="header">
+                <h3>{% trans %}Guías{% endtrans %}</h3>
+            </div>
+            <div class="content">
+                <table id="guideTable" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%"> 
+                    <thead>
+                        <tr>
+                            <th style="text-align:center;">{% trans %}Guía{% endtrans %} </th>
+                            <th style="text-align:center;">Destinatario</th>
+                            <th style="text-align:center;">Fecha</th>
+                            <th style="text-align:center;">Servicio</th>
+                            <th style="text-align:center;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for guide in guides %}
+                            <tr>
+                                <td>
+                                        <a href="{{ path('guide_show', { 'id': guide.id }) }}">{{ guide.number }}</a>
+                                </td>
+                                <td>{{ guide.addressee }}</td>
+                                <td>{{ guide.creationdate|date('m/d/Y') }}</td>
+                                <td>{{ guide.shippingtype }}</td>
+                                {% set last = guide.moves|last %}
+                                <td>{{ last.status }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>{# FIN CONTENT #}
+        </div> {# FIN BLOCK FLAT #}
+        <div class="block-flat">
+            <div class="header">
+                <h3>{% trans %}Warehouses{% endtrans %}</h3>
+            </div>
+            <div class="content">
+                <table id="warehouseTable" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
+                    <thead id="headrec">
+                        <tr>
+                            <th>Número</th>
+                            <th>Remitente</th>
+                            <th>Destinatario</th>
+                            <th>Fecha</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for warehouse in warehouses %}
+                                <tr>
+                                    <td>
+                                        <a href="{{ path('whrec_show', { 'id': warehouse.id }) }}">{{ warehouse.number }}</a>
+                                    </td>
+                                    <td>
+                                        {{ warehouse.shipper }}
+                                    </td>
+                                    <td>
+                                        {{ warehouse.receiver.name }} {{ warehouse.receiver.lastname }}{#,  {{ warehouse.receiver.city }} ({{ warehouse.receiver.city.state }}, {{ warehouse.receiver.city.state.country }}) #}
+                                    </td>
+                                    <td>
+                                        {% if warehouse.creationdate %}
+                                            {{ warehouse.creationdate|date('m/d/Y H:i:s') }}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>{# FIN CONTENT #}
+        </div> {# FIN BLOCK FLAT #}
+        <div class="block-flat">
+            <div class="header">
+                <h3>{% trans %}Recibos{% endtrans %}</h3>
+            </div>
+            <div class="content">
+                <table id="receiptTable" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%"> 
+                    <thead>
+                        <tr>
+                            <th style="text-align:center;">Número</th>
+                            <th style="text-align:center;">Fecha</th>
+                            <th style="text-align:center;">Remitente</th>
+                            <th style="text-align:center;">Carrier</th>
+                            <th style="text-align:center;">Peso</th>
+                            <th style="text-align:center;">Volumen</th>
+                            <th style="text-align:center;">Status</th>
+                            <th style="text-align:center;">{% trans %}Guía{% endtrans %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for receipt in receipts %}
+                            <tr>
+                                <td>
+                                    <a href="{{ path('receipt_show', { 'id': receipt.id }) }}">{{ receipt.number }}</a>
+                                </td>
+                                <td>{% if receipt.arrivedate %}{{ receipt.arrivedate|date('m/d/Y') }}{% endif %}</td>
+                                <td>{{ receipt.shipper }}</td>
+                                <td>{{ receipt.carrier }}</td>
+                                <td>{{ receipt.weight }}</td>
+                                <td>{{ receipt.length }}X{{ receipt.width }}X{{ receipt.height }} </td>
+                                <td>{{ receipt.status }}</td>
+                                <td style="text-align:center;">
+                                    {% if receipt.guide %} 
+                                        <a href="{{ path('guide_show', { 'id': receipt.guide.id }) }}">{{ receipt.guide.number }}</a>
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>{# FIN CONTENT #}
+        </div> {# FIN BLOCK FLAT #}
+        <div class="block-flat">
+            <div class="header">
+                <h3>{% trans %}Facturas{% endtrans %}</h3>
+            </div>
+            <div class="content">
+                <table id="billTable" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th>Número</th>
+                                <th>Creación</th>
+                                <th>Vencimiento</th>
+                                <th>Tipo de pago</th>
+                                <th>Nro de {% trans %}Guía{% endtrans %}</th>
+                                <th>Monto</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entity in bills %}
+                                {% set total = 0 %}
+                                {% for guide in entity.guides %}
+                                    {% set total = total + guide.totalpaid %}
+                                {% endfor %}
+                                <tr>
+                                    {% set head = entity.guides|first %}
+                                    <td><a  class="btn btn-success btn-sm btn-flat" href="{{ path('bill_show', { 'id': entity.id }) }}">{{ entity.number }}</a></td>
+                                    <td>{{ entity.creationdate|date('m/d/Y') }}</td>
+                                    <td>{{ entity.expdate|date('m/d/Y') }}</td>
+                                    <td>{{ entity.paidtype }}</th>
+                                    <td>{{ entity.guides | length }}</td>
+                                    <td>{{ total }}</td>
+                                    <td>{{ entity.status }}</th>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+            </div>{# FIN CONTENT #}
+        </div> {# FIN BLOCK FLAT #}
+        <div class="block-flat">
+            <div class="header">
+                <h3>Pagos</h3>
+            </div>
+            <div class="content">
+                <table id="payTable" class="table hover table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th>Número de {% trans %}Guía{% endtrans %}</th>
+                                <th>Cuenta</th>
+                                <th>Monto</th>
+                                <th>Fecha de Pago</th>
+                                <th>Pago procesado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entity in payments %}
+                                <tr>
+                                    {% if app.user.pobox is null %}
+                                        <td><button type="button" class="btn btn-success btn-xs" onclick="location.href='{{ path('guide_show', { 'id': entity.guide.id }) }}';">{{ entity.guide.number }}</button></td>
+                                        <td><button type="button" class="btn btn-success btn-xs" onclick="location.href='{{ path('account_show', { 'id': entity.account.id }) }}';">{{ entity.account }}</button></td>
+                                    {% else %}
+                                        <td><button type="button" class="btn btn-success btn-xs" onclick="location.href='{{ url('guide_poboxfind') }}?guidenumber={{ entity.guide.number }}';">{{ entity.guide }}</button></td>
+                                        <td><button type="button" class="btn btn-success btn-xs" onclick="location.href='{{ path('account_showpobox', { 'id': entity.account.id }) }}';">{{ entity.account }}</button></td>
+                                    {% endif %}
+                                    <td>{{ entity.amount }}</td>
+                                    <td>{{ entity.paydate |date('m/d/Y') }}</td>
+                                    <td style="text-align:center;">{% if entity.verified %}
+                                        <input class="icheck" type="checkbox" checked="checked" disabled readonly >
+                                        {% else %}
+                                        <input class="icheck" type="checkbox" disabled readonly >
+                                        {% endif %}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+            </div>{# FIN CONTENT #}
+        </div> {# FIN BLOCK FLAT #}
+    </div>
+</div>
+{% endblock %}
+{% block javascripts %}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $thisBillTable=$('#billTable').DataTable({
+            "ordering": false,
+            "searching": false,
+            "info":     false,
+            "lengthChange": false,
+            "paginate": false,
+            "language": {
+                "sSearch": "Buscar",
+                "lengthMenu": 'Mostrando  _MENU_  "{% trans %}Facturas{% endtrans %}" por página',
+                "zeroRecords": "<div style=\"color:red;\">No hay {% trans %}Facturas{% endtrans %} para las guías que ha creado</div>",
+                "sInfo": "Mostrando _START_ a _END_ de _TOTAL_ {% trans %}Facturas{% endtrans %}",
+                "infoEmpty": "No hay registros disponibles",
+                "infoFiltered": "(Filtradas de un total de _MAX_ )",
+                "searchPlaceholder": "Número/Remitente/Destinatario",
+                "paginate" : {
+                    first:    '«',
+                    previous: '‹',
+                    next:     '›',
+                    last:     '»'
+                }
+            },
+        });
+        $thisGuideTable=$('#guideTable').DataTable({
+            "ordering": true,
+            "searching": false,
+            "info":     false,
+            "lengthChange": false,
+            "paginate": false,
+            "columnDefs": [
+                    { "type": 'date', "targets": 2 },
+            ],
+            "order": [[ 2, "desc" ]],
+            "language": {
+                "sSearch": "Buscar",
+                "lengthMenu": 'Mostrando  _MENU_  "{% trans %}Guías{% endtrans %}" por página',
+                "zeroRecords": "<div style=\"color:red;\">No ha creado {% trans %}Guías{% endtrans %}</div>",
+                "sInfo": "Mostrando _START_ a _END_ de _TOTAL_ {% trans %}Guías{% endtrans %}",
+                "infoEmpty": "No hay registros disponibles",
+                "infoFiltered": "(Filtradas de un total de _MAX_ )",
+                "searchPlaceholder": "Número/Remitente/Destinatario",
+                "paginate" : {
+                    first:    '«',
+                    previous: '‹',
+                    next:     '›',
+                    last:     '»'
+                }
+            },
+        });
+        $thisRecTable=$('#receiptTable').DataTable({
+            "ordering": false,
+            "searching": false,
+            "info":     false,
+            "lengthChange": false,
+            "paginate": false,
+            "language": {
+                "sSearch": "Buscar",
+                "lengthMenu": 'Mostrando  _MENU_  "{% trans %}Recibos{% endtrans %}" por página',
+                "zeroRecords": "<div style=\"color:red;\">No ha creado {% trans %}Recibos{% endtrans %}</div>",
+                "sInfo": "Mostrando _START_ a _END_ de _TOTAL_ {% trans %}Recibos{% endtrans %}",
+                "infoEmpty": "No hay registros disponibles",
+                "infoFiltered": "(Filtradas de un total de _MAX_ )",
+                "searchPlaceholder": "Número/Remitente/Destinatario",
+                "paginate" : {
+                    first:    '«',
+                    previous: '‹',
+                    next:     '›',
+                    last:     '»'
+                }
+            },
+        });
+        $thiswarehouseTable=$('#warehouseTable').DataTable({
+            "ordering": false,
+            "searching": false,
+            "info":     false,
+            "lengthChange": false,
+            "paginate": false,
+            "language": {
+                "sSearch": "Buscar",
+                "lengthMenu": 'Mostrando  _MENU_  "{% trans %}Warehouses{% endtrans %}" por página',
+                "zeroRecords": "<div style=\"color:red;\">No ha creado {% trans %}Warehouses{% endtrans %}</div>",
+                "sInfo": "Mostrando _START_ a _END_ de _TOTAL_ {% trans %}Warehouses{% endtrans %}",
+                "infoEmpty": "No hay registros disponibles",
+                "infoFiltered": "(Filtradas de un total de _MAX_ )",
+                "searchPlaceholder": "Número/Remitente/Destinatario",
+                "paginate" : {
+                    first:    '«',
+                    previous: '‹',
+                    next:     '›',
+                    last:     '»'
+                }
+            },
+        });
+        $thisPayment=$('#payTable').DataTable({
+            "ordering": false,
+            "searching": false,
+            "info":     false,
+            "lengthChange": false,
+            "paginate": false,
+            "language": {
+                "sSearch": "Buscar",
+                "lengthMenu": 'Mostrando  _MENU_  "Pagos" por página',
+                "zeroRecords": "<div style=\"color:red;\">No hay pagos registrados a las guías que ha creado</div>",
+                "sInfo": "Mostrando _START_ a _END_ de _TOTAL_ Pagos",
+                "infoEmpty": "No hay registros disponibles",
+                "infoFiltered": "(Filtradas de un total de _MAX_ )",
+                "searchPlaceholder": "Número/Remitente/Destinatario",
+                "paginate" : {
+                    first:    '«',
+                    previous: '‹',
+                    next:     '›',
+                    last:     '»'
+                }
+            },
+        });
+    });
+</script>
+{% endblock %}
+
+

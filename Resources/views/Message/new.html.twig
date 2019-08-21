@@ -1,0 +1,244 @@
+{% extends app.user.pobox is null
+    ? '::newbase.html.twig' 
+    : '::newbase-public.html.twig' %}
+
+{% block title %}
+    <title>Crear mensaje</title>
+{% endblock %}
+
+{# Display the form #}
+
+{% form_theme form 'form/fields.html.twig' %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Crear mensaje</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('message') }}">mensajes</a></li>
+            <li class="active">Crear</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        {{ form_start(form, {attr: {novalidate: 'novalidate', 'id': 'message_type' }}) }}
+        <div class="block-flat">
+            <div class="header">
+                <h3>Redactar mensaje  {% if app.user.pobox %}
+                    al administrador 
+                    {% endif %}
+                </h3>
+            </div>
+            <div class="content">
+                {% if app.user.pobox is null %}
+                    <div class="row">
+                        <div class="col-sm-4 col-md-4">
+                            <button style="margin-top: 13px;" type="button" class="btn btn-primary buser" data-toggle="modal" data-target="#usersearch">Buscar destinatario</button>
+                        </div>
+                        <div class="col-sm-8 col-md-8">
+                            {{ form_row(form.receivername) }}
+                        </div>
+                    </div>
+                {% else %}
+                    {% do form.receivername.setRendered %}
+                {% endif %}
+                
+                {{ form_row(form.subject) }}
+                
+                {{ form_row(form.body) }}
+                <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        <td>
+                        </td>
+                        <td style="text-align:right;">
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-flat" >Regresar</button>
+                            {{ form_widget(form.submit, { 'attr': {'class': 'btn btn-primary btn-flat'} }) }}
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {{ form_end(form) }}
+        <!-- Modal --> {# BUSCAR USUARIO #}
+        <div class="modal fade colored-header md-effect-9" id="usersearch" role="dialog">
+            <div class="modal-dialog modal-md">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button id="closemodaluser" type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h2 class="modal-title" id="buscarcliente">Buscar Cliente   
+                        </h2>
+                    </div>
+
+                    <div class="modal-body form">
+
+                        Buscar: <br><input style="display:inline; width:100%" type="text" placeholder="Nombre/Apellido/Casillero" id="findcustomer" onkeyup="SearchUser(event)" autocomplete="off"  />
+
+                        <center>
+                        <div id="mensajeCus">
+                            <h3 style="color:red;" id="nohay">NO SE ENCONTRARON</h3>
+                        </div>
+                        </center>
+                        <div id="divTable">
+                        <table id="userTable" class="row-border hover order-column" cellspacing="0" width="100%">
+                            <thead class="no-border-y">
+
+                            <tr>
+                                <th><b>Nombre</b></th>
+                                <th><b>Apellido</b></th>
+                                <th><b>Casillero</b></th>
+                                <th><b>Email</b></th>
+                            </tr>
+
+                            </thead>
+                            <tbody class="no-border-y">
+                            </tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="closemodaluser" data-dismiss="modal" class="btn btn-default btn-flat md-close">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div> {# FIN MODAL DE BUSCAR USUARIOS #}
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script type="text/javascript">
+    function SelectUser (id, name, lastname, username, email) {
+        $('#message_type_receiverid').val(id);
+        if (username == email) {
+            var receiver = name + ' ' + lastname + ' (' + email + ')';
+        } else {
+            var receiver = name + ' ' + lastname + ' (' + username + ':' + email + ')';
+        }
+        $('#message_type_receivername').val(receiver);
+        $('#closemodaluser').click();
+        return true;
+    }
+    function SearchUser (e) {
+        e.preventDefault();
+        $('#divTable').show();
+        $('#mensajeCus').hide();
+        var txt = $('#findcustomer').val();
+        var path =  '{{ url('searchuser') }}' + "?pattern=" + txt;
+        if (txt.length > 0) {
+            $.ajax({
+                type: "GET",
+                url:  path,
+                success: function (data) {
+                    if (data.length > 0) {
+                        if ( $.fn.DataTable.isDataTable('#userTable') ) {
+                            $('#userTable').DataTable().destroy();
+                        }
+                        var tableRef = document.getElementById('userTable').getElementsByTagName('tbody')[0];
+                        var nf = tableRef.rows.length;
+                        for (i=0; i < nf; i++) {
+                            tableRef.deleteRow(0);
+                        }
+                        var nc = data.length;
+                        for (i = 0; i < nc; i++) {
+                            var userid = data[i]['userid'];
+                            var nameuser = data[i]['name'];
+                            var lastnameuser = data[i]['lastname'];
+                            var pobox = data[i]['pobox'];
+                            var email = data[i]['email'];
+                            var username = data[i]['username'];
+                            // Insert a row in the table at the last row
+                            var newRow   = tableRef.insertRow(tableRef.rows.length);
+                            newRow.onclick = (function(){
+                                var viduser = userid; var vname = nameuser; var vlastname = lastnameuser;
+                                var vusername = username; var vemail = email; return function()
+                                {SelectUser(viduser, vname, vlastname, vusername, vemail)}})();
+                            newRow.class="highlight";
+
+                            // Insert a cell in the row at index 0
+                            var newCell0  = newRow.insertCell(0);
+                            var newCell1  = newRow.insertCell(1);
+                            var newCell2  = newRow.insertCell(2);
+                            var newCell3  = newRow.insertCell(3);
+
+                            var newText0 = document.createTextNode(nameuser);
+                            newCell0.appendChild(newText0);
+
+                            var newText1 = document.createTextNode(lastnameuser);
+                            newCell1.appendChild(newText1);
+
+                            var newText2 = document.createTextNode(pobox);
+                            newCell2.appendChild(newText2);
+
+                            var newText3 = document.createTextNode(email);
+                            newCell3.appendChild(newText3);
+                            //console.log(nameuser + ' ' + username);
+                        }
+                        $("#userTable tbody tr").mouseover(function() { $(this).addClass("myhover"); });
+                        $("#userTable tbody tr").mouseout(function() { $(this).removeClass("myhover"); });
+                        $('#userTable').DataTable({
+                            "ordering": false,
+                            "searching": false,
+                            "info":     false,
+                            "lengthChange": false,
+                            "scrollX": true,
+                            "pageLength": 10,
+                            "language": {
+                                    "paginate" : {
+                                        first:    '«',
+                                        previous: '‹',
+                                        next:     '›',
+                                        last:     '»'
+                                    }
+                            },
+                            "pagingType": "full_numbers",
+                        });
+                    }  else {
+                        $('#divTable').hide();
+                        $('#mensajeCus').show();
+                    }
+                },
+                error: function (data) {
+                    console.log(data);
+                }
+            });
+        } else {
+            $('#divTable').hide();
+            $('#mensajeCus').hide();
+        }
+        return true;
+    }
+$(document).ready(function () {
+   $('.buser').click(function(e) {
+        e.preventDefault();
+        // var _self = $(this);
+        $('#findcustomer').prop('disabled',false);
+        document.getElementById('buscarcliente').innerHTML = "Buscar Destinatrios";
+        document.getElementById('nohay').innerHTML = "No se encontraron destinatarios";
+        $('#findcustomer').val('');
+        $('#divTable').hide();
+        $('#mensajeCus').hide();
+        return true;
+    });
+    $('#message_type_submit').click(function(evt) {
+        var receiverid = $('#message_type_receiverid').val();
+        {% if app.user.pobox is null %}
+            if (receiverid == 0) {
+                funalert('Debe seleccionar un destinatario');
+                return false;
+            }
+        {% endif %}
+        return true;
+    });
+});
+</script>
+{% endblock %}
+

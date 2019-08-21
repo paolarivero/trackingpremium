@@ -1,0 +1,114 @@
+{% extends '::newbase.html.twig' %}
+{% block title %}
+    <title>Actualizar foto</title>
+{% endblock %}
+
+{% form_theme form 'form/fields.html.twig' %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Actualizar foto de Usuario</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('user') }}">Usuarios</a></li>
+            <li class="active">Foto</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        {{ form_start(form, {attr: {novalidate: 'novalidate', 'id': 'user_type' }}) }}
+        <div class="block-flat">
+            <div class="header">
+                <h3>Foto de Usuario</h3>
+            </div>
+            <div class="content">
+                <div class="form-group">
+                        <div class="col-sm-12">
+                            <div class="dropzone">
+                                <div class="dz-message">
+                                    <h3> Suelta el archivo aquí o haz clic para cargar (JPG/PNG) (<= 1Mb)</h3>
+                                    <span class="note">Se recomienda que la imagen tenga las mismas dimensiones de ancho y alto, para su adecuada visualización. Ejemplo: 200px200px</span>
+                                </div>
+                            </div>
+                        </div>
+                </div>
+                {% if entity.photo %}
+                    <center>
+                    {% set photo = users_photos ~ entity.photo %}
+                    <img src="{{ asset(photo) }}" alt="Photo" style="height:100px;" >
+                    </center>
+                {% endif %}
+                <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        <td>
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default" >Regresar</button>
+                        </td>
+                        <td style="text-align:right;">
+                            {{ form_row(form.submit, { 'attr': {'class': 'btn btn-primary'} }) }}
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>{# FIN CONTENT #}
+        </div> {# FIN BLOCK FLAT #}
+        <input type="hidden" id="acepted">
+        {{ form_end(form) }}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#user_type_fileName').val('');
+        Dropzone.autoDiscover = false;
+        var dropzone_default = new Dropzone(".dropzone", {
+            url: '{{ path('loaduserphoto') }}',
+            maxFiles: 1,
+            uploadMultiple: false,
+            dictMaxFilesExceeded: 'Solo puede seleccionar un (1) archivo',
+            acceptedFiles: 'image/*',
+            dictInvalidFileType: 'No se permiten archivos de este tipo',
+            maxFilesize: 1,  // in Mb
+            dictFileTooBig: "El tamaño del archivo ({{ '{{' ~ 'filesize' ~ '}}' }}Mb) excede el máximo permitido ({{ '{{' ~ 'maxFilesize' ~ '}}' }}Mb)",
+            addRemoveLinks: true,
+            dictRemoveFile: 'Eliminar archivo',
+            init: function () {
+                this.on("error", function(file, message, xhr) { 
+                    if (xhr == null) this.removeFile(file); // perhaps not remove on xhr errors
+                    funalert(message);
+                });
+                this.on("sending", function(file, xhr, formData) {
+                    // send additional data with the file as POST data if needed.
+                    // formData.append("key", "value");  
+                });
+                this.on("success", function(file, response) {
+                    if (response.uploaded) 
+                        $('#user_type_fileName').val(response.fileName);
+                        $('#acepted').val(file.name);
+                        //alert('File Uploaded: ' + response.fileName);
+                });
+                this.on("removedfile", function(file) {
+                    //var num = dropzone_default.getUploadingFiles().length;
+                    //x = confirm('¿Quiere eliminar el archivo? ' + num);
+                    //if(!x)  return false;
+                    //console.log(num + '->' + $('#user_type_fileName').val() + '==' + file.name);
+                    if ($('#acepted').val() == file.name) {
+                        $('#user_type_fileName').val('');
+                    }
+                });
+            }
+        });
+        
+    });
+</script>
+{% endblock %}

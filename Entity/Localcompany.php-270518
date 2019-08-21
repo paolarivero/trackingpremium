@@ -1,0 +1,190 @@
+<?php
+// src/NvCarga/Bundle/Entity/Localcompany.php
+
+namespace NvCarga\Bundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Validator\Constraints as Assert;
+
+/**
+ * @ORM\Entity
+ * @ORM\Table(name="localcompany")
+ * @ORM\HasLifecycleCallbacks()
+ */
+class Localcompany
+{
+    /**
+     * @ORM\Id
+     * @ORM\Column(type="integer")
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    protected $id;
+     /**
+     * @Assert\NotBlank(message = "El Nombre  no puede estar vacío")
+     * @Assert\Length(
+     *      min = 3,
+     *      max = 50,
+     *      minMessage = "El nombre  debe tener al menos {{ limit }} caracteres",
+     *      maxMessage = "El nombre  no puede tener mas de {{ limit }} caracteres"
+     * )
+     * @ORM\Column(type="string", length=50, nullable=false)
+     */
+    protected $name;
+    /**
+     * @ORM\ManyToOne(targetEntity="Country")
+     * @ORM\JoinColumn(name="country_id", referencedColumnName="id")
+     */
+    protected $country;
+      /**
+     * @Assert\NotBlank(message = "El URL no puede estar vacío")
+     * @Assert\Length(
+     *      min = 5,
+     *      minMessage = "El nombre del carrier debe tener al menos {{ limit }} caracteres",
+     * )
+     * @ORM\Column(type="string", length=60, nullable=false)
+     */
+    protected $url;
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    protected $creationdate;
+    /**
+     * @ORM\ManyToOne(targetEntity="Maincompany")
+     * @ORM\JoinColumn(name="maincompany_id", referencedColumnName="id")
+     */
+    protected $maincompany;
+    
+    public function __toString() {
+        return (string) $this->getName();
+    }
+
+    /**
+     * Get id
+     *
+     * @return integer
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set name
+     *
+     * @param string $name
+     *
+     * @return Localcompany
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * Get name
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Set url
+     *
+     * @param string $url
+     *
+     * @return Localcompany
+     */
+    public function setUrl($url)
+    {
+        $this->url = $url;
+
+        return $this;
+    }
+
+    /**
+     * Get url
+     *
+     * @return string
+     */
+    public function getUrl()
+    {
+        return $this->url;
+    }
+
+    /**
+     * Set creationdate
+     *
+     * @param \DateTime $creationdate
+     *
+     * @return Localcompany
+     */
+    public function setCreationdate($creationdate)
+    {
+        $this->creationdate = $creationdate;
+
+        return $this;
+    }
+
+    /**
+     * Get creationdate
+     *
+     * @return \DateTime
+     */
+    public function getCreationdate()
+    {
+        return $this->creationdate;
+    }
+
+    /**
+     * Set country
+     *
+     * @param \NvCarga\Bundle\Entity\Country $country
+     *
+     * @return Localcompany
+     */
+    public function setCountry(\NvCarga\Bundle\Entity\Country $country = null)
+    {
+        $this->country = $country;
+
+        return $this;
+    }
+
+    /**
+     * Get country
+     *
+     * @return \NvCarga\Bundle\Entity\Country
+     */
+    public function getCountry()
+    {
+        return $this->country;
+    }
+     /**
+     * Set maincompany
+     *
+     * @param \NvCarga\Bundle\Entity\Maincompany $maincompany
+     *
+     * @return Localcompany
+     */
+    public function setMaincompany(\NvCarga\Bundle\Entity\Maincompany $maincompany = null)
+    {
+        $this->maincompany = $maincompany;
+
+        return $this;
+    }
+
+    /**
+     * Get maincompany
+     *
+     * @return \NvCarga\Bundle\Entity\Maincompany
+     */
+    public function getMaincompany()
+    {
+        return $this->maincompany;
+    }
+}

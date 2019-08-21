@@ -1,0 +1,305 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>Mostrar {% trans %}Warehouse{% endtrans %}</title>
+{% endblock %}
+
+{% block body -%}
+
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Información  de {% trans %}Warehouse{% endtrans %}</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('whrec_search') }}">{% trans %}Warehouses{% endtrans %}</a></li>
+            <li class="active"> Mostrar {% trans %}Warehouse{% endtrans %}</li>
+            </ol>
+    </div>
+    <div class="cl-mcont">
+        <div class="block-flat">
+            <div class="header">
+                <div class="row">
+                    <div class="col-sm-4 col-md-4">
+                        <h3>{% trans %}Warehouse{% endtrans %} {{ entity.number }} </h3>
+                    </div>
+                    <div class="col-sm-8 col-md-8">
+                        {% if ((app.user.agency.type == "MASTER") or ((app.user.agency == entity.agency) and is_granted('ROLE_ADMIN_RECEIPT')))  %}
+                            {% if entity.guide is null %}
+                                <div class="btn-group" style="margin-bottom: 5px;margin-top: 4px;">
+                                    <button type="button" class="btn btn-default">Opciones</button>
+                                    <button type="button" data-toggle="dropdown" class="btn btn-default dropdown-toggle">
+                                    <span class="caret"></span><span class="sr-only">Opciones</span></button>
+                                    <ul role="menu" class="dropdown-menu">
+                                            <li><a href="{{ path('guide_whrec')~'?whrec_id='~ entity.id }}">Crear Guía</a></li>
+                                            <li><a href="{{ path('whrec_edit', {'id': entity.id }) }}">Editar</a></li>
+                                            <li><a class="bcancel" data-toggle="modal" data-target="#cancelwhrec" href="#">Anular</a></li>
+                                    </ul>
+                                </div>
+                            {% endif %}
+                        {% endif %}
+                        <div class="btn-group" style="margin-bottom: 5px;margin-top: 4px;">
+                                <button type="button" class="btn btn-default">Status</button>
+                                <button type="button" data-toggle="dropdown" class="btn btn-default dropdown-toggle">
+                                <span class="caret"></span><span class="sr-only">Status</span></button>
+                                <ul role="menu" class="dropdown-menu">
+                                    <li><a href="{{ path('statuswhrec_new', {'id': entity.id }) }}">{% trans %}Nuevo Status{% endtrans %}</a></li>
+                                </ul>
+                        </div>
+                        <button type="button" title="Imprimir" class="btn btn-default" onclick="location.href='{{ path('whrec_print', { 'id': entity.id }) }}';"><i class="fa fa-print"></i></button>
+                        <button type="button" title="Generar PDF" class="btn btn-default" onclick="location.href='{{ path('whrec_printpdf', { 'id': entity.id }) }}';"><i class="fa fa-file-text"></i></button>
+                        <button type="button" title="Etiqueta" class="btn btn-default" onclick="location.href='{{ path('whrec_labelpdf', { 'id': entity.id }) }}';"><i class="fa fa-tag"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="row">
+                    <div class="col-md-6 col-sm-6">
+                        <b>
+                        {% if app.user.agency.type == 'MASTER' %}
+                            <i class="fa fa-building-o"></i> Agencia: {{ entity.agency }}<BR>
+                        {% endif %}
+                        <i class="fa fa-user"></i> Recibido Por: {{ entity.receiptdby }}</BR>
+                        </b>
+                    </div>
+                    <div class="col-md-6 col-sm-6">
+                        <b>
+                        <i class="fa fa-calendar"></i> Fecha: {{ entity.creationdate|date('m/d/Y') }}<BR>
+                        <i class="fa fa-flag"></i> País destino: {{ entity.receiver.city.state.country }}<BR>
+                        </b>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6 col-md-6">
+                <div class="block-flat">
+                    <div class="header">
+                        <h3>Remitente</h3>
+                    </div>
+                    <div class="content">
+                        <b>{{ entity.shipper.name }}  {{ entity.shipper.lastname }}</b>
+                        <p>{{ entity.shipper.adrdefault.address }} <BR>
+                        {{ entity.shipper.adrdefault.city }}, {{ entity.shipper.adrdefault.city.state }}, {{ entity.shipper.adrdefault.city.state.country.code }}
+                        {% if entity.shipper.adrdefault.zip %}
+                            ({{ entity.shipper.adrdefault.zip }})
+                        {% endif %}<BR>
+                        {{ entity.shipper.email }} <BR>
+                        {% if entity.shipper.adrdefault.phone  %}
+                            Teléfono:  {{ entity.shipper.adrdefault.phone }} <BR>
+                        {% endif %}
+                        {% if entity.shipper.adrdefault.mobile %}
+                            Móvil:  {{ entity.shipper.adrdefault.mobile }} <BR>
+                        {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-6">
+                <div class="block-flat">
+                    <div class="header">
+                        <h3>Destinatario</h3>
+                    </div>
+                    <div class="content">
+                        <b>{{ entity.receiver.name }}  {{ entity.receiver.lastname }}</b>
+                        <p>{{ entity.receiver.address }} <BR>
+                        {{ entity.receiver.city }}, {{ entity.receiver.city.state }}, {{ entity.receiver.city.state.country.code }}
+                        {% if entity.receiver.zip %}
+                            ({{ entity.receiver.zip }})
+                        {% endif %}<BR>
+                        {{ entity.receiver.customer.email }} <BR>
+                        {% if entity.receiver.phone  %}
+                            Teléfono:  {{ entity.receiver.phone }} <BR>
+                        {% endif %}
+                        {% if entity.receiver.mobile %}
+                            Móvil:  {{ entity.receiver.mobile }} <BR>
+                        {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% if 'peso'|trans == 'Lb' %}
+            {% set conwei = 0.454 %}
+        {% else %}
+            {% set conwei = 1/0.454 %}
+        {% endif %}
+        {% if 'dimension'|trans == 'CF' %}
+            {% set convol = 1/35.3147 %}
+        {% else %}
+            {% set convol =  35.3147 %}
+        {% endif %}
+        {% set volfactor = app.user.agency.maincompany.convertvol %}
+        {% set dimfactor = app.user.agency.maincompany.dimfactor %}
+        <div class="block-flat">
+            <div class="header">
+                <h3>Paquete(s)</h3>
+            </div>
+            <div class="content">
+                <table id="receiptTable"  class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%" style="padding-top: 0px !important; margin-top: -40px !important;">
+                <thead>
+                    <tr>
+                        <th>{% trans %}Recibo{% endtrans %} </th>
+                        <th>Volumen ({% trans %}dimension{% endtrans %}/{% trans %}altdimension{% endtrans %})</th>
+                        <th>Peso ({% trans %}peso{% endtrans %}/{% trans %}altpeso{% endtrans %})</th>
+                        <th>Peso Vol (Vol-{% trans %}peso{% endtrans %})</th>
+                        <th>Tipo</th>
+                        <th>Bultos</th>
+                        <th>Valor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for receipt in entity.receipts %}
+                            {% set volumen = receipt.length*receipt.width*receipt.height %}
+                            {% set pesod = volumen/dimfactor %}
+                            {% set volumen = volumen/volfactor %}
+                            <tr>
+                                <td><a  class="btn btn-success btn-sm btn-flat" href="{{ path('receipt_show', { 'id': receipt.id }) }}">{{ receipt.number }}</a></td>
+                                <td>{{ receipt.length }}X{{ receipt.width }}X{{ receipt.height }} ({{ volumen|number_format(2, '.', ',') }}/{{ (volumen*convol)|number_format(2, '.', ',') }} )</td>
+                                <td>{{ receipt.weight }}/{{ (receipt.weight*conwei)|number_format(2, '.', ',') }}</td>
+                                <td>{{ pesod|number_format(2, '.', ',') }}</td>
+                                <td>{{ receipt.packtype }}</td>
+                                <td>{{ receipt.npack }}</td>
+                                <td>{{ receipt.value }}</td>
+                            </tr>
+                    {% endfor %}
+                </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="block-flat">
+            <div class="header">
+                <div class="row">
+                    <div class="col-sm-6 col-md-6">
+                        <h3>Status del {% trans %}Warehouse{% endtrans %} {{ entity.number }}</h3>
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                        {% if entity.statusguide %}
+                            <label>Mostrar status {% trans %}Guía{% endtrans %} </label> <input id="statusguide" type="checkbox" class="icheck" checked="checked">
+                        {% else %}
+                            <label>Mostrar status {% trans %}Guía{% endtrans %} </label> <input id="statusguide" type="checkbox" class="icheck">
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="content">
+                <table id="statusTable" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%" style="padding-top: 0px !important; margin-top: -40px !important;">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Fecha</th>
+                        <th>{% trans %}Paso{% endtrans %}</th>
+                        <th>Porcentaje</th>
+                        <th>Lugar</th>
+                        <th>Comentario</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for move in entity.liststatus %}
+                        <tr>
+                            <td><buttom class="btn btn-primary btn-xs" title="Editar" onclick="location.href='{{ path('statuswhrec_edit', { 'id': move.id }) }}';"><i class="fa fa-pencil"></i></buttom></td>
+                            <td>{{ move.date |date('d/m/Y H:i:s') }}</td>
+                            <td>{{ move.step.name }}</td>
+                            <td>{{ move.step.percentage }}</td>
+                            <td>{{ move.place }} ({{ move.place.state }})</td>
+                            <td>{{ move.comment }}</td>
+                        </tr>
+                    {% endfor %}
+                    {% if entity.statusguide  and entity.guide is not null %}
+                        {% set guide = entity.guide %}
+                        {% for move in guide.liststatus %}
+                            <tr>
+                                <td><i class="fa fa-list-alt"></td>
+                                <td>{{ move.date |date('d/m/Y H:i:s') }}</td>
+                                <td>{{ move.step.name }}</td>
+                                <td>{{ move.step.percentage }}</td>
+                                <td>{{ move.place }} ({{ move.place.state }})</td>
+                                <td>{{ move.comment }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
+                </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Modal -->
+        <div id="cancelwhrec" tabindex="-1" role="dialog" class="modal fade">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button id="closecancelwhrec" type="button" data-dismiss="modal" aria-hidden="true" class="close">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="text-center">
+                            <div class="i-circle danger"><i class="fa fa-times"></i></div>
+                                <p style="font-size:16px;">Confirme la anulación del {% trans %}Warehouse{% endtrans %} {{ entity.number }}</p>
+                            </div>
+                            <div class="alert alert-danger">
+                                <strong>Advertencia: </strong>Los {% trans %}Recibos{% endtrans %} contenidos en el {% trans %}Warehouse{% endtrans %} serán anulados
+                            </div>
+                            <center>
+                            <button type="button" class="btn btn-info btn-flat gotocancel">Confirmar</button>
+                            </center>
+                        </div>
+                        
+                        <div class="modal-footer">
+                            <div class="text-center">
+                                <button type="button" data-dismiss="modal" class="btn btn-default">Cerrar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div><!-- /.modal-content-->
+            </div><!-- /.modal-dialog-->
+        </div><!-- /.modal-->
+    </div>
+</div>
+
+{% endblock %}
+{% block javascripts %}
+<script type="text/javascript">
+    $(document).ready(function(){
+        var $receiptTable = $('#receiptTable').DataTable({
+            paginate: false,
+            info: false,
+            searching: false,
+            ordering: false,
+        });
+        $('.gotocancel').click(function(e) {
+            e.preventDefault();
+            $('#cancelwhrec').click();
+            var url="{{ path('whrec_cancel') }}" + "?whrec_id={{ entity.id }}";
+            //funalert('VOY A ANULAR LA FACTURA: ' + url);
+            window.location.href = url;
+            return false;
+        });
+        $thisMovTable=$('#statusTable').DataTable({
+            "responvise": true,
+            "searching": false,
+            "info":     false,
+            "lengthChange": false,
+            "paginate": false,
+            "language": {
+                "zeroRecords": "<div style=\"color:red;\">Lo siento no se encontraron Status</div>",
+                },
+            "columnDefs": [
+                { "type": 'date', "targets": 1 },
+            ],
+            "order": [[ 1, "desc" ]],
+        });
+        $('#statusguide').on('ifChecked', function(event){
+            var path = "{{ url('whrec_guideadd', { 'id': entity.id }) }}";
+            //console.log(path);
+            window.location.href = path;
+            return false;
+        });
+        $('#statusguide').on('ifUnchecked', function(event){
+            var path = "{{ url('whrec_guideremove', { 'id': entity.id }) }}";
+            //console.log(path);
+            window.location.href = path;
+            return false;
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+<div class="widget">
+    <div class="widget-header"> <i class="icon-adjust"></i>
+              <h3>Tarifa de la agencia {{ agency.name }}</h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+	<table class="table table-striped table-bordered" style="table-layout: fixed;">
+                <thead>
+                  <tr>
+    			<th colspan=2><h4>Datos de la Tarifa</h4></th>
+			<th>Activa: {% if entity.active %}
+			<input type="checkbox" checked="checked" disabled readonly >
+		    {% else %}
+			<input type="checkbox" disabled readonly >
+		    {% endif %}	</th>
+		  </tr>
+                </thead>
+       		<tbody>
+			<tr>
+    			<td><b>Nombre de la Tarifa: </b>{{ entity.name }}</td>
+			<td><b>Región/Pais: </b>{{ entity.region }}</td>
+			<td><b>Tipo de envío: </b>{{ entity.shippingtype }}</td>
+			</tr>
+
+			<tr>
+			<td><b>Unidad de medida: </b>{{ entity.measure }}</td>
+			<td><b>Valor de la medida: </b>{{ entity.valuemeasure }}</td>
+			<td><b>Ganancia de la agencia: </b>{{ entity.profitag }}</td>
+			</tr>
+
+			<tr>
+			<td colspan=3><b>Peso se cobra: </b>{{ entity.weightpay }}</td>
+			</tr>
+
+			<tr>
+    			<td><b>Costo: </b>{{ entity.cost }}</td>
+			<td><b>Inicio: </b>{{ entity.begin }}</td>
+			<td><b>Hasta: </b>{{ entity.until }}</td>
+			</tr>
+
+			<tr>
+			<td><b>Cobrar Mínimo: {{ entity.minimunlimit }}</td>
+			<td><b>Mínimo: </b>{{ entity.minimun }}</td>
+			<td><b>Valor mínimo: </b>{{ entity.valuemin }}</td>
+			</tr>
+
+			<tr>
+			<td><b>Dimensional </b> {% if entity.dimentional %}
+					<input type="checkbox" checked="checked" disabled readonly >
+		    		{% else %}
+					<input type="checkbox" disabled readonly >
+		    		{% endif %}</td>
+			<td><b>Precio por volumen: </b>{{ entity.volumeprice }}</td>
+			<td><b>Ganancia de la agencia por volumen: </b>{{ entity.profitagv }}</td>
+			</tr>
+			 	
+			<tr>
+    			<td><b>Seguro </b> {% if entity.insurance %}
+					<input type="checkbox" checked="checked" disabled readonly >
+		    		{% else %}
+					<input type="checkbox" disabled readonly >
+		    		{% endif %}</td>
+			<td colspan=2> <b>Porcentaje de Seguro: </b>{{ entity.insuranceper }}</td>
+			</tr>
+
+			<tr>
+    			<td><b>Impuesto </b> {% if entity.tax %}
+					<input type="checkbox" checked="checked" disabled readonly >
+		    		{% else %}
+					<input type="checkbox" disabled readonly >
+		    		{% endif %}</td>
+			<td colspan=2> <b>Porcentaje de Impuesto: </b>{{ entity.taxper }}</td>
+			</tr>
+			
+			<tr>
+			<td><b>Adicional: </b>{{ entity.additional }}</td>
+			<td colspan=2><b>Etiqueta adicional: </b>{{ entity.labeladditional }}</td>
+			</tr>
+    		</tbody>
+        	<tfoot>
+    		<tr>
+    		<td colspan=2 style="text-align:center;"><button type="button" class="btn btn-default" onclick="location.href='{{ path('tariff_edit', { 'id': entity.id }) }}';">Editar</button></td>
+    		<td style="text-align:center;"><button type="button" class="btn btn-default" onclick="location.href='{{ path('tariff', { 'idag': entity.agency.id }) }}';">Regresar a lista</button></td>
+    		</tr>
+	    	</tfoot>
+	</table>
+</div>
+</div>
+{% endblock %}

@@ -1,0 +1,94 @@
+{% extends '::newbase.html.twig' %}
+
+{% block body -%}
+
+</style>
+<div class="widget">
+    <div class="widget-header"> <i class="icon-bar-chart"></i>
+              {% if type == 1 %}
+			<h3> <b>{% trans %}Guías{% endtrans %} por mes </b> </h3>
+	      {% else %}
+			<h3> <b>Monto cobrado por mes </b> </h3>
+
+	      {% endif %}
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+
+     {% set nommeses=['','Enero','Febrero','Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'] %}
+    <div class="table-responsive">
+    {# style="display:none"> #}
+    <table id="guideTable" class="table table-striped table-bordered" data-graph-container-before="1" data-graph-type="column" data-graph-datalabels-enabled="1" style="display:none">
+     <thead>
+	<tr style="background-color:#eeeeee;">
+		<th><h4>MES</h4></th>
+		{% for key in entities|keys %}
+			<th><h4>{{ key }}</h4></th>
+		{% endfor %}
+	</tr>
+     </thead>
+     <tbody>
+	{% for key in nommeses|keys %}
+		{% if key != '' %}
+			<tr>
+			<td>{{ nommeses[key] }}</td>
+			{% for entity in entities %}
+				{% set val = '' %}
+				{% for elmes in entity %}
+					{% if elmes['month'] == key %}
+						{% set val =  elmes['numg'] %}
+					{% endif %}
+				{% endfor %}
+				<td>{{ val }}</td>
+			{% endfor %}
+			</tr>
+		{% endif %}
+	{% endfor %}
+     </tbody>
+
+    </table>
+
+    </div>
+
+
+   </div>
+   </div>
+{% block javascript %}
+	<script src="{{ asset('assets/js/jquery-1.12.4.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/jquery.dataTables.min.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/highcharts.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/jquery.highchartTable-min.js') }}"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+	$('#guideTable').highchartTable();
+	/* $('#guideTable').bind('highchartTable.beforeRender', function(event, highChartConfig) {
+        	highChartConfig.plotOptions = {
+            	area: {
+                events: {
+                    legendItemClick: function(event) {
+                        var chart = $('#container').highcharts();
+                        jQuery.each(chart.series, function(index, serie) {
+                          serie.setVisible(false);
+                        });
+                        this.setVisible(true);
+                        return false;
+                    }
+                }
+
+              }
+        };
+    }).highchartTable({}); */
+
+	$thisGuideTable=$('#guideTable').DataTable({
+		searching: false,
+		"info":     false,
+		"lengthChange": false,
+		"scrollX": false,
+		"paging": false,
+	});
+    });
+</script>
+{% endblock %}
+
+{% endblock %}

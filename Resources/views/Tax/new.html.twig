@@ -1,0 +1,15 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+    <h1>Nuevo impuesto de agencia</h1>
+
+    {{ form(form) }}
+
+        <ul class="record_actions">
+    <li>
+        <a href="{{ path('tax') }}">
+            Regresar a la lista de impuestos de agencia
+        </a>
+    </li>
+</ul>
+{% endblock %}

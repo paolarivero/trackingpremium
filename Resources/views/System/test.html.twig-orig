@@ -1,0 +1,86 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+    {% if app.user.pobox is not null %}
+	<script>window.location.href = "{{ path('pobox_menu', { 'id': app.user.pobox.id }) }}"</script>
+    {% endif %}
+    {# <h1>Sistema NvCarga (Prototipo 0.5) </h1> #}
+    
+	  <ul>
+	    <li><a href="{{ path('message') }}">Mensajería</a></li>
+	    <li><a href="{{ path('receipt') }}">{% trans %}Recibos{% endtrans %}</a></li>
+	        <ul>
+		     <li><a href="{{ path('receipt_new') }}">Agregar {% trans %}Recibos{% endtrans %}</a></li>
+                </ul>
+            <li><a href="{{ path('guide') }}">{% trans %}Guías{% endtrans %}</a></li>
+	        <ul>
+		     <li><a href="{{ path('guide_new') }}">{% trans %}Guías{% endtrans %} para paquetes nuevos</a></li>
+		     <li><a href="{{ path('receipt_search') }}">{% trans %}Guías{% endtrans %} para paquetes con {% trans %}Recibo{% endtrans %}</a></li>
+		     <li><a href="{{ path('guidestatus') }}">Manejar Status de {% trans %}Guías{% endtrans %} (REVISAR EDICIÓN)</a></li>
+                </ul>
+	   <li><a href="{{ path('consolidated') }}">{% trans %}Consolidados{% endtrans %}</a></li>
+	        <ul>
+		     <li><a href="{{ path('consolidated_new') }}">Crear {% trans %}Consolidado{% endtrans %} </a></li>
+		     <li><a href="{{ path('consolidated') }}">Lista de {% trans %}Consolidados{% endtrans %}</a></li>	
+		     <li><a href="{{ path('consolidatedstatus') }}">Manejar Status de {% trans %}Consolidados{% endtrans %} (REVISAR EDICIÓN)</a></li>
+                </ul>
+	    <li><a href="{{ path('bill_wlist') }}">{% trans %}Guías{% endtrans %} con Factura </a></li>
+	    <li><a href="{{ path('bill_list') }}">{% trans %}Guías{% endtrans %} sin Factura </a></li>
+	        <ul>
+		     
+                </ul>
+	    <li><a <h1> Administración de usuarios </h1> </a> </li>
+            <ul>
+                <li><a href="{{ path('user') }}">Usuarios</a> </li>
+		<ul>
+		     <li><a href="{{ path('userstatus') }}">Manejar Status de Usuarios</a></li>
+		     <li><a href="{{ path('user_editpass', { 'id': app.user.id }) }}">Cambiar clave</a></li>
+                </ul>
+                <li><a href="{{ path('role') }}">Roles</a></li>
+            </ul>
+            <li><a <h1> Administración de Lugares </h1> </a> </li>
+            <ul>
+                <li><a href="{{ path('city') }}">Ciudades</a> </li>
+		<li><a href="{{ path('state') }}">Estados</a> </li>
+                <li><a href="{{ path('country') }}">Países</a></li>
+            </ul>
+   
+                <li><a href="{{ path('customer') }}">Clientes</a></li>
+		<ul>
+		     <li><a href="{{ path('customer_new') }}">Crear cliente</a></li>
+		     <li><a href="{{ path('customer_search') }}">Buscar clientes</a></li>
+		     <li><a href="{{ path('customerstatus') }}">Manejar Status de clientes</a></li>
+		     <li><a href="{{ path('customertype') }}">Manejar Tipos de clientes</a></li>
+                </ul>
+                <li><a href="{{ path('agency') }}">Agencias</a></li>
+	        <ul>
+		     <li><a href="{{ path('agencystatus') }}">Manejar Status de agencias</a></li>
+		     <li><a href="{{ path('agencytype') }}">Manejar Tipos de agencias</a></li>
+		     {# <li><a href="{{ path('servicetype, { 'id': app.user.id }) }}">Servicios de Agencias</a></li>
+		     <li><a href="{{ path('tariff', { 'id': app.user.id }) }}">Tarifas de Agencias</a></li>
+		     <li><a href="{{ path('tax') }}">Impuestos de Agencia</a></li>
+		     <li><a href="{{ path('insurance') }}">Seguros de Agencia </a></li> #}
+                </ul>
+		<li><a href="{{ path('pobox') }}">Casilleros</a></li>
+	        <ul>
+		     <li><a href="{{ path('location') }}">Ubicaciones</a></li>
+		     <li><a href="{{ path('poboxstatus') }}">Manejar Status de casilleros</a></li>
+		     <li><a href="{{ path('poboxtype') }}">Manejar Tipos de casilleros</a></li>
+                </ul>
+                <li><a href="{{ path('warehouse') }}">Bodegas</a>  <a href="{{ path('office') }}">Oficinas</a></li>
+		<li><a href="{{ path('news') }}">Noticias</a></li>
+		<li><a <h1> Administración de Transportistas </h1> </a> </li>
+		<ul>
+			<li><a href="{{ path('carrier') }}">Carrier</a></li>
+			<li><a href="{{ path('transporter') }}">Transportistas de carga</a></li>
+			<li><a href="{{ path('localcompany') }}">Transportistas Locales</a></li>
+		</ul>
+		<li><a <h1> Otros elementos </h1> </a> </li>
+		<ul>
+			<li><a href="{{ path('shippingtype') }}">Tipos de Envío</a></li>
+			<li><a href="{{ path('cod') }}">COD</a></li>
+			<li><a href="{{ path('paidtype') }}">Tipos de pago</a></li>
+		</ul>
+         </ul>
+{% endblock %}
+

@@ -1,0 +1,13 @@
+nv_carga_homepage:
+    path:     /hello/{name}
+    defaults: { _controller: NvCargaBundle:Default:index }
+
+NvCargaAnnotations:
+    resource: "@NvCargaBundle/Controller"
+    prefix:   /
+    type:     annotation
+
+NvCargaAPI:
+    resource: "@NvCargaBundle/Controller/api"
+    prefix:   /api
+    type:     rest

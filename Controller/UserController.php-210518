@@ -1,0 +1,688 @@
+<?php
+
+namespace NvCarga\Bundle\Controller;
+
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use NvCarga\Bundle\Entity\User;
+use NvCarga\Bundle\Form\UserType;
+use NvCarga\Bundle\Form\PasswordType;
+use NvCarga\Bundle\Utility\Mypass;
+use Doctrine\ORM\EntityRepository;
+
+
+/**
+ * User controller.
+ *
+ * @Route("/user")
+ */
+class UserController extends Controller
+{
+
+    /**
+     * Lists all ACTIVE User entities.
+     *
+     * @Route("/index", name="user")
+     * @Method("GET")
+     * @Template()
+     * @Security("has_role('ROLE_ADMIN_USER') or has_role('ROLE_ADMIN') or has_role('ROLE_VIEW_USER')")
+     */
+    public function indexAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+        $user = $this->getUser(); 
+        $maincompany = $user->getMaincompany();
+        
+        $outnames = ['trackingpremium','webuser'];
+        $statususer = $em->getRepository('NvCargaBundle:Userstatus')->findOneByName('ACTIVO');
+        if ($user->getAgency()->getType() == "MASTER" ) {
+            $entities = $em->getRepository('NvCargaBundle:User')->createQueryBuilder('u')
+                ->where('u.username not IN (:outnames)')
+                ->andWhere('u.maincompany =:thecompany')
+                ->andWhere('u.status =:status')
+                ->setParameters(['thecompany'=>$maincompany,'outnames'=>$outnames, 'status'=>$statususer])
+                ->getQuery()
+                ->getResult();	
+                
+            $agencies = $em->getRepository('NvCargaBundle:Agency')->findByMaincompany($maincompany);
+        } else {
+            $entities = $em->getRepository('NvCargaBundle:User')->createQueryBuilder('u')
+                ->where('u.username not IN (:outnames)')
+                ->andWhere('u.agency =:agency')
+                ->andWhere('u.status =:status')
+                ->setParameters(['agency'=>$user->getAgency(),'outnames'=>$outnames, 'status'=>$statususer])
+                ->getQuery()
+                ->getResult();	
+            $agencies = null;
+        }
+        
+        return array(
+            'entities' => $entities,
+            'agencies' => $agencies,
+        );
+    }
+    /**
+     * Lists all ACTIVE User entities.
+     *
+     * @Route("/indexoff", name="useroff")
+     * @Method("GET")
+     * @Template()
+     * @Security("has_role('ROLE_ADMIN_USER') or has_role('ROLE_ADMIN') or has_role('ROLE_VIEW_USER')")
+     */
+    public function indexoffAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+        $user = $this->getUser(); 
+        $maincompany = $user->getMaincompany();
+        
+        $outnames = ['trackingpremium','webuser'];
+        $statususer = $em->getRepository('NvCargaBundle:Userstatus')->findOneByName('SUSPENDIDO');
+        if ($user->getAgency()->getType() == "MASTER" ) {
+            $entities = $em->getRepository('NvCargaBundle:User')->createQueryBuilder('u')
+                ->where('u.username not IN (:outnames)')
+                ->andWhere('u.maincompany =:thecompany')
+                ->andWhere('u.status =:status')
+                ->setParameters(['thecompany'=>$maincompany,'outnames'=>$outnames, 'status'=>$statususer])
+                ->getQuery()
+                ->getResult();	
+                
+            $agencies = $em->getRepository('NvCargaBundle:Agency')->findByMaincompany($maincompany);
+        } else {
+            $entities = $em->getRepository('NvCargaBundle:User')->createQueryBuilder('u')
+                ->where('u.username not IN (:outnames)')
+                ->andWhere('u.agency =:agency')
+                ->andWhere('u.status =:status')
+                ->setParameters(['agency'=>$user->getAgency(),'outnames'=>$outnames, 'status'=>$statususer])
+                ->getQuery()
+                ->getResult();	
+            $agencies = null;
+        }
+        
+        return array(
+            'entities' => $entities,
+            'agencies' => $agencies,
+        );
+    }
+    /**
+     * Creates a new User entity.
+     *
+     * @Route("/create", name="user_create")
+     * @Method("POST")
+     * @Template("NvCargaBundle:User:new.html.twig")
+     * @Security("has_role('ROLE_ADMIN_USER') or has_role('ROLE_ADMIN')")
+     */
+    public function createAction(Request $request)
+    {
+        $user = $this->getUser(); 
+        $maincompany = $user->getMaincompany();
+        $agency=$user->getAgency();
+        /*
+        if ($user->getAgency()->getType() != "MASTER" ) {
+            throw $this->createAccessDeniedException('');
+        }
+        */
+        $flashBag = $this->get('session')->getFlashBag();
+        foreach ($flashBag->keys() as $type) {
+                $flashBag->set($type, array());
+        }
+        $entity = new User();
+        $countuser = $maincompany->getCountusers();
+        $plan = $maincompany->getPlan();
+        if (($plan->getUsers()) && ($countuser >= $plan->getMaxusers())) {
+            $message = 'Ha llegado al número máximo de USUARIOS permitidos. Para crear más debe actualizar su plan a uno superior.';
+            if ($this->isGranted('ROLE_ADMIN')) {
+                $message = $message . '<a href="' .  $this->generateUrl('loginmain') . '" > Actualizar ahora</a>';
+            }
+            $flashBag->add('notice',$message);
+            goto next;
+        }
+        $countuser++;
+        $maincompany->setCountusers($countuser);
+        $form = $this->createCreateForm($entity);
+        $form->handleRequest($request);
+        $translator = $this->get('translator');
+        if ($form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $usermail = $em->getRepository('NvCargaBundle:User')->findOneBy(['maincompany'=>$maincompany, 'email'=>$entity->getEmail()]);
+            $username = $em->getRepository('NvCargaBundle:User')->findOneBy(['maincompany'=>$maincompany, 'username'=>$entity->getUsername()]);
+            if ($usermail) {
+                    $this->get('session')->getFlashBag()->add(
+                                        'notice',
+                                        'Ya existe un USUARIO con el EMAIL ' . $entity->getEmail());
+                    goto next;
+                    //throw $this->createNotFoundException('Ya existe un USUARIO con el EMAIL ' . $entity->getEmail());
+            }
+            if ($username) {
+                $this->get('session')->getFlashBag()->add(
+                                        'notice',
+                                        'Ya existe un USUARIO con el USERNAME ' . $entity->getUsername());
+                goto next;
+                // throw $this->createNotFoundException('Ya existe un USUARIO con el USERNAME ' . $entity->getUsername());
+            }
+            //establecemos la contraseña: --------------------------
+            $this->setSecurePassword($entity);
+            $entity->setCreationdate(new \DateTime());
+            // $entity->getAgency($agency);
+	    
+           
+            $status = $em->getRepository('NvCargaBundle:Userstatus')->findOneByName('ACTIVO');
+            $roleuser = $em->getRepository('NvCargaBundle:Role')->findOneByName('ROLE_USER');
+            $entity->setStatus($status);
+            $entity->setMaincompany($maincompany);
+            $profile = $form['profile']->getData();
+            $entity->addUserRole($roleuser);
+            $plan = $maincompany->getPlan();
+            $countadmins = $maincompany->getCountadmins();
+            foreach ($profile->getRoles() as $role) {
+                if ($role->getName() == 'ROLE_ADMIN')  {
+                    $countadmins++;
+                    if ($countadmins > $plan->getMaxadmins()) {
+                        $message = 'Ha llegado al número máximo de usuarios ADMINISTRADORES permitidos. Para crear más debe actualizar su plan a uno superior.';
+                        if ($this->isGranted('ROLE_ADMIN')) {
+                            $message = $message . '<a href="' .  $this->generateUrl('loginmain') . '" > Actualizar ahora</a>';
+                        }
+                        $flashBag->add('notice',$message);
+                        goto next;
+                    }
+                }
+                $entity->addUserRole($role);
+            }
+            $maincompany->setCountadmins($countadmins);
+            $em->persist($entity);
+            $em->flush();
+
+            return $this->redirect($this->generateUrl('user_show', array('id' => $entity->getId())));
+        } else {
+            $this->get('session')->getFlashBag()->add(
+                                        'notice',
+                                        'La forma contiene errores, por favor, verificar.');
+        }
+        next:
+        return array(
+            'entity' => $entity,
+            'form'   => $form->createView(),
+        );
+    }
+
+    /**
+     * Creates a form to create a User entity.
+     *
+     * @param User $entity The entity
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createCreateForm(User $entity)
+    {
+        $form = $this->createForm(new UserType($this->getUser()), $entity, array(
+            'action' => $this->generateUrl('user_create'),
+            'method' => 'POST',
+        ));
+        $maincompany = $this->getUser()->getMaincompany();
+        $em = $this->getDoctrine()->getManager();
+        $agencies = $em->getRepository('NvCargaBundle:Agency')->findByMaincompany($maincompany);
+        $agency=$this->getUser()->getAgency();
+        if ((!$agency->getParent()) && ($agency->getType() == 'MASTER')) {
+            $form->add('agency', 'entity', array('label' => 'Agencia ', 'class'=> 'NvCargaBundle:Agency', 
+                'choices' => $agencies));
+        } else {
+            $form->add('agency', 'entity', array('label' => 'Agencia ', 'class'=> 'NvCargaBundle:Agency', 'disabled'=>true, 'read_only'=>true, 'data'=>$agency));
+        }
+		
+        $form->add('submit', 'submit', array('label' => 'Crear'));
+
+        return $form;
+    }
+
+    /**
+     * Displays a form to create a new User entity.
+     *
+     * @Route("/new", name="user_new")
+     * @Method("GET")
+     * @Template()
+     * @Security("has_role('ROLE_ADMIN_USER') or has_role('ROLE_ADMIN')")
+     */
+    public function newAction()
+    {
+        $user = $this->getUser(); 
+        $maincompany=$user->getMaincompany();
+        
+        $entity = new User();
+        $flashBag = $this->get('session')->getFlashBag();
+        foreach ($flashBag->keys() as $type) {
+                $flashBag->set($type, array());
+        }
+        $countuser = $maincompany->getCountusers();
+        $plan = $maincompany->getPlan();
+        //exit(\Doctrine\Common\Util\Debug::dump($plan->getUsers() . ' ' . $countuser . ' ' . $plan->getMaxusers() )); 
+
+        if (($plan->getUsers()) && ($countuser >= $plan->getMaxusers())) {
+            $message = 'Ha llegado al número máximo de USUARIOS permitidos. Para crear más debe actualizar su plan a uno superior.';
+            if ($this->isGranted('ROLE_ADMIN')) {
+                $message = $message . '<a href="' .  $this->generateUrl('loginmain') . '" > Actualizar ahora</a>';
+            }
+            $flashBag->add('notice',$message);
+        }
+        
+        $form   = $this->createCreateForm($entity);
+
+        return array(
+            'entity' => $entity,
+            'form'   => $form->createView(),
+        );
+    }
+
+    /**
+     * Finds and displays a User entity.
+     *
+     * @Route("/{id}/show", name="user_show")
+     * @Method("GET")
+     * @Template()
+     */
+    public function showAction($id)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $maincompany = $this->getUser()->getMaincompany();
+        $entity = $em->getRepository('NvCargaBundle:User')->findOneBy(['maincompany'=>$maincompany,'id'=>$id]);
+    
+        if (!$entity) {
+            throw $this->createNotFoundException('No existe el usuario');
+        }
+        $this->denyAccessUnlessGranted('show', $entity, 'No tiene permisos para ejecutar esta acción.');
+        $deleteForm = $this->createDeleteForm($id);
+
+        return array(
+            'entity'      => $entity,
+            'delete_form' => $deleteForm->createView(),
+        );
+    }
+
+    /**
+     * Displays a form to edit an existing User entity.
+     *
+     * @Route("/{id}/edit", name="user_edit")
+     * @Method("GET")
+     * @Template()
+     * @Security("has_role('ROLE_ADMIN_USER') or has_role('ROLE_ADMIN')")
+     */
+    public function editAction($id)
+    {
+        $user = $this->getUser(); 
+        /*
+        if ($user->getAgency()->getType() != "MASTER" ) {
+            throw $this->createAccessDeniedException('');
+        }
+        */
+        $em = $this->getDoctrine()->getManager();
+
+        $maincompany = $this->getUser()->getMaincompany();
+        $entity = $em->getRepository('NvCargaBundle:User')->findOneBy(['maincompany'=>$maincompany,'id'=>$id]);
+
+        if (!$entity) {
+            throw $this->createNotFoundException('No existe el usuario');
+        }
+        if (($user->getAgency() != $entity->getAgency()) && ($user->getAgency()->getType() != "MASTER" )) {
+            throw $this->createAccessDeniedException('');
+        }
+        $editForm = $this->createEditForm($entity);
+        $deleteForm = $this->createDeleteForm($id);
+
+        return array(
+            'entity'      => $entity,
+            'edit_form'   => $editForm->createView(),
+            'delete_form' => $deleteForm->createView(),
+        );
+    }
+
+    /**
+    * Creates a form to edit a User entity.
+    *
+    * @param User $entity The entity
+    *
+    * @return \Symfony\Component\Form\Form The form
+    */
+    private function createEditForm(User $entity)
+    {
+        $form = $this->createForm(new UserType($this->getUser()), $entity, array(
+            'action' => $this->generateUrl('user_update', array('id' => $entity->getId())),
+            'method' => 'PUT',
+        ));
+        $form->remove('username');
+        $form->remove('email');
+        $form->add('username', 'text', array('label' => 'Username ', 'read_only'=>true));
+        $form->add('email','email', array('label' => 'Email ', 'read_only'=>true));
+        $form->add('agency', 'entity', array('label' => 'Agencia ', 'class'=> 'NvCargaBundle:Agency', 'disabled'=>true, 'read_only'=>true, 'data'=>$entity->getAgency()));
+        $form->add('user_roles', 'entity', array('label' => 'Roles ', 'class'=> 'NvCargaBundle:Role', 
+                    'query_builder' => function (EntityRepository $er) {
+                    return $er->createQueryBuilder('p')
+                    ->where('p.name != :maincompany')
+                    ->andwhere('p.name not LIKE :status')
+                    ->andwhere('p.name not LIKE :ware')
+                    ->setparameters(['maincompany'=>'ROLE_ADMIN_MAINCOMPANY', 'status'=>'%statu%', 'ware'=>'%warehouse%'])
+                    ->orderBy('p.name', 'ASC');
+                    }, 'multiple'=>'true', 	'expanded' => true, 'attr'=>array('class'=>'icheck')));
+        $form->add('newprofile','checkbox', array('label'=> 'Asignar Perfil ', 'mapped'=>false));
+        $form->add('submit', 'submit', array('label' => 'Actualizar'));
+
+        return $form;
+    }
+    /**
+     * Edits an existing User entity.
+     *
+     * @Route("/{id}/update", name="user_update")
+     * @Method("PUT")
+     * @Template("NvCargaBundle:User:edit.html.twig")
+     * @Security("has_role('ROLE_ADMIN_USER') or has_role('ROLE_ADMIN') or has_role('ROLE_VIEW_USER')")
+     */
+    public function updateAction(Request $request, $id)
+    {
+        $user = $this->getUser(); 
+        /*
+        if ($user->getAgency()->getType() != "MASTER" ) {
+            throw $this->createAccessDeniedException('');
+        }
+        */
+        $em = $this->getDoctrine()->getManager();
+
+        $maincompany = $this->getUser()->getMaincompany();
+        $entity = $em->getRepository('NvCargaBundle:User')->findOneBy(['maincompany'=>$maincompany,'id'=>$id]);
+
+        if (!$entity) {
+            throw $this->createNotFoundException('No existe el usuario');
+        }
+        if (($user->getAgency() != $entity->getAgency()) && ($user->getAgency()->getType() != "MASTER" )) {
+            throw $this->createAccessDeniedException('');
+        }
+        //obtiene la contraseña actual -----------------------
+        $current_pass = $entity->getPassword();
+        
+        $deleteForm = $this->createDeleteForm($id);
+        $editForm = $this->createEditForm($entity);
+        $editForm->handleRequest($request);
+
+        if ($editForm->isValid()) {
+            //evalua si la contraseña fue modificada: ------------------------
+            if (!$entity->getPassword()) {
+                $entity->setPassword($current_pass);
+            }
+            // exit(\Doctrine\Common\Util\Debug::dump($current_pass));
+            if ($current_pass != $entity->getPassword()) {
+                $this->setSecurePassword($entity);
+            }
+            $newprofile = $editForm['newprofile']->getData();
+            if ($newprofile) {
+                $profile = $editForm['profile']->getData();
+                foreach ($entity->getUserRoles() as $role) {
+                    $entity->removeUserRole($role);
+                }
+                foreach ($profile->getRoles() as $role) {
+                    $entity->addUserRole($role);
+                }
+            }
+            $em->flush();
+
+            return $this->redirect($this->generateUrl('user_show', array('id' => $id)));
+        }
+
+        return array(
+            'entity'      => $entity,
+            'edit_form'   => $editForm->createView(),
+            'delete_form' => $deleteForm->createView(),
+        );
+    }
+    /**
+     * Deletes a User entity.
+     *
+     * @Route("/{id}/delete", name="user_delete")
+     * @Method("DELETE")
+     * @Security("has_role('ROLE_ADMIN_USER') or has_role('ROLE_ADMIN')")
+     */
+    public function deleteAction(Request $request, $id)
+    {
+        $form = $this->createDeleteForm($id);
+        $form->handleRequest($request);
+
+        if ($form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $maincompany = $this->getUser()->getMaincompany();
+            $entity = $em->getRepository('NvCargaBundle:User')->findOneBy(['maincompany'=>$maincompany,'id'=>$id]);
+
+            if (!$entity) {
+                throw $this->createNotFoundException('No existe el usuario');
+            }
+
+            $em->remove($entity);
+            $em->flush();
+        }
+
+        return $this->redirect($this->generateUrl('user'));
+    }
+
+    /**
+     * Creates a form to delete a User entity by id.
+     *
+     * @param mixed $id The entity id
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createDeleteForm($id)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('user_delete', array('id' => $id)))
+            ->setMethod('DELETE')
+            ->add('submit', 'submit', array('label' => 'Eliminar'))
+            ->getForm()
+        ;
+    }
+    private function setSecurePassword(&$entity) {
+        $entity->setSalt(md5(time()));
+        $encoder = new \Symfony\Component\Security\Core\Encoder\MessageDigestPasswordEncoder('sha512', true, 10);
+        $password = $encoder->encodePassword($entity->getPassword(), $entity->getSalt());
+        $entity->setPassword($password);
+    }
+
+    /**
+     * Displays a form to change password.
+     *
+     * @Route("/{id}/pass", name="user_editpass")
+     * @Method("GET")
+     * @Template()
+     */
+    public function editpassAction($id)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $maincompany = $this->getUser()->getMaincompany();
+        $entity = $em->getRepository('NvCargaBundle:User')->findOneBy(['maincompany'=>$maincompany,'id'=>$id]);
+
+        if (!$entity) {
+            throw $this->createNotFoundException('No existe el usuario');
+        }
+        // Se verifica con el VOTER si se tiene el permiso para cambiar la clave 
+        $this->denyAccessUnlessGranted('password', $entity, 'No tiene permisos para ejecutar esta acción.');
+        $newpass = new Mypass();
+        $newpass->setPassword($entity->getPassword());
+        $newpass->setId($entity->getId());
+        $editForm = $this->createPasswordForm($newpass);
+        //  $logger = $this->get('logger');
+        //  $mensaje1 = "Password Nuevo: " .  $newpass->getPassword();
+        //  $mensaje2 = "Id: " .  $newpass->getId();
+        //  $logger->info('MENSAJES editpass: ....');
+        //  $logger->info($mensaje1);
+        //  $logger->info($mensaje2);    
+        return array(
+            'theuser' => $entity,
+            'entity'      => $newpass,
+            'edit_form'   => $editForm->createView(),
+        );
+    }
+   /**
+    * Creates a form to change password a User entity.
+    *
+    * @param User $entity The entity
+    *
+    * @return \Symfony\Component\Form\Form The form
+    */
+    private function createPasswordForm(Mypass $entity)
+    {
+        $form = $this->createForm(new PasswordType(), $entity, array(
+            'action' => $this->generateUrl('user_password', array('id' => $entity->getId())),
+            'method' => 'PUT',
+        ));
+
+        $form->add('submit', 'submit', array('label' => 'Cambiar'));
+        return $form;
+    }
+   /**
+     * Change the password an existing User entity.
+     *
+     * @Route("/{id}/password", name="user_password")
+     * @Method("PUT")
+     * @Template("NvCargaBundle:User:editpass.html.twig")
+     */
+    public function passwordAction(Request $request, $id)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $maincompany = $this->getUser()->getMaincompany();
+        $entity = $em->getRepository('NvCargaBundle:User')->findOneBy(['maincompany'=>$maincompany,'id'=>$id]);
+        
+        if (!$entity) {
+            throw $this->createNotFoundException('No existe el usuario');
+        }
+        $user = $this->getUser(); 
+        if (($user->getAgency()->getType() != "MASTER" ) && ($user != $entity)) {
+            throw $this->createAccessDeniedException('');
+        }
+        $this->denyAccessUnlessGranted('password', $entity, 'Unauthorized access!');
+        //obtiene la contraseña actual -----------------------
+        $current_pass = $entity->getPassword();
+        $newpass = new Mypass();
+        $newpass->setPassword($entity->getPassword());
+        $newpass->setId($entity->getId());
+
+        $editForm = $this->createPasswordForm($newpass);
+        $editForm->handleRequest($request);
+	
+    // 	$logger = $this->get('logger');
+    //	$logger->info('MENSAJES dentro de cambiar password: ....');
+    //	$mensaje1 = "Password Nuevo: " .  $newpass->getPassword();
+    //	$mensaje2 = "Password viejo: " .  $current_pass;
+    //      $logger->info('MENSAJES: ....');
+    //	$logger->info($mensaje1);
+    //	$logger->info($mensaje2);
+        
+        if ($editForm->isValid()) {
+            $entity->setPassword($newpass->getPassword());
+            $this->setSecurePassword($entity);
+            $em->flush();
+
+            return $this->redirect($this->generateUrl('system'));
+        } 
+
+        return array(
+            'theuser' => $entity,
+            'entity'      => $entity,
+            'edit_form'   => $editForm->createView(),
+        );
+    }
+    /**
+     * show a user by username or email
+     * @Route("/username",  name="user_username")
+     */
+    public function usernameAction(Request $request)
+    {
+        if (! $request->isXmlHttpRequest()) {
+            throw new NotFoundHttpException();
+        }
+        $name = $request->query->get('name');
+        $maincompany = $this->getUser()->getMaincompany();
+        $em = $this->getDoctrine()->getManager();
+        $user = $em->getRepository('NvCargaBundle:User')->createQueryBuilder('u')
+            ->where('u.username = :name OR u.email = :name')
+            ->andWhere('u.maincompany = :thecompany')
+            ->setParameters(['name'=>$name,'thecompany'=>$maincompany])
+            ->getQuery()
+            ->getOneOrNullResult();
+
+        $result = array();
+        if ($user) {
+            $result[0]=$user->getId();
+            $result[1]=$user->getUsername();
+        } else {
+            $result[0] = 0;
+            $result[1]='';
+        }
+        return new JsonResponse($result); 
+    }
+    /**
+     * Displays a form to change password.
+     *
+     * @Route("/{id}/reactive", name="user_reactive")
+     * @Method("GET")
+     * @Template()
+     * @Security("has_role('ROLE_ADMIN_USER') or has_role('ROLE_ADMIN')")
+     */
+    public function reactiveAction($id)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $maincompany = $this->getUser()->getMaincompany();
+        $entity = $em->getRepository('NvCargaBundle:User')->findOneBy(['maincompany'=>$maincompany,'id'=>$id]);
+
+        if (!$entity) {
+            throw $this->createNotFoundException('No existe el usuario');
+        }
+        $statuspobox = $em->getRepository('NvCargaBundle:Poboxstatus')->findOneByName('ACTIVO');
+        $statususer = $em->getRepository('NvCargaBundle:Userstatus')->findOneByName('ACTIVO');
+        $pobox = $entity->getPobox();
+        
+        if ($pobox) {
+            $pobox->setStatus($statuspobox);
+            $customer = $pobox->getCustomer();
+            $customer->setActive(true);
+        }
+        $entity->setStatus($statususer);
+        
+        $em->flush();
+
+        return $this->redirect($this->generateUrl('useroff'));
+    }
+    /**
+     * Displays a form to change password.
+     *
+     * @Route("/{id}/inactive", name="user_inactive")
+     * @Method("GET")
+     * @Template()
+     * @Security("has_role('ROLE_ADMIN_USER') or has_role('ROLE_ADMIN')")
+     */
+    public function inactiveAction($id)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $maincompany = $this->getUser()->getMaincompany();
+        $entity = $em->getRepository('NvCargaBundle:User')->findOneBy(['maincompany'=>$maincompany,'id'=>$id]);
+
+        if (!$entity) {
+            throw $this->createNotFoundException('No existe el usuario');
+        }
+        $statuspobox = $em->getRepository('NvCargaBundle:Poboxstatus')->findOneByName('SUSPENDIDO');
+        $statususer = $em->getRepository('NvCargaBundle:Userstatus')->findOneByName('SUSPENDIDO');
+        $pobox = $entity->getPobox();
+        
+        if ($pobox) {
+            $pobox->setStatus($statuspobox);
+            $customer = $pobox->getCustomer();
+            $customer->setActive(false);
+        }
+        $entity->setStatus($statususer);
+        
+        $em->flush();
+
+        return $this->redirect($this->generateUrl('user'));
+    }
+}

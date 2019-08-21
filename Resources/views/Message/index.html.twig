@@ -1,0 +1,115 @@
+{% extends app.user.pobox is null
+    ? '::newbase.html.twig' 
+    : '::newbase-public.html.twig' %}
+
+{% block body -%}
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Mensajes de {{ app.user.username }} </h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('message') }}">Mensajes</a></li>
+            <li class="active">Lista</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        <div class="col-md-12">
+            <div class="block-flat">
+                <div class="header">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h3>Buzón</h3>
+                        </div>
+                        <div class="col-md-4">
+                            <button type="button" class="btn btn-sm btn-success" onclick="location.href='{{ path('message_new')}}';">
+                        Nuevo </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="content">
+                    <table id="messageTable" class="responsive display" cellspacing="0" width="100%" >
+                    <thead>
+                    <tr>
+                        <th>Remitente</th>
+                        <th>Fecha</th>	
+                        <th>Asunto</th>
+                        <th>Leído</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for entity in entities %}
+                        <tr  onclick="location.href='{{ path('message_show', { 'id': entity.id }) }}';">
+                            <td>{{ entity.sender }}</td>
+                            <td>{% if entity.creationdate %}{{ entity.creationdate|date('Y-m-d H:i:s') }}{% endif %}</td>
+                            <td>{{ entity.subject }}</td>
+                            <td style="text-align:center;">{% if entity.isread %}
+                                    <input type="checkbox" class="icheck" checked="checked" disabled readonly >
+                                {% else %}
+                                    <input type="checkbox" class="icheck" disabled readonly >
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+<div>
+
+{% endblock %}
+{% block javascripts %}
+
+<script type="text/javascript">
+    $("#messageTable tbody tr").mouseover(function() { $(this).addClass("hovermessage"); });
+    $("#messageTable tbody tr").mouseout(function() { $(this).removeClass("hovermessage"); });
+    $(document).ready(function () {
+        $thisMessageTable=$('#messageTable').DataTable({
+            "ordering": true,
+            "searching": true,
+            "info":     true,
+            "lengthChange": true,
+            "scrollX": true,
+            "pageLength": 10,
+            "lengthMenu": [[10, 15, 20, 25, -1], [10, 15, 20, 25, "Todas"]],
+            "columns": [ null,  { "searchable": false },  null, { "searchable": false } ],
+            
+            "language": {
+                "sSearch": "Buscar",
+                "lengthMenu": "Mostrando  _MENU_  mensajes por página",
+                "zeroRecords": "<div style=\"color:red;\">Lo siento no se encontraron mensajes</div>",
+                "sInfo": "Mostrando _START_ a _END_ de _TOTAL_ mensajes",
+                "infoEmpty": "No hay registros disponibles",
+                "infoFiltered": "(Filtradas de un total de _MAX_ )",
+                "searchPlaceholder": "Remitente/Asunto",
+                "paginate" : {
+                    first:    '«',
+                    previous: '‹',
+                    next:     '›',
+                    last:     '»'
+                }
+            },
+            "columnDefs": [ { "type": 'date', "targets": 1 },],
+            "order": [[ 1, "desc" ]],
+            "pagingType": "full_numbers",
+            "fnDrawCallback": function(oSettings) {
+                if (oSettings._iDisplayLength >= oSettings.fnRecordsDisplay()) {
+                    $(oSettings.nTableWrapper).find('.dataTables_paginate').hide();
+                } else {
+                    $(oSettings.nTableWrapper).find('.dataTables_paginate').show();
+                }
+            },
+            // "dom": '<"top"i>rt<"bottom"flp><"clear">'
+        });
+        
+});
+</script>
+{% endblock %}
+

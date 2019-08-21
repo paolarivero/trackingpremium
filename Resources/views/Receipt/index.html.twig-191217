@@ -1,0 +1,122 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>Lista de {% trans %}Recibos{% endtrans %}</title>
+{% endblock %}
+
+{% block body -%}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Lista de {% trans %}Recibos{% endtrans %}</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('receipt') }}">{% trans %}Recibos{% endtrans %}</a></li>
+            <li class="active"> Todos los {% trans %}Recibos{% endtrans %}</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        <div class="block-flat">
+            {# 
+            <div class="header">
+                <h3>Lista de {% trans %}Recibos{% endtrans %}</h3>
+            </div>
+            #}
+            <div class="content">
+                <div class="table-responsive">
+                    <table id="receiptTable" class="table table-bordered" >
+                        <thead>
+                            <tr>
+                                <th>Número</th>
+                                <th>Agencia</th>
+                                <th>Fecha</th>
+                                <th>Remitente</th>
+                                <th>Destinatario</th>
+                                <th>Carrier</th>
+                                <th>Rec. por</th>
+                                <th>Peso</th>
+                                <th>Valor</th>
+                                <th>Guía/Consol</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for entity in entities %}
+                            {% if entity.type != "Master" %}
+                                <tr>
+                                    <td><a  class="btn btn-success" href="{{ path('receipt_show', { 'id': entity.id }) }}">{{ entity.number }}</a></td>
+                                    <td>{{ entity.agency }}</td>
+                                    <td>{% if entity.arrivedate %}{{ entity.arrivedate|date('m/d/Y') }}{% endif %}</td>
+                                    <td>{{ entity.shipper }}</td>
+                                    <td>{{ entity.receiver.name }} {{ entity.receiver.lastname }}</td>
+                                    <td>{{ entity.carrier }}</td>
+                                    <td>{{ entity.receiptdby }}</td>
+                                    <td>{{ entity.weight }}</td>
+                                    <td>{{ entity.value }}</td>
+                                    <td>
+                                        {% if entity.guide %}
+                                            <a  class="btn btn-info btn-mini" href="{{ path('guide_show', { 'id': entity.guide.id }) }}">{{ entity.guide.number }}</a>
+                                            {# <a  class="btn btn-success" href="{{ url('guide_poboxfind') }}?guidenumber={{ entity.guide.number }}">{{ entity.guide }}</a> #}
+                                            {% if entity.guide.consol %}
+                                                <a  class="btn btn-info btn-mini" href="{{ path('consolidated_show', { 'id': entity.guide.consol.id }) }}">{{ entity.guide.consol.number }}</a>
+                                            {% endif %}
+                                        {% else %}
+                                            No procesado
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+{% block javascripts %}  
+
+<script type="text/javascript">
+    $(document).ready(function () {
+	$thisRecTable=$('#receiptTable').DataTable({
+		"ordering": true,
+		"searching": true,
+		"info":     true,
+		"lengthChange": true,
+		"scrollX": true,
+		"pageLength": 10,
+		"lengthMenu": [[10, 15, 20, 25, 30, -1], [10, 15, 20, 25, 30, "Todos"]],
+		"columns": [ null, { "searchable": false }, { "searchable": false }, null,  null, { "searchable": false }, { "searchable": false }, { "searchable": false }, { "searchable": false }, { "searchable": false }],
+		"language": {
+			"sSearch": "Buscar",
+			"lengthMenu": 'Mostrando  _MENU_  "{% trans %}Recibos{% endtrans %}" por página',
+            		"zeroRecords": "<div style=\"color:red;\">Lo siento no se encontraron {% trans %}Recibos{% endtrans %}</div>",
+			"sInfo": "Mostrando _START_ a _END_ de _TOTAL_ {% trans %}Recibos{% endtrans %}",
+            		"infoEmpty": "No hay registros disponibles",
+            		"infoFiltered": "(Filtradas de un total de _MAX_ )",
+			"searchPlaceholder": "Número/Remitente/Destinatario",
+			"paginate" : {
+               				first:    '«',
+            				previous: '‹',
+            				next:     '›',
+            				last:     '»'
+       			}
+        	},
+		"pagingType": "full_numbers",
+		"fnDrawCallback": function(oSettings) {
+        		if (oSettings._iDisplayLength >= oSettings.fnRecordsDisplay()) {
+            			$(oSettings.nTableWrapper).find('.dataTables_paginate').hide();
+        		} else {
+				$(oSettings.nTableWrapper).find('.dataTables_paginate').show();
+			}
+    		},
+	});
+    });
+</script>
+{% endblock %}

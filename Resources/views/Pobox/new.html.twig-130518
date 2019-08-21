@@ -1,0 +1,330 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>Crear Casillero</title>
+{% endblock %}
+
+{# Display the form #}
+
+{% form_theme form 'form/fields.html.twig' %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Crear Casillero</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('pobox') }}">Casilleros</a></li>
+            <li class="active">Crear</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger alert-white rounded">
+                    <button type="button" data-dismiss="alert" aria-hidden="true" class="close">×</button>
+                    <div class="icon">
+                        <i class="fa fa-warning"></i>
+                    </div>
+                    <strong>Alerta! </strong> {{ flashMessage|raw }} 
+                    </strong>
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+
+        {{ form_start(form, {attr: {novalidate: 'novalidate', 'id': 'pobox_type' }}) }}
+        <div class="block-flat">
+                    <div class="header">
+                        <h3>Agencia</h3>
+                    </div>
+                    <div class="content">
+                        {{ form_widget(form.agencypobox) }}
+                    </div>
+        </div>
+        <div class="block-flat">
+            <div class="header">
+                <h3>Datos del cliente</h3>
+            </div>
+            <div class="content">
+                {{ form_widget(form.type) }}
+
+                <button style="margin-top: 13px;" type="button" class="btn btn-primary bcustomer" data-toggle="modal" data-target="#customersearch" data-thecustomer="1" >Buscar</button></th>
+                <button id="clearcus" type="button" style="margin-top: 13px;"  class="btn btn-default" onclick="ClearCus();">Limpiar</button>
+
+                {{ form_row(form.name_customer) }}
+                {{ form_row(form.lastname_customer) }}
+                {{ form_row(form.docid_customer) }}
+                {{ form_row(form.address_customer) }}
+                {{ form_row(form.zip_customer) }}
+                {{ form_row(form.mobile_customer) }}
+                {{ form_row(form.phone_customer) }}
+                {{ form_row(form.email_customer) }}
+                {{ form_row(form.password) }}
+                <div class="form-group">
+                    <div class="row">
+                            <div class="col-md-2">
+                                <label>Ciudad</label>
+                            </div>
+                            <div class="col-md-10">
+                                <input type="hidden" id="citycustomer" style="width:100%;" />
+                            </div>
+                    </div>
+                </div>
+                {{ form_row(form.cityname_customer) }}
+                <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        <td>
+
+                        </td>
+                        <td style="text-align:right;">
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-flat" >Cancelar</button>
+                            {{ form_widget(form.submit, { 'attr': {'class': 'btn btn-primary btn-flat'} }) }}
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>{# FIN CONTENT #}
+        </div> {# FIN BLOCK FLAT #}
+        {{ form_end(form) }}
+        
+        <!-- Modal --> {# BUSCAR CLIENTE #}
+        <div class="modal fade colored-header md-effect-9" id="customersearch" role="dialog">
+            <div class="modal-dialog modal-md">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button id="closemodalcus1" type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h2 class="modal-title">Buscar Cliente</h2>
+                    </div>
+
+                    <div class="modal-body form">
+
+                        Buscar: <br><input style="display:inline; width:100%" type="text" placeholder="Nombre/Apellido/Email" id="findcustomer" onkeyup="SearchCustomer(event)" autocomplete="off"  />
+
+                        <center>
+                        <div id="mensajeCus">
+                            <h3 style="color:red;">NO SE ENCONTRARON CLIENTES</h3>
+                        </div>
+                        </center>
+                        <div id="divTable">
+                        <table id="customerTable" class="row-border hover order-column" cellspacing="0" width="100%">
+                            <thead class="no-border-y">
+
+                            <tr>
+                                <th><b>Nombre</b></th>
+                                <th><b>Apellido</b></th>
+                                <th><b>Casillero</b></th>
+                                <th><b>Ciudad</b></th>
+                            </tr>
+
+                            </thead>
+                            <tbody class="no-border-y">
+                            </tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="closemodalcus1" data-dismiss="modal" class="btn btn-default btn-flat md-close">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div> {# FIN MODAL DE BUSCAR CLIENTES #}
+    </div>
+</div>
+{% endblock %}
+{% block javascripts %}
+<script type="text/javascript">
+    function ClearCus() {
+        $('#pobox_type_id_customer').val(0);
+        $('#pobox_type_name_customer').val('');
+        $('#pobox_type_lastname_customer').val('');
+        $('#pobox_type_address_customer').val('');
+        $('#pobox_type_cityid_customer').val(0);
+        $('#pobox_type_cityname_customer').val('');
+        $('#citycustomer').select2('data', null);
+        $('#pobox_type_phone_customer').val('');
+        $('#pobox_type_mobile_customer').val('');
+        $('#pobox_type_barrio_customer').val('');
+        $('#pobox_type_email_customer_first').val('');
+        $('#pobox_type_email_customer_second').val('');
+        $('#pobox_type_zip_customer').val('');
+        $('#pobox_type_type_1').iCheck('check');
+        $('#pobox_type_type').change();
+        return true;
+    }
+    function returnSelectCustomer(vidcus, vname, vlastname, vtype, vaddress, vcityid, vcity, vstate, vcountry, vphone, vmobile, vbarrio, vemail, vzip){
+        var thecity = vcity + ' (' + vstate + ', ' + vcountry + ')';
+        
+        $('#pobox_type_id_customer').val(vidcus);
+        $('#pobox_type_name_customer').val(vname);
+        $('#pobox_type_lastname_customer').val(vlastname);
+        if (vtype == 'Persona') {
+            $('#pobox_type_type_1').iCheck('check');
+        } else {
+            $('#pobox_type_type_2').iCheck('check');
+        }
+        $('#pobox_type_type').change();
+        $('#pobox_type_address_customer').val(vaddress);
+        $('#pobox_type_cityid_customer').val(vcityid);
+        $('#citycustomer').select2('data', {id: vcityid, text: thecity});
+        $('#pobox_type_cityname_customer').val(thecity);
+        $('#pobox_type_phone_customer').val(vphone);
+        $('#pobox_type_mobile_customer').val(vmobile);
+        $('#pobox_type_barrio_customer').val(vbarrio);
+        $('#pobox_type_email_customer_first').val(vemail);
+        $('#pobox_type_email_customer_second').val(vemail);
+        $('#pobox_type_zip_customer').val(vzip);
+         
+        $("#closemodalcus1").click();
+        return true;
+    }
+    function SearchCustomer(e) {
+        e.preventDefault();
+        var type = 1;
+        var txt = $.trim( $('#findcustomer').val() );
+        $('#divTable').show();
+        $('#mensajeCus').hide();
+        var path = "{{ url('listcuspobox') }}?pattern=" + txt;
+        if (txt.length > 0) {
+            $.ajax({
+                type: "GET",
+                url:  path,
+                success: function (data) {
+                    if (data.length > 0) {
+
+                    var tableRef = document.getElementById('customerTable').getElementsByTagName('tbody')[0];
+                    var nf = tableRef.rows.length;
+                    for (i=0; i < nf; i++) {
+                        tableRef.deleteRow(0);
+                    }
+                    var nc = data.length;
+                    for (i = 0; i < nc; i++) {
+                        var customerid = data[i]['customerid'];
+                        var namecus = data[i]['name'];
+                        var lastnamecus = data[i]['lastname'];
+                        var pobox = data[i]['pobox'];
+                        var address = data[i]['address'];
+                        var cityid = data[i]['cityid'];
+                        var cityname = data[i]['cityname'];
+                        var allcityname = data[i]['cityname'] + ', ' +  data[i]['state'] + ' (' +  data[i]['country'] + ')';
+
+                        var state = data[i]['state'];
+                        var country = data[i]['country'];
+                        var phone = data[i]['phone'];
+                        var mobile = data[i]['mobile'];
+                        var barrio = data[i]['barrio'];
+                        var email = data[i]['email'];
+                        var zip = data[i]['zip'];
+                        var type = data[i]['type'];
+                        // Insert a row in the table at the last row
+                        var newRow   = tableRef.insertRow(tableRef.rows.length);
+                        newRow.onclick = (function(){
+                            var vidcus = customerid; var vname = namecus; var vlastname = lastnamecus;
+                            var vtype = type; var vaddress = address;  var vcityid = cityid; var vcity= cityname; var vstate = state;
+                            var vcountry = country; var vphone = phone; var vmobile = mobile; var vbarrio = barrio;
+                            var vemail = email; var vzip = zip; 	return function()
+                            {returnSelectCustomer(vidcus, vname, vlastname, vtype, vaddress, vcityid, vcity, vstate,
+                                vcountry, vphone, vmobile, vbarrio, vemail, vzip)}})();
+                        newRow.class="highlight";
+
+                        // Insert a cell in the row at index 0
+                        var newCell0  = newRow.insertCell(0);
+                        var newCell1  = newRow.insertCell(1);
+                        var newCell2  = newRow.insertCell(2);
+                        var newCell3  = newRow.insertCell(3);
+
+                        var newText0 = document.createTextNode(namecus);
+                        newCell0.appendChild(newText0);
+
+                        var newText1 = document.createTextNode(lastnamecus);
+                        newCell1.appendChild(newText1);
+
+                        var newText2 = document.createTextNode(pobox);
+                        newCell2.appendChild(newText2);
+
+                        var newText3 = document.createTextNode(allcityname);
+                        newCell3.appendChild(newText3);
+                    }
+                    $("#customerTable tbody tr").mouseover(function() { $(this).addClass("myhover"); });
+                    $("#customerTable tbody tr").mouseout(function() { $(this).removeClass("myhover"); });
+                }  else {
+                    $('#divTable').hide();
+                    $('#mensajeCus').show();
+                }
+                },
+                error: function (data) {
+                    console.log(data);
+                }
+            });
+        } else {
+            $('#divTable').hide();
+            $('#mensajeCus').hide();
+        }
+        return true;
+    }
+    $(document).ready(function () {
+        $('.bcustomer').click(function(e) {
+            e.preventDefault();
+            $('#findcustomer').val('');
+            $('#divTable').hide();
+            $('#mensajeCus').hide();
+            return true;
+        });
+        
+        $("#citycustomer").select2({
+            placeholder: "Buscar Ciudad",
+            ajax: {
+                url: "{{ path('city_find') }}",
+                dataType: 'json',
+                delay: 250,
+                data: function (term) {
+                    return {
+                        q: term, //search term
+                    };
+                },
+                results: function (data) {
+                    return {
+                        results: data,
+                    };
+                },
+                cache: true
+                },
+             minimumInputLength: 2,
+             formatInputTooShort: function (input, min) { var n = min - input.length; return "Por favor ingrese  " + n + " carcater" + (n == 1? "" : "es") + " mas"; },
+             formatNoMatches: function () { return "No se encuentran resultados"; },
+
+        });
+
+        $('#citycustomer').on("change", function(e) {
+            var cityid = $('#citycustomer').val();
+            $('#pobox_type_cityid_customer').val(cityid);
+            var cityname = $('#citycustomer').select2('data').text;
+            $('#pobox_type_cityname_customer').val(cityname);
+        });
+        var citySID = $("#pobox_type_cityid_customer").val();
+        var citySname = $("#pobox_type_cityname_customer").val();
+        if (citySID && citySname) {
+            // console.log('Hola:  ' +  citySID + ' ' + citySname);
+            $('#citycustomer').select2('data', {id: citySID, text: citySname});
+        }
+        $('#pobox_type_type_1').iCheck('check');
+        $('#pobox_type_type_2').on('ifChecked', function(event){
+            $('#pobox_type_lastname_customer').val('');
+            $('#pobox_type_lastname_customer').prop('readonly', true);
+        });
+        $('#pobox_type_type_1').on('ifChecked', function(event){
+            $('#pobox_type_lastname_customer').prop('readonly', false);
+        });
+        $('#pobox_type_email_customer_first, #pobox_type_email_customer_second').change(function() {
+            $('#guide_type_id_customer').val(0);
+        });
+        $('#pobox_type_submit').click(function(evt) {
+            var cityid = $('#citycustomer').val();
+            if (!cityid) {
+                funalert('Debe seleccionar una ciudad..');
+                return false;
+            }
+        });
+    });
+</script>
+{% endblock %}

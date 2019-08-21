@@ -1,0 +1,26 @@
+
+{% block body -%}
+<div class="widget">
+    <div class="widget-header"> 
+              <h3> <b>Nuevo Estado/Provincia</b></h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content"> 
+	{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }} 
+	<table class="table table-striped table-bordered">
+	<tbody>
+	<tr>
+	<td>{{ form_row(form.name) }}</td>
+	<td>{{ form_row(form.country) }}</td>
+	</tr>
+	</tbody>
+	<tfoot>
+	<tr>
+	<td colspan=2>{{ form_row(form.save) }}</td>
+	</tr>
+	</tfoot>
+	</table>
+	{{ form_end(form) }}
+	</div>
+</div>
+{% endblock %}

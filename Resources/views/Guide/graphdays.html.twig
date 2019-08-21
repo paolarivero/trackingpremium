@@ -1,0 +1,100 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+
+</style>
+<div class="widget">
+    <div class="widget-header"> <i class="icon-bar-chart"></i>
+              <h3> <b>{% trans %}Guías{% endtrans %} por período</b></h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+	{{ form_start(form) }}
+
+    <div class="bodycontainer scrollable">
+
+    <table class="table table-scrollable">
+	<tbody>
+	<tr>
+	<td><h3>Seleccionar Período</h3></td>
+	<td>{{ form_row(form.month) }}</td>
+	<td>{{ form_row(form.year) }}</td>
+	<td>{{ form_row(form.filter) }}</td>
+	</tr>
+	</tbody>
+    </table>
+    </div>
+
+    {{ form_end(form) }}
+
+
+    <div class="table-responsive">
+    {# style="display:none"> #}
+
+    <table id="guideTable" class="table table-striped table-bordered" data-graph-container-before="1" data-graph-type="column" data-graph-datalabels-enabled="1" style="display:none">
+     <thead>
+	<tr style="background-color:#eeeeee;">
+		<th><h4>Día</h4></th>
+		{% for key in entities|keys %}
+			<th><h4>{{ key }}</h4></th>
+		{% endfor %}
+	</tr>
+     </thead>
+     <tbody>
+	{% for key  in 1..31 %}
+			<tr>
+			<td>{{ key }}</td>
+			{% for entity in entities %}
+				{% set val = '' %}
+				{% for day in entity %}
+					{% if day['day'] == key %}
+						{% set val =  day['numg'] %}
+					{% endif %}
+				{% endfor %}
+				<td>{{ val }}</td>
+			{% endfor %}
+			</tr>
+	{% endfor %}
+     </tbody>
+
+    </table>
+
+    </div>
+
+
+
+   </div>
+   </div>
+{% block javascript %}
+
+<script type="text/javascript" src="{{ asset('assets/js/jquery.dataTables.min.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/highcharts.js') }}"></script>
+<script type="text/javascript" src="{{ asset('assets/js/jquery.highchartTable-min.js') }}"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+	$('#guideTable').highchartTable();
+	$('#guide_filter_filter').click(function(){
+		var month = $('#guide_filter_month').val();
+		var year = $('#guide_filter_year').val();
+		var d = new Date();
+		var n = d.getFullYear();
+		var year = n - (5 - year); //SOLO 5 AÑOS HACIA ATRAS....
+		// console.log('MES= ' + month +' AÑO= ' + year);
+		if ((month) && (year)) {
+			var path  = "{{ url('guide_graphics2') }}?&month=" + month + "&year=" + year;
+			//var path  = "{{ url('guide_graphics2') }}?&dateini=" + dateini + "&dateend=" + dateend;
+  			// console.log(path);
+			// alert('A FILTRAR...');
+			window.location.href = path;
+		} else {
+			alert('Debe escoger la fecha');
+				return false;
+		}
+		return false;
+	});
+    });
+</script>
+{% endblock %}
+
+{% endblock %}

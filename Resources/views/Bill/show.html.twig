@@ -1,0 +1,265 @@
+{% extends app.user.pobox is null
+    ? '::newbase.html.twig' 
+    : '::newbase-public.html.twig' %}
+
+{% block title %}
+    <title>Mostrar Factura</title>
+{% endblock %}
+
+{% block body -%}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Información  de Factura</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('bill_index') }}">Facturas</a></li>
+            <li class="active"> Mostrar Factura</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        <div class="block-flat">
+            <div class="header">
+                <div class="row">
+                    <div class="col-sm-4 col-md-4">
+                        <h3>Factura {{ entity.number }} </h3>
+                    </div>
+                    <div class="col-sm-8 col-md-8">
+                        {% if is_granted('ROLE_ADMIN_BILL') or  is_granted('ROLE_ADMIN') or app.user.pobox is not null %}
+                            <div class="btn-group" style="margin-bottom: 5px;margin-top: 4px;">
+                                {% if entity.status != "ANULADA" %}
+                                    <button type="button" class="btn btn-default">Opciones</button>
+                                    <button type="button" data-toggle="dropdown" class="btn btn-default dropdown-toggle">
+                                    <span class="caret"></span><span class="sr-only">Opciones</span></button>
+                                    <ul role="menu" class="dropdown-menu">
+                                        {% if is_granted('ROLE_ADMIN_BILL') or  is_granted('ROLE_ADMIN') %}
+                                            <li><a href="{{ path('bill_edit', {'id': entity.id }) }}">Editar</a></li>
+                                            <li><a class="bcancel" data-toggle="modal" data-target="#cancelbill" href="#">Anular</a></li>
+                                        {% endif %}
+                                        {% if entity.total > entity.balance  and  entity.status == 'PENDIENTE' %}
+                                            <li><a href="{{ path('billpay_new', {'id': entity.id }) }}">Agregar pago</a></li>
+                                        {% endif %}
+                                    </ul>
+                                {% endif %}
+                            </div>
+                        {% endif %}
+                        <button type="button" title="Imprimir" class="btn btn-default" onclick="location.href='{{ path('bill_print', { 'id': entity.id }) }}';"><i class="fa fa-print"></i></button>
+                        <button type="button" title="Generar PDF" class="btn btn-default" onclick="location.href='{{ path('bill_printpdf', { 'id': entity.id }) }}';"><i class="fa fa-file-text"></i></button>
+                        {% if app.user.pobox is null %}
+                            <button type="button" title="Enviar email" class="btn btn-default" onclick="location.href='{{ path('bill_email', {'id': entity.id }) }}';"><i class="fa fa-envelope"></i></button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="content">
+                <div class="row">
+                    <div class="col-md-4 col-sm-4">
+                        <b>
+                        <i class="fa fa-user"></i> Cliente: {{ entity.customer }}<BR>
+                        <i class="fa fa-calendar-check-o"></i> Fecha: {{ entity.creationdate|date('m/d/Y') }}<BR>
+                        {# <i class="fa fa-money"></i> Tipo de pago: {{ entity.paidtype }}<BR> #}
+                        </b>
+                    </div>
+                    <div class="col-md-4 col-sm-4">
+                        <b>
+                        <i class="fa fa-plus-square-o"></i> Nro de {% trans %}Guías{% endtrans %}: {{ entity.guides|length }}<br>
+                        <i class="fa fa-bar-chart"></i> Monto: {{ entity.total }}<br>
+                        <i class="fa fa-thermometer-half"></i> Status: {{ entity.status }}<br>
+                        </b>
+                    </div>
+                    <div class="col-md-4 col-sm-4">
+                        <b>
+                        <i class="fa fa-check"></i> Número de pagos: {{ entity.payments|length }}<br>
+                        <i class="fa fa-money"></i> Monto pagado: {{ entity.balance }}$<br>
+                        <i class="fa fa-dollar"></i> Monto por pagar: {{ entity.total - entity.balance }}$<br>
+                        </b>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+        <div class="block-flat">
+            <div class="header">
+                <h3>Listado de {% trans %}Guías{% endtrans %} incluidas en la Factura</h3>
+            </div>
+            <div class="content">
+                <table id="guideTable" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
+                <thead>
+                    <tr>
+                        <th>Número</th>
+                        <th>Peso</th>
+                        <th>Volumen</th>
+                        <th>Piezas</th>
+                        <th>Valor</th>
+                        <th>Monto</th>
+                    </tr>	
+                </thead>
+                    {% for guide in entity.guides %}
+                        <tr>
+                            {% if app.user.pobox is null %}
+                                <td><a  class="btn btn-success btn-xs btn-flat" href="{{ path('guide_show', { 'id': guide.id }) }}">{{ guide.number }}</a></td>
+                            {% else %}
+                                <td>{{ guide.number }}</td>
+                            {% endif %}
+                            <td>{{ guide.realweight }}</td>
+                            {% set pri = true %}
+                            <td>
+                                {% set volcad = '' %}
+                                {% if guide.masterec %}
+                                    {% set listrec = [guide.masterec] %}
+                                {% else %}
+                                    {% set listrec = guide.receipts %}
+                                {% endif %}
+                                {% for receipt in listrec %}
+                                    {% set vol = (receipt.length*receipt.width*receipt.height/guide.agency.maincompany.convertvol)|number_format(2, '.', ',') %}
+                                    {% if pri %}
+                                        {% set volcad = volcad ~ vol ~ 'dimension'|trans %}
+                                        {% set pri = false %}
+                                    {% else %}
+                                        {% set volcad =  volcad ~ ',  ' ~ vol ~ 'dimension'|trans %}
+                                    {% endif %} 
+                                {% endfor %}
+                                {{ volcad }}
+                            </td>
+                            <td>{{ guide.pieces }}</td>
+                            <td>{{ guide.declared }}</td>
+                            <td>{{ guide.totalpaid }}</td>
+                        </tr>
+                    {% endfor %}
+                <tbody>
+                </tbody>
+                </table>
+            </div>
+        </div>
+        {% if entity.payments|length > 0 %}
+            <div class="block-flat">
+            <div class="header">
+                <h3>Listado de Pagos</h3>
+            </div>
+            <div class="content">
+                <table id="paymentTable" class="table table-striped table-bordered dt-responsive" cellspacing="0" width="100%">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Fecha</th>
+                        <th>Tipo</th>
+                        <th>Monto</th>
+                        <th>Currency</th>
+                        <th>Taza</th>
+                        <th>Cuenta</th>
+                        <th>Verificado</th>
+                        <th>Devuelto</th>
+                    </tr>	
+                </thead>
+                    {% for payment in entity.payments %}
+                            <tr>
+                                <td><buttom class="btn btn-warning btn-xs" title="PDF" onclick="location.href='{{ path('billpay_pdf', { 'id': payment.id }) }}';"><i class="fa fa-print"></i></buttom></td>
+                                <td>{{ payment.paydate|date('m/d/Y H:i:s') }}</td>
+                                <td>{{ payment.paidtype }}</td>
+                                <td>{{ payment.amount }}</td>
+                                <td>{{ payment.currency }}</td>
+                                <td>{{ payment.conversion }}</td>
+                                {% if payment.account is not null %}
+                                    <td>{{ payment.account }}</td>
+                                {% else %}
+                                    <td>N/A</td>
+                                {% endif %}
+                                <td style="text-align:center;">
+                                    {% if payment.verified %}
+                                        <input type="checkbox" checked="checked" class="icheck" disabled readonly >
+                                    {% else %}
+                                        <input type="checkbox" disabled class="icheck" readonly >
+                                    {% endif %}
+                                </td>
+                                <td style="text-align:center;">
+                                    {% if payment.refund %}
+                                        <input type="checkbox" checked="checked" class="icheck" disabled readonly >
+                                    {% else %}
+                                        <input type="checkbox" disabled class="icheck" readonly >
+                                    {% endif %}
+                                </td>
+                            </tr>
+                    {% endfor %}
+                <tbody>
+                </tbody>
+                </table>
+                <table id="foottable" class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        <td><h4>Total de la factura: {{ entity.total }}</h4></td>
+                        <td><h4>Pagado a la factura: {{ entity.balance }}</h4></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+        <!-- Modal -->
+            <div id="cancelbill" tabindex="-1" role="dialog" class="modal fade">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <button id="closecancelbill type="button" data-dismiss="modal" aria-hidden="true" class="close">×</button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="text-center">
+                                <div class="i-circle danger"><i class="fa fa-times"></i></div>
+                                    <p style="font-size:16px;">Confirme la anulación de la Factura {{ entity.number }}</p>
+                                </div>
+                                <center>
+                                <button type="button" class="btn btn-info btn-flat gotocancel">Confirmar</button>
+                                </center>
+                            </div>
+                            
+                            <div class="modal-footer">
+                                <div class="text-center">
+                                    <button type="button" data-dismiss="modal" class="btn btn-default">Cerrar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div><!-- /.modal-content-->
+                </div><!-- /.modal-dialog-->
+            </div><!-- /.modal-->
+    </div>
+</div>
+
+{% endblock %}
+{% block javascripts %}
+<script type="text/javascript">
+    $(document).ready(function(){
+        $('.gotocancel').click(function(e) {
+            e.preventDefault();
+            $('#closecancelguide').click();
+            var url="{{ path('bill_cancel', {'id': entity.id }) }}";
+            window.location.href = url;
+            return false;
+        });
+        var $guideTable = $('#guideTable').DataTable({
+            paginate: false,
+            info: false,
+            searching: false,
+            ordering: false,
+        });
+        {% if entity.payments|length > 0 %}
+            var $paymentTable = $('#paymentTable').DataTable({
+                paginate: false,
+                info: false,
+                searching: false,
+                ordering: false,
+                "columnDefs": [
+                    { "type": 'date', "targets": 1 },
+                ],
+                "order": [[ 1, "desc" ]],
+            });
+        {% endif %}
+        {% if enviado is defined %}
+            funaviso('La factura ha sido enviada por EMAIL al cliente');
+        {% endif %}
+    });
+</script>
+{% endblock %}

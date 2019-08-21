@@ -1,0 +1,66 @@
+{% extends '::layout-pdf.html.twig' %}
+
+{% block body %}
+<div class="container">
+<div class="row">
+    <div class="span3">
+        DESTINATARIO<br>
+	{{ entity.receiver.name }} {{ entity.receiver.lastname }}<br>
+	{{ entity.receiver.address }}<br>
+	{{ entity.receiver.city }} {{ entity.receiver.city.state }} {{ entity.receiver.city.state.country }}<br>
+	<br>
+	
+	REMITENTE<br>
+	{{ entity.shipper }}<br>
+	{{ entity.shipper.adrdefault.address }}<br>
+	{{ entity.shipper.adrdefault.city }} {{ entity.shipper.adrdefault.city.state }} {{ entity.shipper.adrdefault.city.state.country }}<br>
+    </div>
+    <div class="span3">
+        <td>{% if entity.maincompany.logo %}
+        {% set name = companies_logos ~ entity.maincompany.logo %}
+    {% else %}
+        {% set name = companies_logos ~ 'default.png' %}
+    {% endif %}
+        <img src="{{ absolute_url(asset(name)) }}" alt="Logo" style="height:100px;width:100px"></td>
+    </div>
+</div>
+</div>
+
+<table class="table table-bordered">
+<thead>
+	<tr>
+	<th>WHR</th>
+	<th>FECHA</th>
+	</tr>
+</thead>
+<tbody>
+	<tr>
+	<td>{{ entity.number }}</td>
+	<td>{{ entity.arrivedate|date('Y-m-d') }}</td>
+	</tr>
+</tbody>
+</table>
+
+<center>
+
+<div id="demo"></div>
+
+{# {{ codenumber|raw }}<br> #}
+
+
+TRACK: {{ entity.tracking }}
+
+
+</center>
+<script type="text/javascript">
+    $(document).ready(function () {
+		var thecode= {{ entity.number|json_encode|raw }};
+		$("#demo").barcode(
+			thecode, // Value barcode (dependent on the type of barcode)
+			"code128" // type (string)
+		);
+    });
+</script>
+{% endblock %} 
+
+

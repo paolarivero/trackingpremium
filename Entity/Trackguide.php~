@@ -1,0 +1,42 @@
+<?php
+// src/NvCarga/Bundle/Entity/Trackguide.php
+
+namespace NvCarga\Bundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+
+/**
+ * @ORM\Entity
+ * @ORM\Table(name="trackguide")
+ * @ORM\HasLifecycleCallbacks()
+ */
+class Trackguide
+{
+    /**
+     * @ORM\Id
+     * @ORM\Column(type="integer")
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    protected $id;
+    /**
+     * @ORM\ManyToOne(targetEntity="Guide", inversedBy="tracks"))
+     * @ORM\JoinColumn(name="guide_id", referencedColumnName="id")
+     */
+    protected $guide;
+    /**
+     * @ORM\ManyToOne(targetEntity="City")
+     * @ORM\JoinColumn(name="city_id", referencedColumnName="id")
+     */
+    protected $place;
+    /**
+     * @ORM\Column(type="datetime", nullable=false)
+     */
+    protected $trackdate;
+    /**
+     * @Assert\NotBlank(message = "Debe colocar un mensaje")
+     * @ORM\Column(type="text")
+     */
+    protected $message;
+}
+?>

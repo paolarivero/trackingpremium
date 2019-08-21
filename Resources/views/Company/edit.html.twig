@@ -1,0 +1,34 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+<div class="widget">
+    <div class="widget-header"> <i class="icon icon-truck"></i>
+              <h3> <b>Nuevo Empresa Local</b> 
+		
+	      </h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+    <div class="bodycontainer scrollable">
+ {{ form_start(edit_form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+<table class="table table-striped table-bordered">
+<tbody>
+<tr>
+<td>{{ form_row(edit_form.name) }}</td>
+<td>{{ form_row(edit_form.comment) }}</td>
+<td>{{ form_row(edit_form.country) }}</td>
+</tr>
+</tbody>
+<tfoot>
+<tr>
+<td colspan>{{ form_row(edit_form.submit) }}</td>
+<td colspan=2 style="text-align:right;"><button type="button" class="btn btn-default" onclick="location.href='{{ path('company') }}';">Regresar</button></td>
+</tr>
+</tfoot>
+</table>
+</div>
+</div>
+</div>
+{{ form_end(edit_form) }}
+{% endblock %}

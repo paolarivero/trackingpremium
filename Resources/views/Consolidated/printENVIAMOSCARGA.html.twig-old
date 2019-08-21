@@ -1,0 +1,176 @@
+{% extends '::layout-pdf.html.twig' %}
+
+{% block body %}
+<style>
+
+html *
+{
+   font-size: 0.98em !important;
+   color: #000 !important;
+   font-family: Arial !important;
+   line-height: 1.2;
+   -webkit-print-color-adjust: exact; 
+}
+
+.table, tr, td, th {
+    page-break-inside: avoid !important;
+}
+
+.table {
+    border-collapse: collapse;
+}
+
+.table, th, td {
+   border: 1px solid black;
+}
+
+.table th{
+   text-align: center;
+   background-color: #eeeeee;
+}
+
+.table td {
+    text-align: center;
+    background-color: #ffffff; 
+}
+
+</style>
+{% if 'peso'|trans == 'Lb' %}
+	{% set conwei = 0.454 %}
+{% else %}
+	{% set conwei = 1/0.454 %}
+{% endif %}
+<div class="container">
+<div class="row"> 
+<div class="span3">
+      <center>
+      <img src="{{ absolute_url(asset('assets/img/logo_empresa-print.png')) }}" alt="" style="max-height:100px; max-width:150px; width:150px;"><br>
+     </center>
+</div>
+<div class="span3">
+	<center>
+	{{ entity.agency.name }}<br>
+	{{ entity.agency.address }}<br>
+	{{ entity.agency.city }}, {{ entity.agency.city.state }} {{ entity.agency.zip }}. {{ entity.agency.city.state.country }}<br>
+	Ph. {{ entity.agency.phone }} <br>
+	{{ entity.agency.email }}<br>
+	</center>	
+</div>
+<div class="span5">
+<center>
+<h1>{% trans %}Consolidado{% endtrans %}</h1>
+<h1><div id="demo"></div></h1>
+<h1>{{ entity.number }}</h1><br>
+</center>
+</div>
+</div>
+<br>
+
+{% set lastmove = entity.moves|last %}
+<table class="table">
+        <thead>
+		<tr>
+        <th><h3>Número</h3></th>
+		{# <th><h3>Oficina</h3></th> #}
+		<th><h3>Remitente</h3></th>
+		<th><h3>País Origen</h3></th>
+		<th><h3>Destinatario</h3></th>
+		<th><h3>País Destino</h3></th>
+		<th><h3>Servicio</h3></th>
+		{# <th><h3>Fecha</h3></th> #}
+		<th><h3>Nro de {% trans %}Guías{% endtrans %}</h3></th>
+		<th><h3>Peso ({% trans %}peso{% endtrans %}/{% trans %}altpeso{% endtrans %})</h3></th>
+		<th><h3>Status</h3></th>
+		</tr>	
+		</thead>
+       		<tbody>
+			<tr>
+			<td>{{ entity.number }}</td>
+			{# <td>{{ entity.office }}</td>#}
+			<td>{{ entity.sender }}</td>
+			<td>{{ entity.countryfrom }}</td>
+			<td>{{ entity.receiver }}</td>
+			<td>{{ entity.countryto }}</td>
+			<td>{{ entity.shippingtype }}</td>
+			{# <td>{{ entity.creationdate|date('Y-m-d') }}</td> #}
+			<td>{{ entity.guides|length }}</td>
+			{% set ptotal = 0 %}
+			{% for guide in entity.guides %}
+				{% set ptotal = ptotal + guide.realweight %}
+			{% endfor %} 
+			<td>{{ ptotal|number_format(2, '.', ',') }}/{{ (ptotal*conwei)|number_format(2, '.', ',') }}</td>
+			<td>{{ lastmove.status }}</td>
+			</tr>
+		</tbody>
+</table>
+    <table class="table">
+        <thead>
+		<tr>
+		<th colspan="8"><h3>Lista de {% trans %}Guías{% endtrans %} </h3></th>
+		</tr>
+		<tr>
+        <th>Número</th>
+		<th>Consignatario</th>
+		<th>Dirección</th>
+		<th>Piezas</th>
+		<th>Peso ({% trans %}peso{% endtrans %}/{% trans %}altpeso{% endtrans %})</th>
+		<th>Referencia</th>
+		<th>Valor($)</th>
+		<th>Documento</th>
+		</tr>	
+		</thead>
+       		<tbody>
+			{% for guide in entity.guides %}
+			<tr>
+				<td>{{ guide.number }}</td>
+				<td class="wrapword">{{ guide.addressee.name ~ ' ' ~ guide.addressee.lastname}}</td>
+				<td><p id="dir{{ guide.id}}" style="word-wrap:break-word;width: 200px;"> {{ guide.addressee.address ~  ' ('~ guide.addressee.city ~ ')' }}</p></td>
+				<td>{{ guide.pieces }}</td>
+				<td>{{ guide.realweight }}/{{ (guide.realweight*conwei)|number_format(2, '.', ',') }}</td>
+				{% set pri = true %}
+				<td style="width:10%;">
+				{% set volcad = '' %}
+				{% if guide.masterec %}
+					{% set listrec = [guide.masterec] %}
+				{% else %}
+					{% set listrec = guide.receipts %}
+				{% endif %}
+				{% set refcad = '' %}
+				{% for receipt in listrec %}
+                    {% if receipt.reference %}
+                        {% set ref = receipt.reference %}
+                    {% else %}
+                        {% set ref = '' %}
+                    {% endif %}
+					{% if pri %}
+						{% set refcad = refcad ~ ref %}
+						{% set pri = false %}
+					{% else %}
+						{% set refcad =  refcad ~ ',  ' ~ ref  %}
+					{% endif %} 
+				{% endfor %}
+				{{ refcad }}
+				</td>
+				<td>{{ guide.declared }}</td>
+				<td>{{ guide.addressee.docid }}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+    </table>
+{% block javascript %}
+<script type="text/javascript">
+    $(document).ready(function () {
+		var thecode=  "{{ entity.number }}"; // String("0000000" + {{ entity.id }}).slice(-7);
+		$("#demo").barcode(
+			thecode, // Value barcode (dependent on the type of barcode)
+			"code128", // type (string)
+			{ barWidth: 2, barHeight: 60, showHRI: false}
+		);
+		window.print();
+		history.go(-1);
+    });
+</script>
+{% endblock %}
+{% endblock %} 
+
+

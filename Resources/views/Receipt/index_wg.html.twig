@@ -1,0 +1,90 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+
+<div class="widget">
+<div class="widget-header">
+    <h3><i class="icon-list-alt"></i>  Lista de {% trans %}Recibos{% endtrans %}  sin {% trans %}Guía{% endtrans %}  &nbsp; 
+	{% if is_granted('ROLE_ADMIN') or is_granted('ROLE_ADMIN_RECEIPT') %}
+		<a  class="btn btn-default btn-mini" href="{{ path('receipt_new') }}">Crear {% trans %}Recibo{% endtrans %}</a>
+	{% endif %}
+	
+	</h3>
+</div>
+<div class="widget-content">
+    <div class="table-responsive">
+	<table id="receiptTable" class="table table-striped table-sm" cellspacing="0" width="100%" >
+        <thead>
+            <tr>
+                <th>Número</th>
+                <th>Agencia</th>
+                <th>Fecha</th>
+                <th>Remitente</th>
+                <th>Destinatario</th>
+                <th>Carrier</th>
+                <th>Rec. por</th>
+                <th>Peso</th>
+                <th>Valor</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for entity in entities %}
+            <tr>
+                <td><a  class="btn btn-success" href="{{ path('receipt_show', { 'id': entity.id }) }}">{{ entity.number }}</a></td>
+                <td>{{ entity.agency }}</td>
+                <td>{% if entity.arrivedate %}{{ entity.arrivedate|date('m/d/Y') }}{% endif %}</td>
+                <td>{{ entity.shipper }}</td>
+                <td>{{ entity.receiver.name }} {{ entity.receiver.lastname }}</td>
+                <td>{{ entity.carrier }}</td>
+                <td>{{ entity.receiptdby }}</td>
+                <td>{{ entity.weight }}</td>
+                <td>{{ entity.value }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+ </div>
+<ul class="pagination pagination-sm pager" id="myPager1"></ul>
+</div>
+</div>
+{% block javascript %}
+
+<script type="text/javascript" src="{{ asset('assets/js/jquery.dataTables.min.js') }}"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+	$thisRecTable=$('#receiptTable').DataTable({
+		searching: false,
+		"info":     false,
+		"lengthChange": false,
+		"scrollX": true,
+		pageLength: 10,
+		"pagingType": "full_numbers",
+		"fnDrawCallback": function(oSettings) {
+        		if (oSettings._iDisplayLength >= oSettings.fnRecordsDisplay()) {
+            			$(oSettings.nTableWrapper).find('.dataTables_paginate').hide();
+		
+        		} else {
+				$(oSettings.nTableWrapper).find('.dataTables_paginate').show();
+			
+			}
+    		},
+    		language: {				
+      			emptyTable: "<div style=\"color:red;\">No hay {% trans %}Recibos{% endtrans %} sin {% trans %}Guía{% endtrans %}</div>",
+        		paginate: {
+				first:      '<<',
+        			last:       '>>',
+        			previous: '‹',
+        			next:     '›'
+        		},
+        		aria: {
+        			paginate: {
+               				previous: 'Anterior',
+               				next:     'Siguiente'
+        			}
+       			}	
+    		}
+	});
+    });
+</script>
+{% endblock %}
+{% endblock %}

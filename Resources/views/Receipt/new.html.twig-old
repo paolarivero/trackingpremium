@@ -1,0 +1,686 @@
+{% extends '::newbase.html.twig' %}
+{% block title %}
+    <title>Crear {% trans %}Recibo{% endtrans %}</title>
+{% endblock %}
+
+{% form_theme form 'form/fields.html.twig' %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Crear {% trans %}Recibo{% endtrans %}</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('receipt') }}">{% trans %}Recibos{% endtrans %}</a></li>
+            <li class="active">Crear</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        {{ form_start(form, {attr: {novalidate: 'novalidate', 'id': 'receipt_type' }}) }}
+        <div class="row">
+            <div class="col-sm-6 col-md-6">{# Columna para REMITENTE #}
+                <div class="block-flat">
+                    <div class="header">
+                        <h3>Remitente</h3>
+                    </div>
+                    <div class="content">
+                        {{ form_widget(form.typecusrem) }}
+
+                        <button style="margin-top: 13px;" type="button" class="btn btn-primary bcustomer" data-toggle="modal" data-target="#customersearch" data-thecustomer="1" >Buscar</button></th>
+                        <button id="clearrem" type="button" style="margin-top: 13px;"  class="btn btn-default" onclick="ClearRem();">Limpiar</button>
+
+                        {{ form_row(form.name_sender) }}
+                        {{ form_row(form.lastname_sender) }}
+                        {{ form_row(form.email_sender) }}
+                        {{ form_row(form.address_sender) }}
+                        {{ form_row(form.zip_sender) }}
+                        {{ form_row(form.mobile_sender) }}
+                        {{ form_row(form.phone_sender) }}
+                        
+                        <div class="form-group">
+                            <div class="row">
+                            {#
+                                    <div class="col-md-2">
+                                        <label>Ciudad</label>
+                                    </div>
+                            #}
+                                    <div class="col-md-12">
+                                        <input type="hidden" id="citysender" style="width:100%;" />
+                                    </div>
+                            </div>
+                        </div>
+                        {{ form_row(form.country_sender) }}
+                        {{ form_row(form.state_sender) }}
+                        {{ form_row(form.cityname_sender) }}
+                        
+                        {{ form_row(form.noti_sender) }}
+                    </div>{# FIN CONTENT #}
+                </div> {# FIN BLOCK FLAT #}
+            </div> {# FIN DEL REMITENTE #}
+            <div class="col-sm-6 col-md-6">{# Columna para DESTINATARIO #}
+                <div class="block-flat">
+                    <div class="header">
+                        <h3>Destinatario</h3>
+                    </div>
+                    <div class="content">
+                        {{ form_widget(form.typecusdes) }}
+
+                        <button style="margin-top: 13px;" type="button" class="btn btn-primary bcustomer" data-toggle="modal" data-target="#customersearch" data-thecustomer="2" >Buscar</button></th>
+                        <button id="cleardest" type="button" style="margin-top: 13px;"  class="btn btn-default" onclick="ClearDest();">Limpiar</button>
+
+                        {{ form_row(form.name_addr) }}
+                        {{ form_row(form.lastname_addr) }}
+                        {{ form_row(form.email_addr) }}
+                        {{ form_row(form.address_addr) }}
+                        {{ form_row(form.zip_addr) }}
+                        {{ form_row(form.mobile_addr) }}
+                        {{ form_row(form.phone_addr) }}
+                        
+                        <div class="form-group">
+                            <div class="row">
+                            {#
+                                    <div class="col-md-2">
+                                        <label>Ciudad</label>
+                                    </div>
+                            #}
+                                    <div class="col-md-12">
+                                        <input type="hidden" id="cityaddr" style="width:100%;" />
+                                    </div>
+                            </div>
+                        </div>
+                        {{ form_row(form.country_addr) }}
+                        {{ form_row(form.state_addr) }}
+                        {{ form_row(form.cityname_addr) }}
+                        {{ form_row(form.noti_addr) }}
+                    </div>{# FIN CONTENT #}
+                </div> {# FIN BLOCK FLAT #}
+            </div> {# FIN DEL REMITENTE #}
+        </div>
+        <div class="block-flat">
+            <div class="content">
+                <h3>{{ form_row(form.note) }}</h3>
+             </div>
+        </div> 
+        <div class="block-flat">
+            <div class="header">
+                <h3>Paquetes</h3>
+
+            </div>
+            <div class="content">
+                <div class="row marginRow">
+                    <div class="col-sm-6 col-md-6" style="padding-left: 7px;padding-right: 7px; padding-bottom: 7px;">
+                        {{ form_widget(form.carrier) }}
+                    </div>
+                    <div class="col-sm-6 col-md-6" style="padding-left: 7px; padding-right: 7px;padding-bottom: 7px;">
+                        {{ form_widget(form.tracking) }}
+                        {{ form_errors(form.tracking) }}
+                    </div>
+                </div>
+                <div class="row marginRow">
+                    <div class="col-sm-3 col-md-3" style="padding-left: 7px;padding-right: 7px; padding-bottom: 7px;">
+                        {{  form_widget(form.height) }}
+                        {{ form_errors(form.height) }}
+                    </div>
+                    <div class="col-sm-3 col-md-3" style="padding-left: 7px;padding-right: 7px; padding-bottom: 7px;">
+                        {{  form_widget(form.width) }}
+                        {{  form_errors(form.width) }}
+                    </div>
+                    <div class="col-sm-3 col-md-3" style="padding-left: 7px;padding-right: 7px; padding-bottom: 7px;">
+                        {{  form_widget(form.length) }}
+                        {{  form_errors(form.length) }}
+                    </div>
+                    <div class="col-sm-3 col-md-3" style="padding-left: 7px;padding-right: 7px; padding-bottom: 7px;">
+                        {{  form_widget(form.weight) }}
+                        {{  form_errors(form.weight) }}
+                    </div>
+                </div>
+                <div class="row marginRow">
+                    <div class="col-sm-3 col-md-3" style="padding-left: 7px;padding-right: 7px; padding-bottom: 7px;">
+                        {{ form_widget(form.arrivedate) }}
+                    </div>
+                    <div class="col-sm-3 col-md-3" style="padding-left: 7px;padding-right: 7px; padding-bottom: 7px;">
+                        {{ form_widget(form.description) }}
+                    </div>
+                    <div class="col-sm-3 col-md-3" style="padding-left: 7px;padding-right: 7px; padding-bottom: 7px;">
+                        {{ form_widget(form.value) }}
+                        {{ form_errors(form.value) }}
+                    </div>
+                    <div class="col-sm-3 col-md-3" style="padding-left: 7px;padding-right: 7px; padding-bottom: 7px;">
+                        <center>
+                            <a href="#"  id="sppack" class="btn btn-flat btn-primary" style="text-align:center;">+</a>
+                        </center>
+                    </div>
+                </div>
+                {{ form_row(form.packages) }}
+    
+                
+                <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        <td>
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default" >Cancelar</button>
+                        </td>
+                        <td style="text-align:right;">
+                            {{ form_row(form.submit, { 'attr': {'class': 'btn btn-primary'} }) }}
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+            </div>
+        </div>
+        {{ form_end(form) }}
+        <!-- Modal -->
+        <div class="modal fade colored-header md-effect-9" id="customersearch" role="dialog">
+            <div class="modal-dialog modal-md">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button id="closemodalcus1" type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h2 class="modal-title">Buscar Cliente</h2>
+                    </div>
+
+                    <div class="modal-body form">
+
+                        Buscar: <br><input style="display:inline; width:100%;margin-bottom: 15px;padding-left: 5px;" type="text" placeholder="Nombre/Apellido/Casillero" id="findcustomer" onkeyup="SearchCustomer(event)" autocomplete="off"  />
+
+                        <center>
+                        <div id="mensajeCus">
+                            <h3 style="color:red;">No se encontraron clientes</h3>
+                        </div>
+                        </center>
+                        <div id="divTable">
+                        <table id="customerTable" class="row-border hover order-column" cellspacing="0" width="100%">
+                            <thead class="no-border-y">
+
+                            <tr>
+                                <th><b>Nombre</b></th>
+                                <th><b>Apellido</b></th>
+                                <th><b>Casillero</b></th>
+                                <th><b>Ciudad</b></th>
+                            </tr>
+
+                            </thead>
+                            <tbody class="no-border-y">
+                            </tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="closemodalcus1" data-dismiss="modal" class="btn btn-default btn-flat md-close">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div> <!-- FIN MODAL -->
+        
+        
+        
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+
+<script type="text/javascript">
+    function statesbyname(id,idcountry,state) {
+        var val = $(idcountry).val();
+        $.ajax({
+            type: "POST",
+            url: "{{ url('select_states') }}?country_id=" + val,
+            success: function(data) {
+                // Remove current options
+                $(id).html('');
+                $.each(data, function(k, v) {
+                    if (k == state) {
+                        $(id).append('<option value="' + v + '" selected="selected">' + k + '</option>');
+                    } else {
+                        $(id).append('<option value="' + v + '">' + k + '</option>');
+                    }
+                });
+            }
+        });
+        return true;
+    }
+    function ClearRem() {
+        $('#receipt_type_id_sender').val(0);
+        $('#receipt_type_name_sender').val('');
+        $('#receipt_type_lastname_sender').val('');
+        $('#receipt_type_address_sender').val('');
+        $('#receipt_type_cityid_sender').val(0);
+        $('#receipt_type_cityname_sender').val('');
+        $('#receipt_type_state_sender').val('');
+        $('#receipt_type_country_sender').val('');
+        $('#receipt_type_phone_sender').val('');
+        $('#receipt_type_mobile_sender').val('');
+        $('#receipt_type_barrio_sender').val('');
+        $('#receipt_type_email_sender').val('');
+        $('#receipt_type_zip_sender').val('');
+        $('#receipt_type_typecusrem_1').prop("checked", true);
+        $('#receipt_type_typecusrem_2').prop("checked", false);
+        $('#receipt_type_typecusrem').change();
+        return false;	
+    }
+    function ClearDest() {
+        $('#receipt_type_id_addr').val(0);
+        $('#receipt_type_name_addr').val('');
+        $('#receipt_type_lastname_addr').val('');
+        $('#receipt_type_address_addr').val('');
+        $('#receipt_type_cityid_addr').val(0);
+        $('#receipt_type_cityname_addr').val('');
+        $('#receipt_type_cityname_addr').change();
+        $('#receipt_type_state_addr').val('');
+        $('#receipt_type_country_addr').val('');
+        $('#receipt_type_phone_addr').val('');
+        $('#receipt_type_mobile_addr').val('');
+        $('#receipt_type_barrio_addr').val('');
+        $('#receipt_type_email_addr').val('');
+        $('#receipt_type_zip_addr').val('');
+        $('#receipt_type_typecusdes_1').prop("checked", true);
+        $('#receipt_type_typecusdes_2').prop("checked", false);
+        $('#receipt_type_typecusdes').change();
+        return false;	
+    }
+
+    function returnSelectCustomer(vidcus, vname, vlastname, vtype, vaddress, vcityid, vcity, vstate, vcountry, vphone, vmobile, vbarrio, vemail, vzip){
+        var thecity = vcity + ' (' + vstate + ', ' + vcountry + ')';
+        
+        if ($('#receipt_type_selcustomer').val() === "1") {
+            $('#receipt_type_id_sender').val(vidcus);
+            $('#receipt_type_name_sender').val(vname);
+            $('#receipt_type_lastname_sender').val(vlastname);
+            if (vtype == 'Persona') {
+                $('#receipt_type_typecusrem_1').iCheck('check');
+            } else {
+                $('#receipt_type_typecusrem_2').iCheck('check');
+            }
+            $('#receipt_type_typecusrem').change();
+            $('#receipt_type_address_sender').val(vaddress);
+            $('#receipt_type_cityid_sender').val(vcityid);
+            $('#citysender').select2('data', {id: vcityid, text: thecity});
+            $('#receipt_type_cityname_sender').val(vcity);
+            $('#receipt_type_country_sender option').map(function () {
+                if ($(this).text() == vcountry) return this;
+            }).attr('selected', 'selected');
+            statesbyname('#receipt_type_state_sender','#receipt_type_country_sender', vstate);
+            $('#receipt_type_phone_sender').val(vphone);
+            $('#receipt_type_mobile_sender').val(vmobile);
+            $('#receipt_type_barrio_sender').val(vbarrio);
+            $('#receipt_type_email_sender').val(vemail);
+            $('#receipt_type_zip_sender').val(vzip);
+        } else {
+            $('#receipt_type_id_addr').val(vidcus);
+            $('#receipt_type_name_addr').val(vname);
+            $('#receipt_type_lastname_addr').val(vlastname);
+            if (vtype == 'Persona') {
+                $('#receipt_type_typecusdes_1').iCheck('check');
+            } else {
+                $('#receipt_type_typecusdes_2').iCheck('check');
+            }
+            $('#receipt_type_typecusdes').change();
+            $('#receipt_type_address_addr').val(vaddress);
+            $('#receipt_type_cityid_addr').val(vcityid);
+            $('#cityaddr').select2('data', {id: vcityid, text: thecity});
+            $('#receipt_type_cityname_addr').val(vcity);
+            $('#receipt_type_country_addr option').map(function () {
+                if ($(this).text() == vcountry) return this;
+            }).attr('selected', 'selected');
+            statesbyname('#receipt_type_state_addr','#receipt_type_country_addr', vstate);
+            $('#receipt_type_phone_addr').val(vphone);
+            $('#receipt_type_mobile_addr').val(vmobile);
+            $('#receipt_type_barrio_addr').val(vbarrio);
+            $('#receipt_type_email_addr').val(vemail);
+            $('#receipt_type_zip_addr').val(vzip);
+        }
+
+        $("#closemodalcus1").click();
+        return true;
+    }
+    function SearchCustomer(e) {
+        e.preventDefault();
+        var typecus=$('#receipt_type_selcustomer').val();
+        var txt = $.trim( $('#findcustomer').val() );
+        $('#divTable').show();
+        $('#mensajeCus').hide();
+        var path = "{{ url('listcustomer') }}?pattern=" + txt + "&typecus=" + typecus;
+        if (txt.length > 0) {
+            $.ajax({
+                type: "GET",
+                url:  path,
+                success: function (data) {
+                    if (data.length > 0) {
+
+                    var tableRef = document.getElementById('customerTable').getElementsByTagName('tbody')[0];
+                    var nf = tableRef.rows.length;
+                    for (i=0; i < nf; i++) {
+                        tableRef.deleteRow(0);
+                    }
+                    var nc = data.length;
+                    for (i = 0; i < nc; i++) {
+                        var customerid = data[i]['customerid'];
+                        var namecus = data[i]['name'];
+                        var lastnamecus = data[i]['lastname'];
+                        var pobox = data[i]['pobox'];
+                        var address = data[i]['address'];
+                        var cityid = data[i]['cityid'];
+                        var cityname = data[i]['cityname'];
+                        var allcityname = data[i]['cityname'] + ', ' +  data[i]['state'] + ' (' +  data[i]['country'] + ')';
+
+                        var state = data[i]['state'];
+                        var country = data[i]['country'];
+                        var phone = data[i]['phone'];
+                        var mobile = data[i]['mobile'];
+                        var barrio = data[i]['barrio'];
+                        var email = data[i]['email'];
+                        var zip = data[i]['zip'];
+                        var type = data[i]['type'];
+                        // Insert a row in the table at the last row
+                        var newRow   = tableRef.insertRow(tableRef.rows.length);
+                        newRow.onclick = (function(){
+                            var vidcus = customerid; var vname = namecus; var vlastname = lastnamecus;
+                            var vtype = type; var vaddress = address;  var vcityid = cityid; var vcity= cityname; var vstate = state;
+                            var vcountry = country; var vphone = phone; var vmobile = mobile; var vbarrio = barrio;
+                            var vemail = email; var vzip = zip; 	return function()
+                            {returnSelectCustomer(vidcus, vname, vlastname, vtype, vaddress, vcityid, vcity, vstate,
+                                vcountry, vphone, vmobile, vbarrio, vemail, vzip)}})();
+                        newRow.class="highlight";
+
+                        // Insert a cell in the row at index 0
+                        var newCell0  = newRow.insertCell(0);
+                        var newCell1  = newRow.insertCell(1);
+                        var newCell2  = newRow.insertCell(2);
+                        var newCell3  = newRow.insertCell(3);
+
+                        var newText0 = document.createTextNode(namecus);
+                        newCell0.appendChild(newText0);
+
+                        var newText1 = document.createTextNode(lastnamecus);
+                        newCell1.appendChild(newText1);
+
+                        var newText2 = document.createTextNode(pobox);
+                        newCell2.appendChild(newText2);
+
+                        var newText3 = document.createTextNode(allcityname);
+                        newCell3.appendChild(newText3);
+                    }
+                    $("#customerTable tbody tr").mouseover(function() { $(this).addClass("myhover"); });
+                    $("#customerTable tbody tr").mouseout(function() { $(this).removeClass("myhover"); });
+                }  else {
+                    $('#divTable').hide();
+                    $('#mensajeCus').show();
+                }
+                },
+                error: function (data) {
+                    console.log(data);
+                }
+            });
+        } else {
+            $('#divTable').hide();
+            $('#mensajeCus').hide();
+        }
+        return true;
+    }
+    
+    
+    $(document).ready(function () {
+        $('.md-trigger').modalEffects();
+        
+        $('#receipt_type_typecusrem_1').iCheck('check');
+        $('#receipt_type_typecusrem_2').on('ifChecked', function(event){
+            $('#receipt_type_lastname_sender').val('');
+            $('#receipt_type_lastname_sender').prop('readonly', true);
+        });
+        $('#receipt_type_typecusrem_1').on('ifChecked', function(event){
+            $('#receipt_type_lastname_sender').prop('readonly', false);
+        });
+        
+        $('#receipt_type_typecusdes_1').iCheck('check');
+        $('#receipt_type_typecusdes_2').on('ifChecked', function(event){
+            $('#receipt_type_lastname_addr').val('');
+            $('#receipt_type_lastname_addr').prop('readonly', true);
+        });
+        $('#receipt_type_typecusdes_1').on('ifChecked', function(event){
+            $('#receipt_type_lastname_addr').prop('readonly', false);
+        });
+        $("#citysender").select2({
+            placeholder: "Buscar Ciudad",
+            ajax: {
+                url: "{{ path('city_find') }}",
+                dataType: 'json',
+                delay: 250,
+                data: function (term) {
+                    return {
+                        q: term, //search term
+                    };
+                },
+                results: function (data) {
+                    return {
+                        results: data,
+                    };
+                },
+                cache: true
+                },
+             minimumInputLength: 2,
+             formatInputTooShort: function (input, min) { var n = min - input.length; return "Por favor ingrese  " + n + " carcater" + (n == 1? "" : "es") + " mas"; },
+             formatNoMatches: function () { return "No se encuentran resultados"; },
+             
+        });
+        $('#citysender').on("change", function(e) { 
+            var cityid = $('#citysender').val();
+            $('#receipt_type_cityid_sender').val(cityid);
+            var complete = $('#citysender').select2('data').text;
+            var ini1 = complete.lastIndexOf('(');
+            var ini2 = complete.lastIndexOf(',');
+            var end = complete.lastIndexOf(')');
+            var state = complete.substring(ini1+1,ini2);
+            var country = complete.substring(ini2+2,end);
+            // $('#receipt_type_country_sender').val('');
+            $('#receipt_type_country_sender option').map(function () {
+                if ($(this).text() == country) return this;
+            }).attr('selected', 'selected');
+            statesbyname('#receipt_type_state_sender', '#receipt_type_country_sender', state); 
+            $('#receipt_type_cityname_sender').val(complete.substring(0,ini1-1));
+        });
+        
+        $("#cityaddr").select2({
+            placeholder: "Buscar Ciudad",
+            ajax: {
+                url: "{{ path('city_find') }}",
+                dataType: 'json',
+                delay: 250,
+                data: function (term) {
+                    return {
+                        q: term, //search term
+                    };
+                },
+                results: function (data) {
+                    return {
+                        results: data,
+                    };
+                },
+                cache: true
+                },
+             minimumInputLength: 2,
+             formatInputTooShort: function (input, min) { var n = min - input.length; return "Por favor ingrese  " + n + " carcater" + (n == 1? "" : "es") + " mas"; },
+             formatNoMatches: function () { return "No se encuentran resultados"; },
+             
+        });
+        
+        $('#cityaddr').on("change", function(e) { 
+            var cityid = $('#cityaddr').val();
+            $('#receipt_type_cityid_addr').val(cityid);
+            var complete = $('#cityaddr').select2('data').text;
+            var ini1 = complete.lastIndexOf('(');
+            var ini2 = complete.lastIndexOf(',');
+            var end = complete.lastIndexOf(')');
+            var state = complete.substring(ini1+1,ini2);
+            var country = complete.substring(ini2+2,end);
+            // $('#receipt_type_country_addr').val('');
+            $('#receipt_type_country_addr option').map(function () {
+                if ($(this).text() == country) return this;
+            }).attr('selected', 'selected');
+            statesbyname('#receipt_type_state_addr', '#receipt_type_country_addr', state); 
+            $('#receipt_type_cityname_addr').val(complete.substring(0,ini1-1));
+        });
+        
+        var citySID = $("#receipt_type_cityid_sender").val();
+        var citySname = $("#receipt_type_cityname_sender").val();
+        if (citySID && citySname) {
+            // console.log('Hola:  ' +  citySID + ' ' + citySname);
+            $('#citysender').select2('data', {id: citySID, text: citySname});
+        }
+        var cityAID = $("#receipt_type_cityid_addr").val();
+        var cityAname = $("#receipt_type_cityname_addr").val();
+        if (cityAID && cityAname) {
+            // console.log('Hola:  ' +  citySID + ' ' + citySname);
+            $('#cityaddr').select2('data', {id: cityAID, text: cityAname});
+        }
+        
+        $(function() {
+            $('#receipt_type_arrivedate').datepicker();
+                /*
+                startDate: '-180d',
+                endDate: '+1d',
+                autoclose: true);
+                */
+            $('#receipt_type_arrivedate').val($.datepicker.formatDate('mm/dd/yy', new Date()));
+        });
+        $('.list-packages').collection({
+            add_at_the_end: false,
+            allow_up: false,
+            allow_down: false,
+            min: 0,
+            add: '<a id="newpack"></a>',
+            after_add: function (collection, element) {
+                var npack = $('.list-packages').find('> div').length;
+                var pos = npack-1;
+                // $(".red-star").remove();
+                // $("label.required").append('<span class="red-star" title="Campo Obligatorio"> *</span>');
+                $('#receipt_type_packages_'+ pos +'_arrivedate').datepicker();
+                $('#receipt_type_packages_'+ pos +'_arrivedate').val($.datepicker.formatDate('mm/dd/yy', new Date()));
+                // $('#receipt_type_packages_'+ pos +'_thelabel').val('Paquete Adicional ' + npack );
+            },
+            after_remove: function (collection, element) {
+                $('#newpack').hide();
+                var npack = $('.list-packages').find('> div').length;
+                // console.log(npack);
+                if (npack == 0) {
+                    $('#sppack').show();
+                }
+            },
+        });
+
+        $('#newpack').hide();
+
+        $('#sppack').click(function(e) {
+            e.preventDefault();
+            $('#newpack').click();
+            $('#sppack').hide();
+        });
+
+        $('#receipt_type_packages').change(function() {
+            $('#newpack').hide();
+        });
+        var $thisCusTable=null;
+        $('.bcustomer').click(function(e) {
+            e.preventDefault();
+            var thecustomer = $(this).data('thecustomer');
+            $('#receipt_type_selcustomer').val(thecustomer);
+            $('#findcustomer').val('');
+            $('#divTable').hide();
+            $('#mensajeCus').hide();
+            return true;
+        });
+        $('#receipt_type_submit').click(function(evt) {
+            {% if app.user.maincompany.defsender is null %}
+                var defsender = 0;
+            {% else %}
+                var defsender = 1;
+            {% endif %}
+            
+            if ((!$('#receipt_type_name_sender').val()) && (!defsender)) {
+                funalert('Debe seleccionar el nombre del  Remitente');
+                return false;
+            }
+            if ((!$('#receipt_type_address_sender').val()) && (!defsender)) {
+                funalert('Debe seleccionar la dirección del  Remitente');
+                return false;
+            }
+            if (((!$('#receipt_type_country_sender').val()) || (!$('#receipt_type_state_sender').val()) || (!$('#receipt_type_cityname_sender').val()))  && (!defsender)) {
+                funalert('Debe seleccionar PAIS/ESTADO/CIUDAD del  Remitente');
+                return false;
+            }
+            
+            {% if app.user.maincompany.defreceiver is defined %}
+                var defreceiver = true;
+            {% else %}
+                var defreceiver = false;
+            {% endif %}
+            {% if app.user.maincompany.defpackage is defined %}
+                var defpackage = true;
+            {% else %}
+                var defpackage = false;
+            {% endif %}
+            
+            /*
+            if (citysender == 0 ) {
+                funalert('Debe seleccionar la ciudad del Remitente');
+                return false;
+            }
+            if (cityaddr == 0 ) {
+                funalert('Debe seleccionar la ciudad del Destinatario');
+                return false;
+            }
+            */
+            var formcontent = $('#receipt_type').serializeArray();
+            for (var x = 0; x < formcontent.length; x++) {
+                if (formcontent[x].name.indexOf("carrier") >= 0) {
+                    var carrier = formcontent[x].value;
+                    var track = formcontent[x+1].value;
+                    // console.log('Tracking: ' +  track + '. Carrier: ' + carrier);
+                    if ((track) && (carrier)) {
+                        $.ajax({
+                            url: "{{ url('alert_search') }}?tracking=" + track + "&carrier=" + carrier,
+                            success: function(data) {
+                                if (data['id'] != 0) {
+                                    var mensaje = 'El paquete con el tracking: ' + track + ' y el carrier: ' + data['carrier'] + ' tiene una alerta de casillero ' + data['pobox'] + '. Verificar!!!!';
+                                    funalert(mensaje);
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+            return true;
+        });
+        $('#receipt_type_country_sender').change(function(){
+           var val = "#receipt_type_country_sender";
+           statesbyname('#receipt_type_state_sender', val, '');
+           $('#citysender').val('');
+           return false;
+        });
+        $('#receipt_type_country_addr').change(function(){
+            var val = "#receipt_type_country_addr";
+            statesbyname('#receipt_type_state_addr', val, '');
+            $('#cityaddr').val('');
+            return false;
+        });
+        $('#receipt_type_state_sender').change(function(){
+            $('#receipt_type_cityid_sender').val(0);
+            $('#citysender').val('');
+            return false;
+        });
+        $('#receipt_type_state_addr').change(function(){
+            $('#receipt_type_cityid_addr').val(0);
+            $('#cityaddr').val('');
+            return false;
+        });
+    });
+</script>
+{% endblock %}

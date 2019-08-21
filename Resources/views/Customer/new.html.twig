@@ -1,0 +1,148 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>Crear Cliente</title>
+{% endblock %}
+
+{# Display the form #}
+
+{% form_theme form 'form/fields.html.twig' %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Crear Cliente</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('customer') }}">Clientes</a></li>
+            <li class="active">Crear</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger alert-white rounded">
+                    <button type="button" data-dismiss="alert" aria-hidden="true" class="close">×</button>
+                    <div class="icon">
+                        <i class="fa fa-warning"></i>
+                    </div>
+                    <strong>Alerta! </strong> {{ flashMessage|raw }} 
+                    </strong>
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+
+        {{ form_start(form, {attr: {novalidate: 'novalidate', 'id': 'customer_type' }}) }}
+        <div class="block-flat">
+                    <div class="header">
+                        <h3>Agencia</h3>
+                    </div>
+                    <div class="content">
+                        {{ form_widget(form.agency) }}
+                    </div>
+        </div>
+        <div class="block-flat">
+            <div class="header">
+                <h3>Datos del cliente</h3>
+            </div>
+            <div class="content">
+                {{ form_widget(form.type) }}
+                {{ form_row(form.name) }}
+                {{ form_row(form.lastname) }}
+                {{ form_row(form.docid) }}
+                {{ form_row(form.address) }}
+                {{ form_row(form.zip) }}
+                {{ form_row(form.mobile) }}
+                {{ form_row(form.phone) }}
+                {{ form_row(form.email) }}
+
+                <div class="form-group">
+                    <div class="row">
+                            <div class="col-md-2">
+                                <label>Ciudad</label>
+                            </div>
+                            <div class="col-md-10">
+                                <input type="hidden" id="citycustomer" style="width:100%;" />
+                            </div>
+                    </div>
+                </div>
+                {{ form_row(form.cityname) }}
+                <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        <td>
+
+                        </td>
+                        <td style="text-align:right;">
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-flat" >Cancelar</button>
+                            {{ form_widget(form.submit, { 'attr': {'class': 'btn btn-primary btn-flat'} }) }}
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>{# FIN CONTENT #}
+        </div> {# FIN BLOCK FLAT #}
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}
+{% block javascripts %}
+<script type="text/javascript">
+    
+   
+    
+    $(document).ready(function () {
+       
+        $("#citycustomer").select2({
+            placeholder: "Buscar Ciudad",
+            ajax: {
+                url: "{{ path('city_find') }}",
+                dataType: 'json',
+                delay: 250,
+                data: function (term) {
+                    return {
+                        q: term, //search term
+                    };
+                },
+                results: function (data) {
+                    return {
+                        results: data,
+                    };
+                },
+                cache: true
+                },
+             minimumInputLength: 2,
+             formatInputTooShort: function (input, min) { var n = min - input.length; return "Por favor ingrese  " + n + " carcater" + (n == 1? "" : "es") + " mas"; },
+             formatNoMatches: function () { return "No se encuentran resultados"; },
+
+        });
+
+        $('#citycustomer').on("change", function(e) {
+            var cityid = $('#citycustomer').val();
+            $('#customer_type_cityid').val(cityid);
+            var cityname = $('#citycustomer').select2('data').text;
+            $('#customer_type_cityname').val(cityname);
+        });
+        var citySID = $("#customer_type_cityid").val();
+        var citySname = $("#customer_type_cityname").val();
+        if (citySID && citySname) {
+            // console.log('Hola:  ' +  citySID + ' ' + citySname);
+            $('#citycustomer').select2('data', {id: citySID, text: citySname});
+        }
+        $('#customer_type_type_1').iCheck('check');
+        $('#customer_type_type_2').on('ifChecked', function(event){
+            $('#customer_type_lastname').val('');
+            $('#customer_type_lastname').prop('readonly', true);
+        });
+        $('#customer_type_type_1').on('ifChecked', function(event){
+            $('#customer_type_lastname').prop('readonly', false);
+        });
+        $('#customer_type_submit').click(function(evt) {
+            var cityid = $('#citycustomer').val();
+            if (!cityid) {
+                funalert('Debe seleccionar una ciudad..');
+                return false;
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,317 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>Mostrar Empresa</title>
+{% endblock %}
+
+{% block body -%}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Información  de Empresa</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('maincompany') }}">Empresas</a></li>
+            <li class="active"> Mostrar Empresa</li>
+            </ol>
+    </div>
+    <div class="cl-mcont">
+        <div class="block-flat">
+            <div class="header">
+                <div class="row">
+                    <div class="col-sm-8 col-md-8">
+                        <h3>{{ entity.name }} (Acrónimo: {{ entity.acronym}})</h3> 
+                    </div>
+                    <div class="col-sm-4 col-md-4">
+                        {% if ((app.user.agency.type == "MASTER") and is_granted('ROLE_ADMIN_MAINCOMPANY'))  %}
+                            <div class="btn-group" style="margin-bottom: 5px;margin-top: 4px;">
+                                    <button type="button" class="btn btn-default">Opciones</button>
+                                    <button type="button" data-toggle="dropdown" class="btn btn-default dropdown-toggle">
+                                    <span class="caret"></span><span class="sr-only">Opciones</span></button>
+                                    <ul role="menu" class="dropdown-menu">
+                                            <li><a href="{{ path('maincompany_edit', {'id': entity.id }) }}">Editar</a></li>
+                                    </ul>
+                            </div>
+                        {% else %}
+                            <table class="no-border">
+                                <tbody class="no-border-y">
+                                    <tr>
+                                    <td>
+                                        <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-sm" >Regresar</button>
+                                    </td>
+                                    <td style="text-align:right;">
+                                    <buttom class="btn btn-primary btn-sm" title="Crear" onclick="location.href='{{ path('maincompany_edit', {'id': entity.id }) }}';">Editar </buttom>
+                                    </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4 col-md-4">
+                        <center>
+                        <h3>Logo impresión</h3> 
+                        {% if entity.logo %}
+                            {% set logo = companies_logos ~ entity.logo %}
+                        {% else %}
+                            {% set logo = companies_logos ~ 'default.png' %}
+                        {% endif %}
+                        <img src="{{ asset(logo) }}" alt="Logo" style="height:100px;" ><br>
+                        <button type="button" onclick="location.href='{{ path('updatelogo', { 'id': entity.id }) }}'" class="btn btn-primary btn-flat btn-sm" >Actualizar</button>
+                        </center>
+                    </div>
+                    <div class="col-sm-4 col-md-4">
+                        <center>
+                        <h3>Logo de sistema</h3> 
+                        {% if entity.logomain %}
+                            {% set logomain = companies_logosmain ~ entity.logomain %}
+                        {% else %}
+                            {% set logomain = companies_logosmain ~ 'logo.png' %}
+                        {% endif %}
+                        <img src="{{ asset(logomain) }}" alt="Logomain" style="height:100px;" ><br>
+                        <button type="button" onclick="location.href='{{ path('updatelogomain', { 'id': entity.id }) }}'" class="btn btn-primary btn-flat btn-sm" >Actualizar</button>
+                        </center>
+                        
+                    </div>
+                    <div class="col-sm-4 col-md-4">
+                        <center>
+                        <h3>Fondo pantallas de acceso</h3> 
+                        {% if entity.background %}
+                            {% set background = companies_backgrounds ~ entity.background %}
+                            <img src="{{ asset(background) }}" alt="Background" style="height:100px;" >
+                        {% else %}
+                            <div style="background-color: #000000; width:100px;height:100px;border:1px solid #000;"></div>
+                        {% endif %}<br>
+                        <button type="button" onclick="location.href='{{ path('updatebackground', { 'id': entity.id }) }}'" class="btn btn-primary btn-flat btn-sm" >Actualizar</button>
+                        </center>
+                    </div>
+                </div>
+            </div>
+        <div class="content">
+            <div class="row">
+                <div class="col-sm-4 col-md-4">
+                EMAIL: {{ entity.email}}
+                </div>
+                <div class="col-sm-4 col-md-4">
+                URL: {{ entity.url}}
+                </div>
+                 <div class="col-sm-4 col-md-4">
+                Factor dimensional: {{ entity.dimfactor}}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-4 col-md-4">
+                Numeración inicial casilleros: {{ entity.ininum}}
+                </div>
+                <div class="col-sm-4 col-md-4">
+                Numeración inicial {% trans %}Guías{% endtrans %}: {{ entity.iniguide}}
+                </div>
+                 <div class="col-sm-4 col-md-4">
+                Factor para calcular volumen: {{ entity.convertvol}} 
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12 col-md-12">
+                Asignar primer status automáticamente:
+                    {% if entity.roundtotal %}
+                    <input type="checkbox" class="icheck" name="roundmeasure" value="yes" readonly=true disabled=true checked>
+                    {% else %}
+                    <input type="checkbox" class="icheck" name="roundmeasure" readonly=true disabled=true value="no">
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-4 col-md-4">
+                Redondeo del total:
+                    {% if entity.roundtotal %}
+                    <input type="checkbox" class="icheck" name="roundmeasure" value="yes" readonly=true disabled=true checked>
+                    {% else %}
+                    <input type="checkbox" class="icheck" name="roundmeasure" readonly=true disabled=true value="no">
+                    {% endif %}
+                </div>
+                <div class="col-sm-4 col-md-4">
+                Redondeo por peso: {{ entity.roundweight}}
+                </div>
+                 <div class="col-sm-4 col-md-4">
+                Redondeo por volumen: {{ entity.roundvol}} 
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-4 col-md-4">
+                Prefijo de {% trans %}Guías{% endtrans %}: {{ entity.prefixguide}}
+                </div>
+                <div class="col-sm-4 col-md-4">
+                Prefijo de Casilleros: {{ entity.prefixpobox}}
+                </div>
+                 <div class="col-sm-4 col-md-4">
+                Prefijo de {% trans %}Consolidados{% endtrans %}: {{ entity.prefixconsol}} 
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-4 col-md-4">
+                Nombre de cliente en Dir. Casillero: {% if entity.customername %}
+                <input type="checkbox" checked="checked" class="icheck" disabled readonly >
+                {% else %}
+                <input type="checkbox" class="icheck" disabled readonly >
+                {% endif %}
+                </div>
+                <div class="col-sm-4 col-md-4">
+                Nombre de Empresa en Dir. Casillero: {% if entity.companyname %} 
+                <input type="checkbox" checked="checked" class="icheck" disabled readonly >
+                {% else %}
+                <input type="checkbox" class="icheck" disabled readonly >
+                {% endif %}
+                </div>
+                <div class="col-sm-4 col-md-4">
+                Número de Casillero en Dir. Casillero: {% if entity.numbername %} 
+                <input type="checkbox" checked="checked" class="icheck" disabled readonly >
+                {% else %}
+                <input type="checkbox" class="icheck" disabled readonly >
+                {% endif %} 
+                </div>
+            </div>
+            {% if entity.billurl is not null %}
+                <br>
+                <div class="row">
+                    <div class="col-sm-12 col-md-12">
+                        Dirección URL para pagos de factura: <b>{{ entity.billurl }}</b>
+                    </div>
+                </div>
+            {% endif %}
+            <div class="row">
+                <div class="col-sm-8 col-md-8">
+                <p style="border-style:solid; padding-left:5px">MENSAJE a clientes: <br><br>  {{ entity.poboxmsg | nl2br}}</p>
+                </div>
+                <div class="col-sm-4 col-md-4">
+                Países: 
+                <ul style="padding-left:20px">
+                {% for country in entity.countries %}
+                       <li> {{ country }} </li>
+                {% endfor %}</td>
+                </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+     <div class="block-flat">
+        {% set plan = entity.plan %}
+        <div class="header">
+            <h3>Plan </h3>
+        </div>
+        <div class="content">
+            Nombre: {{ plan.name }}<br>
+            Descripción: {{ plan.description }}<br>
+            Precio: ${{ plan.price }}<br>
+            
+        </div>
+    </div>
+    {#
+    <div class="block-flat">
+        <div class="header">
+            <h3>Límites de entidades</h3>
+        </div>
+        <div class="content">
+            <div class="row">
+                <div class="col-sm-4 col-md-4">
+                {% trans %}Recibos{% endtrans %}: {{ entity.maxreceipts }} 
+                </div>
+                <div class="col-sm-4 col-md-4">
+                {% trans %}Warehouse{% endtrans %}:  {{ entity.maxwhrecs }}
+                </div>
+                <div class="col-sm-4 col-md-4">
+                {% trans %}Guías{% endtrans %}:  {{ entity.maxguides }} <br>
+                Bolsas: {{ entity.maxbags }} 
+                </div>
+               
+            </div>
+            <div class="row">
+                <div class="col-sm-4 col-md-4">
+                {% trans %}Consolidados{% endtrans %}: {{ entity.maxconsolidates }}
+                </div>
+                <div class="col-sm-4 col-md-4">
+                Agencias: {{ entity.maxagencies }}
+                </div>
+                <div class="col-sm-4 col-md-4">
+                Clientes: {{ entity.maxcustomers }}
+                </div>
+                
+            </div>
+            <div class="row">
+                <div class="col-sm-4 col-md-4">
+                Usuarios: {{ entity.maxusers }}
+                </div>
+                <div class="col-sm-4 col-md-4">
+                Facturas: {{ entity.maxbills }} 
+                </div>
+                <div class="col-sm-4 col-md-4">
+                Casilleros: {{ entity.maxpoboxes }} 
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-4 col-md-4">
+                Cuentas Bancarias: {{ entity.maxaccounts }}
+                </div>
+                <div class="col-sm-4 col-md-4">
+                Alertas: {{ entity.maxalerts }}
+                </div>
+                <div class="col-sm-4 col-md-4">
+                Servicios Adicionales: {{ entity.maxadservices }} 
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-12 col-md-12">
+                Empresas Locales: {{ entity.maxcompanies }} 
+                </div>
+            </div>
+        </div>
+    </div>
+    #}
+    <div class="block-flat">
+        <div class="header">
+            <h3>Lista de Agencias</h3>
+        </div>
+        <div class="content">
+            <table id="agencyTable" class="table table-striped table-bordered dt-responsive" cellspacing="0" width="100%">
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Ciudad</th>
+                        <th>Email</th>
+                        <th>Manager</th>
+                        <th>Tipo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for agency in entity.agencies %}
+                        <tr>
+                            <td style="text-align:center;">
+                                <button type="button" class="btn btn-default btn-sm" onclick="location.href='{{ path('agency_show', { 'id': agency.id }) }}';">{{ agency.name}}</button></td>
+                            <td>{{ agency.city}}</td>
+                            <td>{{ agency.email}}</td>
+                            <td>{{ agency.manager}}</td>
+                            <td>{{ agency.type}}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+        </div>
+    </div>
+    
+</div>
+{% endblock %}
+{% block javascripts %}
+<script type="text/javascript">
+    $(document).ready(function () {
+        $thisAgencyTable=$('#agencyTable').DataTable({
+            "responsive": true,
+            "ordering": false,
+            "searching": false,
+            "info":     false,
+            "lengthChange": false,
+            "paginate": false,
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,38 @@
+{# src/NvCarga/Bundle/Resources/views/Security/login_remember.html.twig #}
+{% extends '::layout_min.html.twig' %}
+
+{% block body -%}
+
+<div id="cl-wrapper" class="forgotpassword-container">
+		<div class="middle">
+			<div class="block-flat">
+				<div class="header">
+					<h3 class="text-center"><img src="{{ asset('assets/newTemplate/img/logo.png') }}" alt="logo" class="logo-img"></h3>
+				</div>
+				<div>
+					{{ form_start(form, {'attr': {'novalidate': 'novalidate', 'class': 'form-horizontal', 'style' : 'margin-bottom: 0px !important' }}) }}
+					{# <form style="margin-bottom: 0px !important;" action="index.html" parsley-validate="" novalidate class="form-horizontal"> #}
+						<div class="content">
+							<h5 class="title text-center">Restablecer mi contraseña</h5>
+
+							<div class="form-group">
+								<div class="col-sm-12">
+									<div class="input-group"><span class="input-group-addon"><i class="fa fa-envelope"></i></span>
+										{# <input type="email" name="email" parsley-trigger="change" parsley-error-container="#email-error" required="" placeholder="Your Email" class="form-control"> #}
+										{{ form_row(form.email, {'attr': {'placeholder': 'Your Email', 'class' : 'form-remember', 'required' : 'required', 'parsley-error-container' : '#email-error'}}) }}
+									</div>
+									<div id="email-error"></div>
+								</div>
+							</div>
+
+							<button type="submit" class="btn btn-block btn-primary btn-rad btn-lg">Enviar</button>
+						</div>
+					{{ form_end(form) }}
+				</div>
+			</div>
+			<div class="text-center out-links"><a href="#">© 2014 Your Company</a></div>
+		</div>
+	</div>
+
+
+{% endblock %}

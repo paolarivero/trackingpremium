@@ -1,0 +1,453 @@
+<?php
+
+namespace NvCarga\Bundle\Controller;
+
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use NvCarga\Bundle\Entity\Baddress;
+use NvCarga\Bundle\Form\BaddressType;
+
+use Symfony\Component\Validator\Constraints\NotBlank;
+
+/**
+ * Baddress controller.
+ *
+ * @Route("/baddress")
+ */
+class BaddressController extends Controller
+{
+
+    /**
+     * Lists all Baddress entities.
+     *
+     * @Route("/index", name="baddress")
+     * @Method("GET")
+     * @Template()
+     */
+/*
+    public function indexAction()
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $entities = $em->getRepository('NvCargaBundle:Baddress')->findAll();
+
+        return array(
+            'entities' => $entities,
+        );
+    }
+*/
+    /**
+     * Creates a new Baddress entity.
+     *
+     * @Route("/{id}/{type}/creation", name="baddress_create")
+     * @Method("POST")
+     * @Template("NvCargaBundle:Baddress:new.html.twig")
+     */
+    public function createAction(Request $request, $id, $type)
+    {
+        $entity = new Baddress();
+        $em = $this->getDoctrine()->getManager();
+        $user = $this->getUser();
+        $admin = $this->isGranted('ROLE_ADMIN') || $this->isGranted('ROLE_ADMIN_CUSTOMER'); 
+       
+        $pobox = $user->getPobox();
+        $customerdir = $em->getRepository('NvCargaBundle:Customer')->find($id);
+        
+        if (!$customerdir) {
+            throw $this->createNotFoundException('No existe el cliente para agregar dirección');
+        }
+        $customer = null;
+        if ($pobox) {
+            $customer = $pobox->getCustomer();
+        } else {
+            $customer = $customerdir;
+        }
+        $admin = ($admin) && ($user->getMaincompany() == $customerdir->getMaincompany());
+        if (($customer != $customerdir ) && (!$admin)) {
+            throw $this->createNotFoundException('No tiene permiso para crear direcciones del cliente');
+        }
+        $entity->setCustomer($customerdir);
+        $form = $this->createCreateForm($entity,$type);
+        $form->handleRequest($request);
+        
+        if ($form->isValid()) {
+            $cityid = $form->get("cityid")->getData();
+            if (!$cityid) {
+                throw $this->createNotFoundException('Debe seleccionar una ciudad');
+            }
+            $city = $em->getRepository('NvCargaBundle:City')->find($cityid);
+            $entity->setCity($city);
+            $em->persist($entity);
+            if (!$customer->getAdrdefault()) {
+                $customer->setAdrdefault($entity);
+                $customer->addBaddress($entity);
+            }
+            
+            if (!$customer->getAdrmain()) { // NUEVO CUANDO el cliente no tiene dirección principal
+                $newadr = new Baddress();
+                $newadr->setName($customerdir->getName());
+                $newadr->setLastname($customerdir->getLastname());
+                $newadr->setAddress($entity->getAddress());
+                $newadr->setPhone($entity->getPhone());
+                $newadr->setMobile($entity->getMobile());
+                $newadr->setZip($entity->getZip());
+                $newadr->setDocid($entity->getDocid());
+                $newadr->setCity($entity->getCity());
+                $newadr->setCustomer($entity->getCustomer());
+                $customer->setAdrmain($newadr);
+                $customer->addBaddress($newadr);
+                $em->persist($newadr);
+            }
+            
+            $em->flush();
+            switch ($type) {
+                case 1: 
+                    return $this->redirect($this->generateUrl('customer_show', array('id' => $entity->getCustomer()->getId())));
+                    break;
+                case 2: 
+                    return $this->redirect($this->generateUrl('alert_new'));
+                    break;
+                case 3: 
+                    return $this->redirect($this->generateUrl('pobox_menu', array('id' => $pobox->getId())));
+            }
+        }
+        
+        /*
+        if ($form->isValid()) {
+            $cityid = $form->get("cityid")->getData();
+            if (!$cityid) {
+                throw $this->createNotFoundException('Debe seleccionar una ciudad');
+            }
+            $city = $em->getRepository('NvCargaBundle:City')->find($cityid);
+            $entity->setCity($city);
+            $em->persist($entity);
+            $em->flush();
+        
+            if ($type == 2) {
+                return $this->redirect($this->generateUrl('alert_new'));
+            } else {
+                return $this->redirect($this->generateUrl('customer_show', array('id' => $entity->getCustomer()->getId())));
+            }
+           
+        }
+        */
+        return array(
+            'entity' => $entity,
+            'form'   => $form->createView(),
+        );
+    }
+
+    /**
+     * Creates a form to create a Baddress entity.
+     *
+     * @param Baddress $entity The entity
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createCreateForm(Baddress $entity, $type)
+    {
+        $form = $this->createForm(new BaddressType(), $entity, array(
+            'action' => $this->generateUrl('baddress_create', array('id' => $entity->getCustomer()->getId(), 'type' => $type)),
+            'method' => 'POST',
+        ));
+
+        $form->add('submit', 'submit', array('label' => 'Crear'));
+
+        return $form;
+    }
+
+    /**
+     * Displays a form to create a new Baddress entity.
+     *
+     * @Route("/{id}/change", name="baddress_change")
+     */
+    public function changeAction($id)
+    {
+        
+        $em = $this->getDoctrine()->getManager();
+        $user = $this->getUser();
+        $entity = $em->getRepository('NvCargaBundle:Baddress')->find($id);
+        if (!$entity) {
+            throw $this->createNotFoundException('No existe la dirección');
+        }
+        $admin = $this->isGranted('ROLE_ADMIN') || $this->isGranted('ROLE_ADMIN_CUSTOMER');       
+        $pobox = $user->getPobox();
+        $customerdir = $entity->getCustomer();
+        
+        if (!$customerdir) {
+            throw $this->createNotFoundException('No existe el cliente para modificarle dirección principal');
+        }
+        $customer = null;
+        if ($pobox) {
+            $customer = $pobox->getCustomer();
+        }
+        $admin = ($admin) && ($user->getMaincompany() == $customerdir->getMaincompany());
+        if (($customer != $customerdir ) && (!$admin)) {
+            throw $this->createNotFoundException('No tiene permiso para modificar direcciones del cliente');
+        }
+        $customerdir->setAdrdefault($entity);
+        $em->flush();
+
+        return $this->redirect($this->generateUrl('customer_show', array('id' => $entity->getCustomer()->getId())));
+    }
+    /**
+     * Displays a form to create a new Baddress entity.
+     *
+     * @Route("/{id}/{type}/new", name="baddress_new")
+     * @Method("GET")
+     * @Template()
+     */
+    public function newAction($id, $type)
+    {
+        $entity = new Baddress();
+        
+        $em = $this->getDoctrine()->getManager();
+        $user = $this->getUser();
+        $admin = $this->isGranted('ROLE_ADMIN') || $this->isGranted('ROLE_ADMIN_CUSTOMER');       
+        $pobox = $user->getPobox();
+        $customerdir = $em->getRepository('NvCargaBundle:Customer')->find($id);
+        
+        if (!$customerdir) {
+            throw $this->createNotFoundException('No existe el cliente para agregar dirección');
+        }
+        $customer = null;
+        if ($pobox) {
+            $customer = $pobox->getCustomer();
+        }
+        $admin = ($admin) && ($user->getMaincompany() == $customerdir->getMaincompany());
+        if (($customer != $customerdir ) && (!$admin)) {
+            throw $this->createNotFoundException('No tiene permiso para crear direcciones del cliente');
+        }
+        
+        $entity->setCustomer($customerdir);
+        $form   = $this->createCreateForm($entity, $type);
+        return array(
+            'entity' => $entity,
+            'form'   => $form->createView(),
+        );
+    }
+
+    /**
+     * Finds and displays a Baddress entity.
+     *
+     * @Route("/{id}", name="baddress_show")
+     * @Method("GET")
+     * @Template()
+     */
+/*
+    public function showAction($id)
+    {
+        $em = $this->getDoctrine()->getManager();
+
+        $entity = $em->getRepository('NvCargaBundle:Baddress')->find($id);
+
+        if (!$entity) {
+            throw $this->createNotFoundException('Unable to find Baddress entity.');
+        }
+
+        $deleteForm = $this->createDeleteForm($id);
+
+        return array(
+            'entity'      => $entity,
+            'delete_form' => $deleteForm->createView(),
+        );
+    }
+*/
+    /**
+     * Displays a form to edit an existing Baddress entity.
+     *
+     * @Route("/{id}/edit", name="baddress_edit")
+     * @Method("GET")
+     * @Template()
+     */
+    public function editAction($id)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $user = $this->getUser();
+        $admin = $this->isGranted('ROLE_ADMIN') || $this->isGranted('ROLE_ADMIN_CUSTOMER');
+        $entity = $em->getRepository('NvCargaBundle:Baddress')->find($id);
+        $pobox = $user->getPobox();
+        $customer = null;
+        if (!$entity) {
+                throw $this->createNotFoundException('No existe la dirección');
+            }
+        if ($pobox) {
+            $customer = $pobox->getCustomer();
+        } 
+        $admin = ($admin) && ($user->getMaincompany() == $entity->getCustomer()->getMaincompany());
+        if (($customer != $entity->getCustomer()) && (!$admin)) {
+            throw $this->createNotFoundException('No tiene permiso para editar direcciones del cliente');
+        }
+
+        $editForm = $this->createEditForm($entity);
+//        $deleteForm = $this->createDeleteForm($id);
+
+        return array(
+            'entity'      => $entity,
+            'form'   => $editForm->createView(),
+//            'delete_form' => $deleteForm->createView(),
+        );
+    }
+
+    /**
+    * Creates a form to edit a Baddress entity.
+    *
+    * @param Baddress $entity The entity
+    *
+    * @return \Symfony\Component\Form\Form The form
+    */
+    private function createEditForm(Baddress $entity)
+    {
+        $form = $this->createForm(new BaddressType(), $entity, array(
+            'action' => $this->generateUrl('baddress_update', array('id' => $entity->getId())),
+            'method' => 'PUT',
+        ));
+        $form->remove('cityid');
+        //$form->remove('cityname');
+        
+        $form->add('cityid', 'hidden', array('mapped'=>false, 'data'=>$entity->getCity()->getId()));
+        // $form->add('cityname', 'hidden', array('data'=>$entity->getCity(), 'label'=> 'Ciudad ', 'read_only' => true, 'mapped'=>false, 'constraints' => array(new NotBlank(["message" => "Escoja una ciudad"])))) ;
+        //$form->add('state', 'text', array('data'=>$entity->getCity()->getState(),'label'=> 'Estado ', 'read_only' => true, 'mapped'=>false));
+        //$form->add('country', 'text', array('data'=>$entity->getCity()->getState()->getCountry(),'label'=> 'País ', 'read_only' => true, 'mapped'=>false));
+        $form->add('submit', 'submit', array('label' => 'Actualizar'));
+
+        return $form;
+    }
+    /**
+     * Edits an existing Baddress entity.
+     *
+     * @Route("/{id}", name="baddress_update")
+     * @Method("PUT")
+     * @Template("NvCargaBundle:Baddress:edit.html.twig")
+     */
+    public function updateAction(Request $request, $id)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $user = $this->getUser();
+        $admin = $this->isGranted('ROLE_ADMIN') || $this->isGranted('ROLE_ADMIN_CUSTOMER');
+        $entity = $em->getRepository('NvCargaBundle:Baddress')->find($id);
+        $pobox = $user->getPobox();
+        $customer = null;
+        if (!$entity) {
+                throw $this->createNotFoundException('No existe la dirección');
+            }
+        if ($pobox) {
+            $customer = $pobox->getCustomer();
+        }
+        $admin = ($admin) && ($user->getMaincompany() == $entity->getCustomer()->getMaincompany());
+        if (($customer != $entity->getCustomer()) && (!$admin)) {
+            throw $this->createNotFoundException('No tiene permiso para editar direcciones del cliente');
+        }
+
+        // $deleteForm = $this->createDeleteForm($id);
+        $city = $entity->getCity()->getId();
+        $editForm = $this->createEditForm($entity);
+        $editForm->handleRequest($request);
+	
+
+        if ($editForm->isValid()) {
+            $cityid = $editForm->get("cityid")->getData();
+            if ($cityid != $city) {
+                $newcity = $em->getRepository('NvCargaBundle:City')->find($cityid);
+                $entity->setCity($newcity);
+            }
+            $em->flush();
+
+            return $this->redirect($this->generateUrl('customer_show', array('id' => $entity->getCustomer()->getId())));
+        }
+
+        return array(
+            'entity'      => $entity,
+            'form'   => $editForm->createView(),
+         //   'delete_form' => $deleteForm->createView(),
+        );
+    }
+    /**
+     * Deletes a Baddress entity.
+     *
+     * @Route("/delete/{id}", name="baddress_delete")
+     */
+    public function deleteAction(Request $request, $id)
+    {
+        $em = $this->getDoctrine()->getManager();
+        $user = $this->getUser();
+        $admin = $this->isGranted('ROLE_ADMIN') || $this->isGranted('ROLE_ADMIN_CUSTOMER');
+        $entity = $em->getRepository('NvCargaBundle:Baddress')->find($id);
+        $pobox = $user->getPobox();
+        $customer = null;
+	
+        if (!$entity) {
+                throw $this->createNotFoundException('No existe la dirección');
+            }
+        if ($pobox) {
+            $customer = $pobox->getCustomer();
+        } 
+        $admin = ($admin) && ($user->getMaincompany() == $entity->getCustomer()->getMaincompany());
+        if (($customer != $entity->getCustomer()) && (!$admin)) {
+            throw $this->createNotFoundException('No tiene permiso para eliminar direcciones del cliente');
+        }
+        
+        $alerts = $em->getRepository('NvCargaBundle:Alert')->findBy(array('baddress' => $entity));
+        if ($alerts) {
+            throw $this->createNotFoundException('Existen paquetes alertados con esta dirección destino. Debe eliminar esa alertas para poder eliminar la dirección');
+        }
+        $translator = $this->get('translator');
+        $receipts = $em->getRepository('NvCargaBundle:Receipt')->findBy(array('receiver' => $entity));
+        if ($receipts) {
+            throw $this->createNotFoundException('Existen ' . $translator->trans('Recibos') .' con esta dirección destino. Debe eliminar/modificar los paquetes para poder eliminar la dirección');
+        }
+        $customer = $entity->getCustomer();
+
+        $customer->removeBaddress($entity);
+        $default = $customer->getBaddress()->first();
+        
+        if ($customer->getAdrdefault() == $entity) {
+            $customer->setAdrdefault($default);
+        }
+        // exit(\Doctrine\Common\Util\Debug::dump($customer));
+
+        $em->remove($entity);
+        $em->flush();
+
+/*        
+        $form = $this->createDeleteForm($id);
+        $form->handleRequest($request);
+
+        if ($form->isValid()) {
+            $em = $this->getDoctrine()->getManager();
+            $entity = $em->getRepository('NvCargaBundle:Baddress')->find($id);
+
+            if (!$entity) {
+                throw $this->createNotFoundException('Unable to find Baddress entity.');
+            }
+
+            $em->remove($entity);
+            $em->flush();
+        }
+
+
+        return $this->redirect($this->generateUrl('baddress'));
+*/
+        return $this->redirect($this->generateUrl('customer_show', array('id' => $entity->getCustomer()->getId())));
+    }
+
+    /**
+     * Creates a form to delete a Baddress entity by id.
+     *
+     * @param mixed $id The entity id
+     *
+     * @return \Symfony\Component\Form\Form The form
+     */
+    private function createDeleteForm($id)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('baddress_delete', array('id' => $id)))
+            ->setMethod('DELETE')
+            ->add('submit', 'submit', array('label' => 'Delete'))
+            ->getForm()
+        ;
+    }
+}

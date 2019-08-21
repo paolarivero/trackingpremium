@@ -1,0 +1,160 @@
+{% extends '::layout-pdf.html.twig' %}
+
+{% block body %}
+<style>
+
+.chr {
+    margin:0;
+    height:1px;
+    border:none;
+    color:#333;
+    background-color:#333;
+}
+
+</style>
+{% if entity.masterec %}
+    {% set listrec = [entity.masterec] %}
+{% else %}
+    {% set listrec =  entity.receipts %}
+{% endif %}
+{% set pieces = listrec|length %}
+{% for key,receipt in listrec %}
+    {# {% if key == 0 %}
+        <div style="padding-top:15px;float: none !important;">
+    {% else %}
+        <div style="padding-top:15px;float: none !important; page-break-before: avoid;">
+    {% endif %}
+    #}
+    <div style="padding-top:10px;page-break-inside: avoid;  page-break-after: avoid;">
+        <table class="no-border" cellspacing="0" width="100%">
+        <tr>
+            <td style="width:48%;">
+                {% if entity.maincompany.logo %}
+                    {% set name = companies_logos ~ entity.maincompany.logo %}
+                {% else %}
+                    {% set name = companies_logos ~ 'default.png' %}
+                {% endif %}
+                <img src="{{ absolute_url(asset(name)) }}" alt="Logo" style="width:100px;">
+                {# <img src="{{ absolute_url(asset('assets/img/logo_empresa-print.png')) }}" alt="" style="width:50%"> #}
+            </td>
+            <td style="width:48%;">
+              <p style="font-size:40px;" align="center"><em>
+                {% if entity.tariff.shippingtype.name == "Aéreo" %}
+                    AIR
+                {% else %}
+                    OCEAN
+                {% endif %}
+              <em>  </p>
+            </td>
+        </tr>
+        </table>
+        <hr class="chr">
+        CONSIGNEE<br>
+        {{ entity.addressee.name }} {{ entity.addressee.lastname }} <br>
+          {{ entity.addressee.address }}  <br>
+        Teléfono:
+    {% if entity.addressee.phone is defined%}
+    {{ entity.addressee.phone }},
+    {% endif %}
+    {% if entity.addressee.mobile is defined%}
+    {{ entity.addressee.mobile }}
+    {% endif %}
+
+        <hr class="chr">
+        <table class="no-border" cellspacing="0" width="100%">
+        <tr>
+            <td style="width:48%;">{{ 'Guide'|trans|upper }} #</td>
+            <td style="width:48%; text-align:right">
+            DATE: {{ entity.creationdate|date('m/d/Y') }}</td>
+        </tr>
+        </table>
+        <br>
+        <p style="font-size:30px;" align="center">
+            {{ entity.number }}
+        </p>
+
+        <table class="no-border" cellspacing="0" width="100%">
+        <tbody>
+        <tr>
+            <td  valign="top" rowspan=2 style="border-right:1px solid black;border-top:1px solid black;">
+            DESTINATION<br>
+            <p style="font-size:30px;line-height: 85%;" align="center" >
+            {{ entity.addressee.city }}
+            </p>
+            </td>
+            <td style="width:48%;border-top:1px solid black; padding-left:5px">
+            PCS
+            <p style="font-size:14px;" align="center">
+            <b>{{ entity.pieces }}</b>
+            </p>
+            </td>
+        </tr>
+        <tr>
+            <td style="border-top:1px solid black; padding-left:5px">
+            PACKAGETYPE<br>
+            <center></center>
+            </td>
+        </tr>
+        </tbody>
+        </table>
+        <table class="no-border" cellspacing="0" width="100%">
+        <tbody>
+        {# <tr>
+            <td style="width:33%; border-top:1px solid black; border-right:1px solid black;">
+            UNIT WEIGHT<br>
+            <center>{{ entity.tariff.measure.label|upper }}</center>
+            </td>
+            <td style="width:33%; border-top:1px solid black; border-right:1px solid black;padding-left:5px">
+            TOTAL WEIGHT<br>
+            <center>{{ receipt.weight }}</center>
+            </td>
+            <td style="width:33%; border-top:1px solid black; border-right:0; padding-left:5px">
+            DIMENSIONS<br>
+            <center>{{ receipt.width }}X{{ receipt.length }}x{{ receipt.height }}</center>
+            </td>
+        </tr>
+        #}
+        <tr>
+            <td style="border-right:1px solid black; border-top:1px solid black;">
+            ITEM #<br>
+            <center>{{ receipt.number }}</center>
+            </td>
+            <td rowspan=2 valign="top" style="width:48%; border-top:1px solid black;border-bottom:1px solid black;">
+            DESCRIPTION<BR>
+
+            </td>
+        </tr>
+        <tr>
+            <td  style="border-right:1px solid black; border-top:1px solid black; border-bottom:1px solid black;">
+            GUIDE<br>
+            <center>{{ entity.number }}</center>
+            </td>
+        </tr>
+        </tbody>
+        </table>
+        <div style="padding-top:5px;">
+            <center>
+            <div id="demo{{ key }}" style="padding-top:10px;"></div>
+            {% set number = key + 1 %}
+            <h3>{{ number }} of  {{ pieces }}</h3>
+            </center>
+        </div>
+    </div>
+
+{% endfor %}
+
+{% block javascript %}
+<script type="text/javascript">
+    $(document).ready(function () {
+        var thecode= {{ entity.number|json_encode|raw }};
+        {% for key,receipt in listrec %}
+            $("#demo{{ key }}").barcode(
+                thecode, // Value barcode (dependent on the type of barcode)
+                "code128",  // type (string)
+                { barWidth: 2, barHeight: 40, showHRI: false}
+            );
+        {% endfor %}
+    });
+</script>
+{% endblock %}
+{% endblock %}

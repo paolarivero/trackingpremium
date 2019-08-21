@@ -1,0 +1,1952 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>{{ formname }}</title>
+{% endblock %}
+
+{# Display the form #}
+
+{% form_theme form 'form/fields.html.twig' %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>{{ formname }}</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('guide') }}">{% trans %}Guías{% endtrans %}</a></li>
+            <li class="active">Reempacar</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+
+        {{ form_start(form, {attr: {novalidate: 'novalidate', 'id': 'guide_type' }}) }}
+
+
+        <div class="block-flat">
+                    <div class="header">
+                        <h3>Agencia</h3>
+                    </div>
+                    <div class="content">
+                        {{ form_widget(form.agency) }}
+                    </div>
+        </div>
+        <div class="row">
+            <div class="row">
+            <div class="col-sm-6 col-md-6">{# Columna para REMITENTE #}
+                <div class="block-flat">
+                    <div class="header">
+                        <h3>Remitente</h3>
+                    </div>
+                    <div class="content">
+                        {{ form_widget(form.typecusrem) }}
+
+                        <button style="margin-top: 13px;" type="button" class="btn btn-primary bcustomer" data-toggle="modal" data-target="#customersearch" data-thecustomer="1" >Buscar</button></th>
+                        <button id="clearrem" type="button" style="margin-top: 13px;"  class="btn btn-default" onclick="ClearRem();">Limpiar</button>
+
+                        {{ form_row(form.name_sender) }}
+                        {{ form_row(form.lastname_sender) }}
+                        {{ form_row(form.email_sender) }}
+                        {{ form_row(form.address_sender) }}
+                        {{ form_row(form.zip_sender) }}
+                        {{ form_row(form.mobile_sender) }}
+                        {{ form_row(form.phone_sender) }}
+
+                        <div class="form-group">
+                            <div class="row">
+                                    <div class="col-md-2">
+                                        <label>Ciudad</label>
+                                    </div>
+                                    <div class="col-md-10">
+                                        <input type="hidden" id="citysender" style="width:100%;" />
+                                    </div>
+                            </div>
+                        </div>
+                        {{ form_row(form.cityname_sender) }}
+                        {{ form_row(form.emailnoti) }}
+                    </div>{# FIN CONTENT #}
+                </div> {# FIN BLOCK FLAT #}
+            </div> {# FIN DEL REMITENTE #}
+
+            <div class="col-sm-6 col-md-6">{# Columna para DESTINATARIO #}
+                <div class="block-flat">
+                    <div class="header">
+                        <h3>Destinatario</h3>
+                    </div>
+                    <div class="content">
+                        {{ form_widget(form.typecusdes) }}
+
+                        <button style="margin-top: 13px;" type="button" class="btn btn-primary bcustomer" data-toggle="modal" data-target="#customersearch" data-thecustomer="2" >Buscar</button></th>
+                        <button id="cleardest" type="button" style="margin-top: 13px;"  class="btn btn-default" onclick="ClearDest();">Limpiar</button>
+
+                        {{ form_row(form.name_addr) }}
+                        {{ form_row(form.lastname_addr) }}
+                        {{ form_row(form.email_addr) }}
+                        {{ form_row(form.address_addr) }}
+                        {{ form_row(form.zip_addr) }}
+                        {{ form_row(form.mobile_addr) }}
+                        {{ form_row(form.phone_addr) }}
+
+                        <div class="form-group">
+                            <div class="row">
+                                    <div class="col-md-2">
+                                        <label>Ciudad</label>
+                                    </div>
+                                    <div class="col-md-10">
+                                        <input type="hidden" id="cityaddr" style="width:100%;" />
+                                    </div>
+                            </div>
+                        </div>
+                        {{ form_row(form.cityname_addr) }}
+                        {{ form_row(form.mobilnoti) }}
+                    </div>{# FIN CONTENT #}
+                </div> {# FIN BLOCK FLAT #}
+            </div> {# FIN DEL REMITENTE #}
+        </div>
+        <div class="block-flat">
+            <div class="header">
+                <h3>Paquetes</h3>
+
+            </div>
+            <div class="content">
+                {{ form_row(form.packages) }}
+                <hr>
+
+                <div id="accordion3" class="panel-group accordion">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title"><a style="color: #555;" data-toggle="collapse" data-parent="#accordion3" href="#ac3-11" aria-expanded="false"><i class="fa fa-angle-right"></i>Avanzado</a></h4>
+                        </div>
+                        <div id="ac3-11" class="panel-collapse collapse">
+                            <div class="panel-body">
+
+                <div class="row marginRow">
+
+                    <div class="col-sm-6 col-md-6">
+                        <div class="form-group">
+                            <label>Número de copias del último paquete: </label>
+                            <input style="display:block-inline;padding-left:5px"  id="numcopies" type="number" name="numcopies" min="0" max="100" step="1" value="0">
+                            <button type="button" class="btn btn-primary bcopypack">Copiar</button>
+                        </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+        </div>
+                <h3>Resumen </h3>
+                <hr>
+                <div class="row marginRow" style="margin-bottom: 0px !important">
+
+                    <div class="col-sm-4 col-md-4" style="padding-bottom: 7px;">
+                            {{ form_widget(form.realweight) }}
+                    </div>
+
+
+                    <div class="col-sm-4 col-md-4"  style="padding-bottom: 7px;">
+                            {{ form_widget(form.insurance_amount) }}
+                    </div>
+
+                    <div class="col-sm-4 col-md-4" style="padding-bottom: 7px;">
+                            {{ form_widget(form.pieces) }}
+                    </div>
+                </div>
+
+                <div class="row marginRow">
+                        <div class="col-sm-4 col-md-4" style="padding-bottom: 7px;">
+                                {{ form_widget(form.declared) }}
+                        </div>
+
+                        <div class="col-sm-4 col-md-4" style="padding-bottom: 7px;height: 34px;">
+                                {{ form_widget(form.contain) }}
+                        </div>
+
+                        <div class="col-sm-4 col-md-4" style="padding-bottom: 7px;">
+                                {{ form_widget(form.file) }}
+                                {% if entity.imageSize > 0 %}
+                                    <img style="width:200px;" alt="Imagen del paquete" src="data:{{ entity.imageType }};base64,{{ image }}" />
+                                {% endif %}
+                        </div>
+                    </div>
+            </div>
+        </div>
+        <div class="block-flat">
+            <div class="header">
+                <div class="row marginRow">
+                    <div class="col-sm-6 col-md-6">
+                        <h3><b>Tarifa y Servicios</b> </h3>
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                        <center>
+                        {{ form_row(form.calculate) }}
+                        </center>
+                    </div>
+                </div>
+            </div>
+            <div class="content">
+                <div class="row marginRow">
+                    <div class="col-sm-2 col-md-2">
+                      <div class="form-group">
+                        <div class="row">
+                          <div class="col-md-12">
+
+
+
+                            <button style="text-align:left;" type="button" class="btn btn-primary btn-sm btn-flat btariff" style="margin:auto;display:block">Seleccionar Tarifa</button>
+
+
+                          </div>  </div>  </div>
+                    </div>
+                    <div class="col-sm-4 col-md-4">
+                    <div class="form-group">
+                      <div class="row">
+                        <div class="col-md-12">
+                      {{ form_widget(form.tariffname) }}
+                            </div>  </div>  </div>
+                    </div>
+                    <div class="col-sm-2 col-md-2">
+                    <div class="form-group">
+                      <div class="row">
+                        <div class="col-md-12">
+
+                      {{ form_widget(form.measurevalue) }}
+                        {{ form_errors(form.measurevalue) }}
+
+
+  </div>  </div>  </div>
+                    </div>
+
+
+                <div class="col-sm-1 col-md-1">
+                <div class="form-group">
+                  <div class="row">
+                    <div class="col-md-12">
+
+              <label padding-top: 5px; margin-left: -10px;> medida</label>
+
+
+</div>  </div>  </div>
+                </div>
+            </div>
+
+                <div id="accordion3" class="panel-group accordion">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <h4 class="panel-title"><a style="color: #555;" data-toggle="collapse" data-parent="#accordion3" href="#ac3-1" aria-expanded="false"><i class="fa fa-angle-right"></i>Avanzado</a></h4>
+                        </div>
+                        <div id="ac3-1" class="panel-collapse collapse">
+                            <div class="panel-body">
+                                <div class="row marginRow">
+                                    <div class="col-sm-4 col-md-4">
+                                      <label class="control-label required" for="guide_type_measurevalue"> Valor Tarifa <input type="number" id="id2" readonly class="form-control" /></label>
+                                    </div>
+                                    <div class="col-sm-4 col-md-4">
+                                        <label> % Impuesto {{ form_widget(form.tax_per) }} </label>
+                                        {{ form_errors(form.tax_per) }}
+                                    </div>
+                                    <div class="col-sm-4 col-md-4">
+                                        <label> % Seguro {{ form_widget(form.insurance_per) }} </label>
+                                        {{ form_errors(form.insurance_per) }}
+                                    </div>
+                                </div>
+                                <div class="row marginRow">
+                                    <div class="col-sm-4 col-md-4">
+                                        <label> Pago inicial {{ form_widget(form.downpayment) }} </label>
+                                        {{ form_errors(form.downpayment) }}
+                                    </div>
+                                    <div class="col-sm-4 col-md-4">
+                                        <label> Descuento {{ form_widget(form.discount) }} </label>
+                                        {{ form_errors(form.tax_per) }}
+                                    </div>
+                                    <div class="col-sm-4 col-md-4">
+                                        <label> Otros cargos {{ form_widget(form.otherfees) }} </label>
+                                        {{ form_errors(form.insurance_per) }}
+                                    </div>
+                                </div>
+                                <div class="row marginRow">
+                                    <div class="col-sm-4 col-md-4">
+                                        <label> Peso a pagar {{ form_widget(form.paidweight) }} </label>
+                                        {{ form_errors(form.paidweight) }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                {# // INICIO PARA SERVICIOS ADICIONALES #}
+                <input type='hidden' id='wdes' value=0 />
+                <input type='hidden' id='paypal'  value=0 />
+                {% if services|length > 0 %}
+                    <div id="accordion4" class="panel-group accordion">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h4 class="panel-title"><a style="color: #555;" data-toggle="collapse" data-parent="#accordion4" href="#ac4-1" aria-expanded="false"><i class="fa fa-angle-right"></i>Servicios adicionales</a></h4>
+                            </div>
+                            <div id="ac4-1" class="panel-collapse collapse">
+                                <div class="panel-body">
+                                    <div class="row marginRow">
+                                        <div class="col-sm-4 col-md-4">
+                                            <center>Nombre</center>
+                                        </div>
+                                        {#
+                                        <div class="col-sm-2 col-md-2">
+                                            <center>Descripción</center>
+                                        </div>
+                                        #}
+                                        <div class="col-sm-2 col-md-2">
+                                            <center>Medida</center>
+                                        </div>
+                                        <div class="col-sm-2 col-md-2">
+                                            <center>Precio</center>
+                                        </div>
+                                        <div class="col-sm-2 col-md-2">
+                                            <center>Cantidad</center>
+                                        </div>
+                                        <div class="col-sm-2 col-md-2">
+                                            <center>Total</center>
+                                        </div>
+                                    </div>
+                                    {{ form_row(form.services) }}
+
+                                    <p align="right"><b> Total servicios adicionales: <input style="padding-left:5px;" "type='number' id='subtotal' readonly"/></b></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                {# // FIN PARA SERVICIOS ADICIONALES #}
+            </div>
+        </div>
+        <div class="block-flat">
+            <div class="header">
+                <h3><b>Costos</b></h3>
+            </div>
+            <div class="content">
+                    <div class="row marginRow">
+                        <div class="col-sd-2 col-md-2">
+                            <center>
+                                <label>Flete</label>
+                                {{ form_widget(form.freight) }}
+                            </center>
+                        </div>
+                        <div class="col-sd-2 col-md-2">
+                            <center>
+                              <label>Flete Volumen</label>
+                                {{ form_widget(form.volfreight) }}
+                            </center>
+                        </div>
+                        <div class="col-sd-2 col-md-2">
+                            <center>
+                                <label>Impuestos</label>
+                                {{ form_widget(form.tax_paid) }}
+                            </center>
+                        </div>
+                        <div class="col-sd-2 col-md-2">
+                            <center>
+                                <label>Seguro</label>
+                                {{ form_widget(form.insurance_paid) }}
+                            </center>
+                        </div>
+                        <div class="col-sd-4 col-md-4">
+                            <center>
+                                <label>Total</label>
+                                {{ form_widget(form.totalpaid) }}
+                            </center>
+                        </div>
+                    </div>
+                    <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        <td>
+
+                        </td>
+                        <td style="text-align:right;">
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-flat" >Cancelar</button>
+                            {{ form_widget(form.submit, { 'attr': {'class': 'btn btn-primary btn-flat'} }) }}
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+
+        <!-- Modal --> {# BUSCAR CLIENTE #}
+        <div class="modal fade colored-header md-effect-9" id="customersearch" role="dialog">
+            <div class="modal-dialog modal-md">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button id="closemodalcus1" type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h2 class="modal-title">Buscar Cliente</h2>
+                    </div>
+
+                    <div class="modal-body form">
+
+                        Buscar: <br><input style="display:inline; width:100%" type="text" placeholder="Nombre/Apellido/Casillero" id="findcustomer" onkeyup="SearchCustomer(event)" autocomplete="off"  />
+
+                        <center>
+                        <div id="mensajeCus">
+                            <h3 style="color:red;">NO SE ENCONTRARON CLIENTES</h3>
+                        </div>
+                        </center>
+                        <div id="divTable">
+                        <table id="customerTable" class="row-border hover order-column" cellspacing="0" width="100%">
+                            <thead class="no-border-y">
+
+                            <tr>
+                                <th><b>Nombre</b></th>
+                                <th><b>Apellido</b></th>
+                                <th><b>Casillero</b></th>
+                                <th><b>Ciudad</b></th>
+                            </tr>
+
+                            </thead>
+                            <tbody class="no-border-y">
+                            </tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="closemodalcus1" data-dismiss="modal" class="btn btn-default btn-flat md-close">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div> {# FIN MODAL DE BUSCAR CLIENTES #}
+
+
+        <!-- Modal --> {# BUSCAR TARIFA #}
+        <div class="modal fade colored-header md-effect-9" id="tariffsearch" role="dialog">
+            <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button id="closemodaltariff" type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h2 class="modal-title" id="mentariff"></h2>
+                    </div>
+                    <div class="modal-body">
+                        <div class="table-responsive">
+                            {# <table id="tariffTable" class="table-box dt-responsive nowrap" cellspacing="0" width="100%" > #}
+                            <table id="tariffTable" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
+                                <thead>
+                                   <tr>
+                                        <th><b>Servicio</b></th>
+                                        <th><b>Medida</b></th>
+                                        <th><b>Valor</b></th>
+                                        <th><b>Seguro</b></th>
+                                        <th><b>Tax</b></th>
+                                        <th><b>Inicia</b></th>
+                                        <th><b>Hasta</b></th>
+                                        <th><b>Mínimo</b></th>
+                                        <th><b>$Ini</b></th>
+                                        <th><b>$Adi</b></th>
+                                   </tr>
+                                </thead>
+                                <tbody>
+
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="closemodaltariff1" type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div> {# FIN DEL MODAL BUSCAR TARIFA #}
+        {% do form.cod.setRendered %}
+        {% do form.paidtype.setRendered %}
+        {{ form_end(form) }}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+<script type="text/javascript">
+    function ClearRem() {
+        $('#guide_type_id_sender').val(0);
+        $('#guide_type_name_sender').val('');
+        $('#guide_type_lastname_sender').val('');
+        $('#guide_type_address_sender').val('');
+        $('#guide_type_cityid_sender').val(0);
+        $('#guide_type_cityname_sender').val('');
+        $('#citysender').select2('data', null);
+        $('#guide_type_phone_sender').val('');
+        $('#guide_type_mobile_sender').val('');
+        $('#guide_type_barrio_sender').val('');
+        $('#guide_type_email_sender').val('');
+        $('#guide_type_zip_sender').val('');
+        $('#guide_type_typecusrem_1').iCheck('check');
+        $('#guide_type_typecusrem').change();
+        return true;
+    }
+    function ClearDest() {
+        $('#guide_type_id_addr').val(0);
+        $('#guide_type_name_addr').val('');
+        $('#guide_type_lastname_addr').val('');
+        $('#guide_type_address_addr').val('');
+        $('#guide_type_cityid_addr').val(0);
+        $('#guide_type_cityname_addr').val('');
+        $('#cityaddr').select2('data', null);
+        $('#guide_type_phone_addr').val('');
+        $('#guide_type_mobile_addr').val('');
+        $('#guide_type_barrio_addr').val('');
+        $('#guide_type_email_addr').val('');
+        $('#guide_type_zip_addr').val('');
+        $('#guide_type_typecusdes_1').iCheck('check');
+        $('#guide_type_typecusdes').change();
+        return true;
+    }
+
+    function returnSelectCustomer(vidcus, vname, vlastname, vtype, vaddress, vcityid, vcity, vstate, vcountry, vphone, vmobile, vbarrio, vemail, vzip){
+        var thecity = vcity + ' (' + vstate + ', ' + vcountry + ')';
+
+        if ($('#guide_type_selcustomer').val() === "1") {
+            $('#guide_type_id_sender').val(vidcus);
+            $('#guide_type_name_sender').val(vname);
+            $('#guide_type_lastname_sender').val(vlastname);
+            if (vtype == 'Persona') {
+                $('#guide_type_typecusrem_1').iCheck('check');
+            } else {
+                $('#guide_type_typecusrem_2').iCheck('check');
+            }
+            $('#guide_type_typecusrem').change();
+            $('#guide_type_address_sender').val(vaddress);
+            $('#guide_type_cityid_sender').val(vcityid);
+            $('#citysender').select2('data', {id: vcityid, text: thecity});
+            $('#guide_type_cityname_sender').val(thecity);
+            $('#guide_type_phone_sender').val(vphone);
+            $('#guide_type_mobile_sender').val(vmobile);
+            $('#guide_type_barrio_sender').val(vbarrio);
+            $('#guide_type_email_sender').val(vemail);
+            $('#guide_type_zip_sender').val(vzip);
+        } else {
+            $('#guide_type_id_addr').val(vidcus);
+            $('#guide_type_name_addr').val(vname);
+            $('#guide_type_lastname_addr').val(vlastname);
+            if (vtype == 'Persona') {
+                $('#guide_type_typecusdes_1').iCheck('check');
+            } else {
+                $('#guide_type_typecusdes_2').iCheck('check');
+            }
+            $('#guide_type_typecusdes').change();
+            $('#guide_type_address_addr').val(vaddress);
+            $('#guide_type_cityid_addr').val(vcityid);
+            $('#cityaddr').select2('data', {id: vcityid, text: thecity});
+            $('#guide_type_cityname_addr').val(thecity);
+            $('#guide_type_phone_addr').val(vphone);
+            $('#guide_type_mobile_addr').val(vmobile);
+            $('#guide_type_barrio_addr').val(vbarrio);
+            $('#guide_type_email_addr').val(vemail);
+            $('#guide_type_zip_addr').val(vzip);
+        }
+
+        $("#closemodalcus1").click();
+        return true;
+    }
+    function SearchCustomer(e) {
+        e.preventDefault();
+        var typecus=$('#guide_type_selcustomer').val();
+        var txt = $.trim( $('#findcustomer').val() );
+        $('#divTable').show();
+        $('#mensajeCus').hide();
+        var path = "{{ url('listcustomer') }}?pattern=" + txt + "&typecus=" + typecus;
+        if (txt.length > 0) {
+            $.ajax({
+                type: "GET",
+                url:  path,
+                success: function (data) {
+                    if (data.length > 0) {
+
+                    var tableRef = document.getElementById('customerTable').getElementsByTagName('tbody')[0];
+                    var nf = tableRef.rows.length;
+                    for (i=0; i < nf; i++) {
+                        tableRef.deleteRow(0);
+                    }
+                    var nc = data.length;
+                    for (i = 0; i < nc; i++) {
+                        var customerid = data[i]['customerid'];
+                        var namecus = data[i]['name'];
+                        var lastnamecus = data[i]['lastname'];
+                        var pobox = data[i]['pobox'];
+                        var address = data[i]['address'];
+                        var cityid = data[i]['cityid'];
+                        var cityname = data[i]['cityname'];
+                        var allcityname = data[i]['cityname'] + ', ' +  data[i]['state'] + ' (' +  data[i]['country'] + ')';
+
+                        var state = data[i]['state'];
+                        var country = data[i]['country'];
+                        var phone = data[i]['phone'];
+                        var mobile = data[i]['mobile'];
+                        var barrio = data[i]['barrio'];
+                        var email = data[i]['email'];
+                        var zip = data[i]['zip'];
+                        var type = data[i]['type'];
+                        // Insert a row in the table at the last row
+                        var newRow   = tableRef.insertRow(tableRef.rows.length);
+                        newRow.onclick = (function(){
+                            var vidcus = customerid; var vname = namecus; var vlastname = lastnamecus;
+                            var vtype = type; var vaddress = address;  var vcityid = cityid; var vcity= cityname; var vstate = state;
+                            var vcountry = country; var vphone = phone; var vmobile = mobile; var vbarrio = barrio;
+                            var vemail = email; var vzip = zip; 	return function()
+                            {returnSelectCustomer(vidcus, vname, vlastname, vtype, vaddress, vcityid, vcity, vstate,
+                                vcountry, vphone, vmobile, vbarrio, vemail, vzip)}})();
+                        newRow.class="highlight";
+
+                        // Insert a cell in the row at index 0
+                        var newCell0  = newRow.insertCell(0);
+                        var newCell1  = newRow.insertCell(1);
+                        var newCell2  = newRow.insertCell(2);
+                        var newCell3  = newRow.insertCell(3);
+
+                        var newText0 = document.createTextNode(namecus);
+                        newCell0.appendChild(newText0);
+
+                        var newText1 = document.createTextNode(lastnamecus);
+                        newCell1.appendChild(newText1);
+
+                        var newText2 = document.createTextNode(pobox);
+                        newCell2.appendChild(newText2);
+
+                        var newText3 = document.createTextNode(allcityname);
+                        newCell3.appendChild(newText3);
+                    }
+                    $("#customerTable tbody tr").mouseover(function() { $(this).addClass("myhover"); });
+                    $("#customerTable tbody tr").mouseout(function() { $(this).removeClass("myhover"); });
+                }  else {
+                    $('#divTable').hide();
+                    $('#mensajeCus').show();
+                }
+                },
+                error: function (data) {
+                    console.log(data);
+                }
+            });
+        } else {
+            $('#divTable').hide();
+            $('#mensajeCus').hide();
+        }
+        return true;
+    }
+
+    var tariff_flat = false;
+    /*
+    function removeHead() {
+        var lst = document.getElementsByClassName("tablepp");
+        for(var i = 0; i < lst.length; ++i) {
+            lst[i].style.display = 'none';
+        }
+        lst[0].style.display = 'table-row';
+    }
+    */
+    function updatePack() {
+        var npack = $('.list-packages').find('> div').length;
+        if ($('#guide_type_pieces').val() <= 0) {
+            $('#guide_type_pieces').val(npack);
+        }
+        var peso=0;
+        var valor=0;
+
+        for (var i=0; i< npack; i++) {
+            var strpeso='#guide_type_packages_'+i+'_weight';
+            var strvalor='#guide_type_packages_'+i+'_value';
+            peso = peso + Number($(strpeso).val());
+            valor = valor + Number($(strvalor).val());
+        }
+        peso = peso.toFixed(2);
+        $('#guide_type_realweight').val(peso);
+        valor=valor.toFixed(2);
+        $('#guide_type_declared').val(valor);
+    }
+
+    // INICIO PARA SERVICIOS ADICIONALES
+    function newPaypal() {
+        var nserv = $('.list-services').find('> div').length;
+        for (var i=0; i< nserv; i++) {
+            var strname='#guide_type_services_'+i+'_name';
+            var stramount='#guide_type_services_'+i+'_amount';
+            var strtotal='#guide_type_services_'+i+'_total';
+            var name = $(strname).val();
+            if ( name.toLowerCase().indexOf('paypal') !== -1 ) {
+                $(stramount).attr('readonly', true);
+            }
+        }
+    }
+
+    function changePaypal() {
+        var nserv = $('.list-services').find('> div').length;
+        var option = $("#guide_type_paidtype option:selected").html();
+        for (var i=0; i< nserv; i++) {
+            var strprice='#guide_type_services_'+i+'_price';
+            var strname='#guide_type_services_'+i+'_name';
+            var stramount='#guide_type_services_'+i+'_amount';
+            var strtotal='#guide_type_services_'+i+'_total';
+            var name = $(strname).val();
+
+            if ( name.toLowerCase().indexOf('paypal') !== -1 ) {
+                if (option.toLowerCase().indexOf('paypal') !== -1 ) {
+                    var cargo= Number($('#wdes').val());
+                    $(stramount).val(cargo.toFixed(2));
+                } else {
+                    $(stramount).val(0.00);
+                }
+                var amount = $(stramount).val();
+                var price = $(strprice).val();
+                var val1 = Number(amount)*Number(price)/100;
+                $(strtotal).val(val1.toFixed(2));
+                $('#paypal').val(val1.toFixed(2));
+            }
+        }
+    }
+
+    function valServ() {
+        var nserv = $('.list-services').find('> div').length;
+        error = 0;
+        for (var i=0; i< nserv; i++) {
+            var strprice='#guide_type_services_'+i+'_price';
+            var stramount='#guide_type_services_'+i+'_amount';
+            var strmeasure='#guide_type_services_'+i+'_measure';
+            var strtotal='#guide_type_services_'+i+'_total';
+            var strdepend = '#guide_type_services_'+i+'_medependof';
+            var strid = '#guide_type_services_'+i+'_id';
+            
+            $(stramount).attr('style', 'background-color: white;');
+            $(strtotal).attr('style', 'background-color: white; ');
+            $(strprice).attr('style', 'background-color: white; ');
+            
+            var amount = $(stramount).val();
+            var price = $(strprice).val();
+            var unit = $(strmeasure).val();
+
+            if ( amount != 0) {
+                if  (amount < 0) {
+                    error1 = 1;
+                    $(stramount).attr('style', 'background-color: #F2DEDE; ');
+                    $(strtotal).attr('style', 'background-color: #F2DEDE; ');
+                }
+                if (price < 0) {
+                    error1 = 1;
+                    $(strprice).attr('style', 'background-color: #F2DEDE; ');
+                    $(strtotal).attr('style', 'background-color: #F2DEDE; ');
+                }
+                if ((unit == '%') && (price > 100)) {
+                    error = 1;
+                    $(strprice).attr('style', 'background-color: #F2DEDE; ');
+                    $(strtotal).attr('style', 'background-color: #F2DEDE; ');
+                }
+                if ((unit == 'Unit') && !((Math.floor(amount) == amount) && $.isNumeric(amount))) {
+                    error = 1;
+                    $(stramount).attr('style', 'background-color: #F2DEDE; ');
+                    $(strtotal).attr('style', 'background-color: #F2DEDE; ');
+                }
+            }
+        }
+        if (error == 1) {
+            var mensaje = 'Hay errores en valores de los servicios adicionales, debe verificar';
+            funalert(mensaje);
+        }
+        return error;
+    }
+    // FIN PARA SERVICIOS ADICIONALES
+
+    function valPack() {
+        var npack = $('.list-packages').find('> div').length;
+        if (npack > 0) {
+            $('#guide_type_pieces').val(npack);
+        } else {
+            $('#guide_type_pieces').val(1);
+        }
+        var peso=0;
+        var valor=0;
+        var error1=0;
+        var error2=0;
+        for (var i=0; i< npack; i++) {
+            var strpeso='#guide_type_packages_'+i+'_weight';
+            var strvalor='#guide_type_packages_'+i+'_value';
+            var strlg='#guide_type_packages_'+i+'_length';
+            var strwd='#guide_type_packages_'+i+'_width';
+            var strhg='#guide_type_packages_'+i+'_height';
+            var strtrack='#guide_type_packages_'+i+'_tracking';
+            var pack = i +1;
+            
+            
+            $(strpeso).attr('style', 'background-color: white; ');
+            $(strvalor).attr('style', 'background-color: white; ');
+            $(strlg).attr('style', 'background-color: white; ');
+            $(strwd).attr('style', 'background-color: white; ');
+            $(strhg).attr('style', 'background-color: white; ');
+            $(strtrack).attr('style', 'background-color: white; width: 20em');
+            
+
+            var lg = Number($(strlg).val());
+            var wd = Number($(strwd).val());
+            var hg = Number($(strhg).val());
+            var pesoi = Number($(strpeso).val());
+            var valori = Number($(strvalor).val());
+            var track = $(strtrack).val();
+            
+            if (!$(strvalor).val()) {
+                $(strvalor).val(0.0);
+                valori = 0.0;
+            }
+            if (lg <= 0) {
+                error1 = 1;
+                $(strlg).attr('style', 'background-color: #F2DEDE; ');
+            }
+            if (wd <= 0) {
+                error1 = 1;
+                $(strwd).attr('style', 'background-color: #F2DEDE; ');
+            }
+            if (hg <= 0) {
+                error1 = 1;
+                $(strhg).attr('style', 'background-color: #F2DEDE; ');
+            }
+            if (pesoi <=0) {
+                error1 = 1;
+                $(strpeso).attr('style', 'background-color: #F2DEDE; ');
+            }
+            if (valori < 0) {
+                error1 = 1;
+                $(strvalor).attr('style', 'background-color: #F2DEDE; ');
+            }
+            var emailcus = $('guide_type_email_addr').val();
+            if (track) {
+                $.ajax({
+                    url: "{{ url('alert_search') }}?tracking=" + track,
+                    success: function(data) {
+                        if ((data['id'] != 0) && (data['emailcus'] != emailcus)) {
+                            error2 = 1;
+                            $(strtrack).attr('style', 'background-color: #F2DEDE; width: 20em');
+                        }
+                    }
+                });
+            }
+            peso = peso + pesoi;
+            valor = valor + valori;
+        }
+
+        if (error2 == 1) {
+            var mensaje = 'Hay paquetes alertados por casilero que tienen un cliente distinto al usuario del casillero. DEBE VERIFICAR...' ;
+            funalert(mensaje);
+        }
+        if (error1 == 1) {
+            var mensaje = 'Hay paquetes con errores en las dimensiones y/o valores, debe verificar';
+            funalert(mensaje);
+        }
+        peso=peso.toFixed(2);
+        $('#guide_type_realweight').val(peso);
+        valor=valor.toFixed(2);
+        $('#guide_type_declared').val(valor);
+        return (error1 + error2);
+    }
+    function setTariffResult(tid, tname, measure, tmeasure, tax, taxper, insurance, insuranceper){
+        $('#hasadd').hide();
+        tariff_flat = false;
+        $('#guide_type_tariffname').val(tname);
+        $('#guide_type_tariffid').val(tid);
+        //TAXPER
+        $('#guide_type_tax_per').val(taxper);
+        $('#guide_type_insurance_per').val(insuranceper);
+        $('#guide_type_measurevalue').val(measure);
+        // MODIFIED 01/10/18
+        if (tax) {
+            $('#guide_type_tax_per').attr('readonly', false);
+        } else {
+            $('#guide_type_tax_per').val('0.0');
+            $('#guide_type_tax_per').attr('readonly', true);
+        }
+        if (insurance) {
+            $('#guide_type_insurance_per').attr('readonly', false);
+        } else {
+            $('#guide_type_insurance_per').val('0.0');
+            $('#guide_type_insurance_per').attr('readonly', true);
+        }
+        //
+        $('#id2').val(measure);
+
+        $("#closemodaltariff").click();
+        /* AGREGADO PARA LAS TARIFAS PLANAS */
+        var tname = $('#guide_type_tariffname').val();
+
+        var strlg='#guide_type_packages_0_length';
+        var strwd='#guide_type_packages_0_width';
+        var strhg='#guide_type_packages_0_height';
+
+        $(strlg).attr('readonly', false);
+        $(strwd).attr('readonly', false);
+        $(strhg).attr('readonly', false);
+        // $("#guide_type_paidweight").show();
+        $("#guide_type_measurevalue").show();
+        // $("#guide_type_volfreight").show();
+        $("#id2").show();
+        $("#newpack").show();
+        $("#guide_type_fvround").val(0);
+
+        if (tname.indexOf('Fija:') != -1){
+            tariff_flat = true;
+            if ((tmeasure == 'CF') || (tmeasure == 'M3')) {
+                $($(".collection-remove.btn.btn-default").get().reverse()).each(function(i, obj) {
+                    $(this).click();
+                });
+                var npack = $('.list-packages').find('> div').length;
+                var peso=0;
+                var valor=0;
+                for (var i=0; i< npack; i++) {
+                    var strpeso='#guide_type_packages_'+i+'_weight';
+                    var strvalor='#guide_type_packages_'+i+'_value';
+                    peso = peso + Number($(strpeso).val());
+                    valor = valor + Number($(strvalor).val());
+                }
+
+                var pos = tname.indexOf('>');
+
+                var length = tname.substring(pos+1,pos+3);
+                var width = tname.substring(pos+4,pos+6);
+                var height = tname.substring(pos+7,pos+9);
+
+                $(strlg).val(length);
+                $(strwd).val(width);
+                $(strhg).val(height);
+
+                $(strlg).attr('readonly', true);
+                $(strwd).attr('readonly', true);
+                $(strhg).attr('readonly', true);
+
+                // $("#guide_type_paidweight").hide();
+                $("#guide_type_measurevalue").hide();
+                $("#guide_type_fvround").val(1);
+                // $("#guide_type_volfreight").hide();
+                $("#id2").hide();
+                $("#newpack").hide();
+            }
+        }
+        /* ======================================== */
+        calculate_all();
+        return true;
+    }
+    function calculate_all() {
+            var thistariff = $('#guide_type_tariffid').val();
+            $('#guide_type_insurance_per').attr('readonly', false);
+            $('#guide_type_tax_per').attr('readonly', false);
+            // console.log(thistariff);
+            if (!(thistariff)) {
+                funalert('Debe seleccionar una tarifa...');
+                return false;
+            }
+            var valida = valPack();
+            if (valida > 0) {
+                return false;
+            }
+            // INICIO PARA SERVICIOS ADICIONALES
+            valida = valServ();
+            if (valida > 0) {
+                return false;
+            }
+            // FIN PARA SERVICIOS ADICIONALES
+            var pesor = Number($('#guide_type_realweight').val());
+            if (pesor <= 0) {
+                funalert('El peso debe ser mayor que cero (0)...');
+                return false;
+            }
+            var pieces = Number($('#guide_type_pieces').val());
+            if (pieces < 1) {
+                funalert('Debe tener al menos un (1) paquete...');
+                return false;
+            }
+            var declared = Number($('#guide_type_declared').val());
+            if (declared < 0) {
+                funalert('El valor declarado debe ser mayor o igual a cero (0)...');
+                return false;
+            }
+            $("#type_guide_submit").attr("disabled", "disabled");
+            $.ajax({
+                type: "GET",
+                url: "{{ url('tariff_find') }}?tariff_id=" + thistariff,
+                success: function(data) {
+                    $("#type_guide_submit").removeAttr("disabled");
+                    var fletev = 0.0;
+                    var flete = 0.0;
+                    var pesoc = 0.0;
+                    var seguro = 0.0;
+                    var total = 0.0;
+                    var impuesto = 0.0;
+
+                    var measure = data['measure'];
+                    var insurance = data['insurance'];
+                    var tax = data['tax'];
+                    var dimentional = data['dimentional'];
+                    var begin = Number(data['begin']);
+                    var until = Number(data['until']);
+                    var minimun = Number(data['minimun']);
+                    var valuemeasure = Number(data['valuemeasure']);
+                    var valuemin = Number(data['valuemin']);
+                    var minimunlimit = data['minimunlimit'];
+                    var volumeprice = Number(data['volumeprice']);
+                    var additional = Number(data['additional']);
+                    var labeladditional = data['labeladditional'];
+                    var weightpay = data['weightpay']; //NUEVO PARA DIFERENTES COBROS DE PESO
+
+                    if (additional > 0) {
+                        $('#hasadd').show();
+                        $('#valueadd').val(additional);
+                        $('#labeladd').val(labeladditional);
+                    }
+                    // document.getElementById('id1').value=pesor;
+                    if ($('#guide_type_measurevalue').val()) {
+                        var this_measurevalue = Number($('#guide_type_measurevalue').val());
+                    } else {
+                        var this_measurevalue = 0.0;
+                    }
+                    var declarado = Number($('#guide_type_declared').val());
+                    // document.getElementById('id2').value=valuemeasure;
+                    // document.getElementById('id4').value=$('#guide_type_declared').val();
+                    if (!(this_measurevalue)) {
+                        $('#guide_type_measurevalue').val(valuemeasure);
+                    } else {
+                        if (this_measurevalue < 0) {
+                            funalert("El valor de la medida no puede ser menor que cero (0)...");
+                            return false;
+                        } else {
+                            valuemeasure = this_measurevalue;
+                        }
+                    }
+                    var npack = $('.list-packages').find('> div').length;
+                    var roundweight = '{{ app.user.agency.maincompany.roundweight }}';
+                    var roundvol = '{{ app.user.agency.maincompany.roundvol }}';
+                    {% if app.user.agency.maincompany.roundtotal %}
+                        var roundtotal = true;
+                    {% else %}
+                        var roundtotal = false;
+                    {% endif %}
+                    // console.log(roundmeasure);
+                    // console.log(roundtotal);
+
+                    if (measure === 'Lb') {
+                        var pesot = 0.0;
+                        var valuedim = "{{ app.user.agency.maincompany.dimfactor }}";
+                        var dimfactor = Number(valuedim);
+                        if ( roundweight == 'Individual' ) { // HAY REDONDEO INDIVIDUAL
+                            var pesot = 0.0;
+                            for (var i=0; i< npack; i++) {
+                                var strpeso='#guide_type_packages_'+i+'_weight';
+                                var strlg='#guide_type_packages_'+i+'_length';
+                                var strwd='#guide_type_packages_'+i+'_width';
+                                var strhg='#guide_type_packages_'+i+'_height';
+                                var lg = Number($(strlg).val());
+                                var wd = Number($(strwd).val());
+                                var hg = Number($(strhg).val());
+                                var pesoi = Number($(strpeso).val());
+
+                                var pesovol = lg*wd*hg/dimfactor;
+                                //NUEVO PARA DIFERENTES COBROS DE PESO
+                                if (weightpay == 'Mayor') {
+                                    if (pesovol > pesoi )   { // SE COBRA EL PESO DIMENSIONAL o VOLUMETRICO
+                                        pesoi = pesovol;
+                                    }
+                                } else {
+                                    if (weightpay == 'Peso Volumen') {
+                                        pesoi = pesovol;
+                                    }
+                                }
+
+                                // CAMBIO POR TARIFAS
+                                pesoi =  Math.ceil(pesoi);
+                                if ((minimunlimit == 'Individual') && (pesoi < minimun)) {
+                                    pesoi = minimun;
+                                    flete = flete + valuemin
+                                } else {
+                                    flete = flete + pesoi*valuemeasure;
+                                }
+                                pesot = pesot + pesoi;
+                            }
+                        } else { // NO HAY REDONDEO INDIVIDUAL
+                            var pesot = 0.0;
+                            var totalminimun = 0.0; // CAMBIO POR TARIFAS
+                            for (var i=0; i< npack; i++) {
+                                var strpeso='#guide_type_packages_'+i+'_weight';
+                                var strlg='#guide_type_packages_'+i+'_length';
+                                var strwd='#guide_type_packages_'+i+'_width';
+                                var strhg='#guide_type_packages_'+i+'_height';
+                                var lg = Number($(strlg).val());
+                                var wd = Number($(strwd).val());
+                                var hg = Number($(strhg).val());
+                                var pesoi = Number($(strpeso).val());
+
+                                var pesovol = lg*wd*hg/dimfactor;
+                                //NUEVO PARA DIFERENTES COBROS DE PESO
+                                if (weightpay == 'Mayor') {
+                                    if (pesovol > pesoi )   { // SE COBRA EL PESO DIMENSIONAL o VOLUMETRICO
+                                        pesoi = pesovol;
+                                    }
+                                } else {
+                                    if (weightpay == 'Peso Volumen') {
+                                        pesoi = pesovol;
+                                    }
+                                }
+                                // CAMBIO POR TARIFAS
+                                if ((minimunlimit == 'Individual') && (pesoi < minimun)) {
+                                    totalminimun = totalminimun + minimun;
+                                    flete = flete + valuemin;
+                                } else {
+                                    pesot = pesot + pesoi;
+                                }
+                            }
+
+                            if ( roundweight == 'Total' ) { // HAY REDONDEO TOTAL
+                                pesot =  Math.ceil(pesot);
+                            }
+                            // CAMBIO POR TARIFAS
+                            flete = flete + pesot*valuemeasure;
+                            pesot = pesot + totalminimun;
+                        }
+
+                        if ((begin > pesot) || (pesot > until )) {
+                            // console.log(pesot + ':' + begin + ':' + until );
+                            funalert('El peso total de los paquetes ESTA fuera del rango aceptado por la tarifa');
+                            return false;
+                        }
+                        // CAMBIO POR TARIFAS
+                        if ((pesot < minimun) && (minimunlimit == 'Total')) {
+                            pesoc = minimun;
+                            flete = valuemin; // Se COBRA lo MINIMO Total
+                        } else {
+                            pesoc = pesot;
+                        }
+                        $("label[for='guide_type_paidweight']").text("Peso a pagar");
+                        if (tariff_flat) {
+                            flete = valuemeasure;
+                        }
+                    } else {
+                        if ( roundvol == 'Individual' ) { // HAY REDONDEO INDIVIDUAL
+                            var volt = 0.0;
+                            for (var i=0; i< npack; i++) {
+                                var strlg='#guide_type_packages_'+i+'_length';
+                                var strwd='#guide_type_packages_'+i+'_width';
+                                var strhg='#guide_type_packages_'+i+'_height';
+                                var lg = Number($(strlg).val());
+                                var wd = Number($(strwd).val());
+                                var hg = Number($(strhg).val());
+
+                                var vol = lg*wd*hg/Number({{ app.user.agency.maincompany.convertvol }});
+                                // CAMBIO POR TARIFAS
+                                vol = Math.ceil(vol);
+                                if ((minimunlimit == 'Individual') && (vol < minimun)) {
+                                    vol = minimun;
+                                    fletev = fletev + valuemin;
+                                } else {
+                                    fletev = fletev + vol*valuemeasure;
+                                }
+                                // console.log('P' + i+ '= ' + begin + ':' + until + '->' + vol);
+                                if ((begin > vol) || (vol > until )) {
+                                    funalert('El volumen de uno de los paquetes ESTA fuera del rango aceptado por la tarifa');
+                                    return false;
+                                }
+                                volt = volt + vol;
+                            }
+                        } else {
+                            var volt = 0.0;
+                            var totalminimun = 0.0; // CAMBIO POR TARIFAS
+                            for (var i=0; i< npack; i++) {
+                                var strlg='#guide_type_packages_'+i+'_length';
+                                var strwd='#guide_type_packages_'+i+'_width';
+                                var strhg='#guide_type_packages_'+i+'_height';
+                                var lg = Number($(strlg).val());
+                                var wd = Number($(strwd).val());
+                                var hg = Number($(strhg).val());
+
+                                var vol = lg*wd*hg/Number({{ app.user.agency.maincompany.convertvol }});
+                                // CAMBIO POR TARIFAS
+                                if ((minimunlimit == 'Individual') && (vol < minimun)) {
+                                    totalminimun = totalminimun + minimun;
+                                    fletev = fletev + valuemin;
+                                } else {
+                                    volt = volt + vol;
+                                }
+
+                                // console.log('P' + i+ '= ' + begin + ':' + until + '->' + vol);
+                                if ((begin > vol) || (vol > until )) {
+                                    funalert('El volumen de uno de los paquetes ESTA fuera del rango aceptado por la tarifa');
+                                    return false;
+                                }
+                            }
+                            if ( roundvol == 'Total' ) { // HAY REDONDEO TOTAL
+                                volt =  Math.ceil(volt);
+                            }
+                            // CAMBIO POR TARIFAS
+                            fletev = fletev + volt*valuemeasure;
+                            volt = volt + totalminimun;
+
+                        }
+                        if ((volt < minimun) && (minimunlimit == 'Total')) {
+                            pesoc = minimun;
+                            fletev = valuemin; // SE COBRA MINIMO
+                        } else {
+                            pesoc = volt;
+                        }
+
+                        // $('#guide_type_paidweight').hide();
+                        $("label[for='guide_type_paidweight']").text("Volumen Total ({% trans %}dimension{% endtrans %})");
+                        if (tariff_flat) {
+                            fletev = valuemeasure;
+                        }
+                    }
+                    pesoc = pesoc.toFixed(2);
+                    $('#guide_type_paidweight').val(pesoc);
+                    var insurance_per = Number($('#guide_type_insurance_per').val());
+                    var insurance_amount = Number($('#guide_type_insurance_amount').val());
+                    if (insurance) {
+                        // console.log("Tiene seguro");
+                        if (insurance_amount >= 0) {
+                            // console.log($('#guide_type_insurance_per').val());
+                            if ((insurance_per >= 0) && (insurance_per <= 100)) {
+                                seguro = insurance_amount * insurance_per/100;
+                            } else {
+                                funalert('El porcentaje por seguro debe estar entre 0 y 100');
+                                return false;
+                            }
+                        } else {
+                            funalert('La cantidad a asegurar no puede ser negativa');
+                            return false;
+                        }
+                    }  else {
+                        $('#guide_type_insurance_per').val(0.0)
+                        $('#guide_type_insurance_per').attr('readonly', true);
+                    }
+                    var tax_per = Number($('#guide_type_tax_per').val());
+                    if (tax) {
+                        // console.log("Tiene seguro");
+                        if (declarado >= 1) {
+                            if ((tax_per >= 0) && (tax_per <= 100)) {
+                                impuesto = declarado * tax_per/100;
+                            } else {
+                                funalert('El porcentaje por impuesto debe estar entre 0 y 100');
+                                return false;
+                            }
+
+                        } else {
+                            funalert('El valor declarado debe ser mayor o igual a 1');
+                            return false;
+                        }
+                    } else {
+                        $('#guide_type_tax_per').val(0.0);
+                        $('#guide_type_tax_per').attr('readonly', true);
+                    }
+                    var descuento = Number($('#guide_type_discount').val());
+                    if (descuento < 0) {
+                        funalert("El descuento no puede ser negativo... ");
+                        return false;
+                    }
+                    var otherfees = Number($('#guide_type_otherfees').val());
+
+                    if (otherfees < 0) {
+                        funalert("Los cargos adicionales no pueden ser negativos...");
+                        return false;
+                    }
+                    // INICIO PARA SERVICIOS ESPECIALES
+                    {% if services|length > 0 %}
+                        var subtotal = Number($('#subtotal').val());
+                    {% else %}
+                        var subtotal = 0.0;
+                    {% endif %}
+
+                    var wdes = flete + fletev + otherfees  + impuesto + seguro + subtotal + additional;
+                    $('#wdes').val(wdes);
+                    changePaypal();
+                    var paypal = Number($('#paypal').val());
+
+                    total = flete + fletev - descuento + otherfees  + impuesto + seguro + subtotal + paypal + additional;
+                    // FIN PARA SERVICIOS ESPECIALES
+                    if (total < 0) {
+                        funalert("El total debe ser mayor o igual a Cero (0)");
+                        return false;
+                    }
+
+                    // console.log(total);
+
+                    flete = flete.toFixed(2);
+                    fletev = fletev.toFixed(2);
+
+                                seguro = seguro.toFixed(2);
+                    impuesto = impuesto.toFixed(2);
+
+                    //total = Math.ceil(total);
+                    total = total.toFixed(2);
+
+                    if (($("#guide_type_fvround").val() == 1) || (roundtotal)){
+                        total = Math.ceil(total);
+                        fletev = Math.ceil(fletev);
+                        // funalert('REDONDEAR ' + $("#guide_type_fvround").val());
+                    }
+                    if (roundtotal) {
+                        total = Math.ceil(total);
+                    }
+                    $('#guide_type_insurance_per').val(insurance_per);
+                    $('#guide_type_insurance_amount').val(insurance_amount);
+                    $('#guide_type_tax_per').val(tax_per);
+                    $('#guide_type_insurance_paid').val(seguro);
+                    $('#guide_type_tax_paid').val(impuesto);
+
+                    $('#guide_type_freight').val(flete);
+                    $('#guide_type_volfreight').val(fletev);
+                    $('#guide_type_totalpaid').val(total);
+                    $('#guide_type_discount').val(descuento);
+                    $('#guide_type_otherfees').val(otherfees);
+
+                    } // FIN DEl SUCCESS de AJAX
+                }); // FIN AJAX
+            return true;
+        } // FIN CALCULAR MONTO DE GUIA
+    $(document).ready(function () {
+        {% if edition %}
+            $('#guide_type_edition').val('FALSE');
+            $('#guide_type_selcustomer').val(1);
+            {% set sender = entity.sender %}
+            returnSelectCustomer({{ sender.id }}, "{{ sender.name }}", "{{ sender.lastname }}", "{{ sender.type }}", "{{ sender.adrdefault.address }}", {{ sender.adrdefault.city.id }}, "{{ sender.adrdefault.city.name }}",  "{{ sender.adrdefault.city.state.name }}", "{{ sender.adrdefault.city.state.country.name }}", "{{ sender.adrdefault.phone }}", "{{ sender.adrdefault.mobile }}", "{{ sender.adrdefault.barrio }}", "{{ sender.email }}", "{{ sender.adrdefault.zip }}");
+            
+            $('#guide_type_selcustomer').val(2);
+            {% set addr = entity.addressee %}
+            returnSelectCustomer({{ addr.id }}, "{{ addr.name }}", "{{ addr.lastname }}", "{{ addr.customer.type }}", "{{ addr.address }}", {{ addr.city.id }}, "{{ addr.city.name }}",  "{{ addr.city.state.name }}", "{{ addr.city.state.country.name }}", "{{ addr.phone }}", "{{ addr.mobile }}", "{{ addr.barrio }}", "{{ addr.customer.email }}", "{{ addr.zip }}");
+        {% endif %}
+        $('.md-trigger').modalEffects();
+
+        $('#hasadd').hide();
+        newPaypal();
+        var tarriffname = $('#guide_type_tariffname').val();
+        if (tarriffname) {
+            calculate_all();
+        }
+        // INICIO PARA SERVICIOS ADICIONALES
+        {% if services|length > 0 %}
+            $('.list-services').collection({
+                allow_up: false,
+                allow_down: false,
+            });
+        {% endif %}
+        var lst = document.getElementsByClassName("tableserv");
+        for(var i = 1; i < lst.length; ++i) {
+            lst[i].style.display = 'none';
+        }
+        $('#guide_type_paidtype').change(function() {
+            var tarriffname = $('#guide_type_tariffname').val();
+            if (tarriffname) {
+                calculate_all();
+            }
+        });
+        $('#guide_type_email_sender').change(function() {
+            $('#guide_type_id_sender').val(0);
+        });
+        $('#guide_type_email_addr').change(function() {
+            $('#guide_type_id_addr').val(0);
+        });
+        /*
+        var bodyserv = document.getElementById("servbody");
+        bodyserv.style.display = 'none';
+        $('.bserv').click(function(e) {
+            if (bodyserv.style.display == 'none') {
+                bodyserv.style.display = 'table';
+                // $("#bserv").html('Ocultar');
+                bodyserv.style.width = '100%';
+            } else {
+                bodyserv.style.display = 'none';
+                // $("#bserv").html('Mostrar');
+            }
+        });
+        */
+        $('#subtotal').val(0.0);
+        var listadep = [];
+        {% for service in services %}
+            var lst = [];
+            var cst = 0;
+            {% for depend in service.medependof %}
+                lst[cst++] = {{ depend.id }};
+            {% endfor %}
+            listadep[{{ service.id }}] = lst;
+        {% endfor %}
+
+        $('.list-services').change(function() {
+            var nserv = $('.list-services').find('> div').length;
+            var subtotal=0;
+            for (var i=0; i< nserv; i++) {
+                var strprice='#guide_type_services_'+i+'_price';
+                var stramount='#guide_type_services_'+i+'_amount';
+                var strmeasure='#guide_type_services_'+i+'_measure';
+                var strtotal='#guide_type_services_'+i+'_total';
+                var strdepend = '#guide_type_services_'+i+'_medependof';
+                var strid = '#guide_type_services_'+i+'_id';
+                var strname='#guide_type_services_'+i+'_name';
+                var name = $(strname).val();
+
+                var price = $(strprice).val();
+
+                var measure = $(strmeasure).val();
+                var depend = $(strdepend).length;
+                var id = $(strid).val();
+
+                var ndep = listadep[id].length;
+
+                var mcant = 0;
+                for (var j=0; j<ndep; j++) {
+                    var vdep = listadep[id][j];
+                    for (var k=0; k< nserv; k++) {
+                        var vid =$('#guide_type_services_'+k+'_id').val();
+                        if (vid == vdep) {
+                            var vprice=$('#guide_type_services_'+k+'_price').val();
+                            var vamount=$('#guide_type_services_'+k+'_amount').val();
+                            var vmeasure=$('#guide_type_services_'+k+'_measure').val();
+                            if (vmeasure == '%') {
+                                mcant = mcant +  Number(vprice)*Number(vamount)/100;
+                            } else {
+                                mcant = mcant +  Number(vprice)*Number(vamount);
+                            }
+                            break;
+                        }
+                    }
+                }
+                if (ndep > 0) {
+                    $(stramount).attr('readonly', true);
+                    $(stramount).val(mcant.toFixed(2));
+                }
+                var amount = $(stramount).val();
+                // funalert(price + ' ' + amount + ' ' + measure);
+                // console.log(id + ':' + ndep);
+                var total = Number(price)*Number(amount);
+                if (measure == '%') {
+                    total = total/100;
+                }
+                $(strtotal).val(total.toFixed(2));
+                if ( name.toLowerCase().indexOf('paypal') !== -1 ) {
+                    total=0;
+                }
+                subtotal =  subtotal + total;
+
+            }
+            $('#subtotal').val(subtotal.toFixed(2));
+            var thistariff = $('#guide_type_tariffid').val();
+            if (subtotal < 0) {
+                funalert('La suma de los servicios adicionales no puede ser negativo');
+                $('#guide_type_totalpaid').val('');
+                return false;
+            }
+            valida = valServ();
+            if ((thistariff) && (valida == 0)) {
+                    calculate_all();
+            }
+        });
+        // FIN PARA SERVICIOS ADICIONALES
+        $('.list-services').change(); // AGREGADO EN MODO DE EDICIÓN/ERRORES
+        /* AGREGADO PARA LAS TARIFAS PLANAS */
+        // var tname = $('#guide_type_tariffname').val();
+        // var tid = $('#guide_type_tariffid').val('');
+
+        // setTariffResult('', '');
+        /*
+        $("label.required").append('<span class="red-star" title="Campo Obligatorio"> *</span>');
+        */
+        $('#guide_type_calculate').click(function(){  // FUNCION PARA CALCULAR EL MONTO DE LA GUIA
+            calculate_all();
+        });
+        
+        $('#guide_type_measurevalue').change(function() {
+            var thistariff = $('#guide_type_tariffid').val();
+            var val = $(this).val();
+            if (val < 0) {
+                funalert('No puede asignar un valor de medida negativo..');
+                return false;
+            }
+
+            if (thistariff) {
+                var valtaff = $("#id2").val();
+                if (val < valtaff) {
+                    funalert('El valor tarifa no puede ser menor al asignado a la tarifa..');
+                    $('#guide_type_totalpaid').val('');
+                    return false;
+                }
+                calculate_all();
+            }
+        });
+        $('#guide_type_tax_per, #guide_type_insurance_per').change(function() {
+            var thistariff = $('#guide_type_tariffid').val();
+            var val = $(this).val();
+            var $label = $("label[for='"+this.id+"']")
+            if (val < 0) {
+                funalert('El ' + $label.text() + ' debe estar entre 0 y 100...');
+                $('#guide_type_totalpaid').val('');
+                return false;
+            }
+            if (thistariff) {
+                calculate_all();
+            }
+        });
+        $('#guide_type_discount, #guide_type_otherfees, #guide_type_declared, #guide_type_insurance_amount').change(function() {
+            var thistariff = $('#guide_type_tariffid').val();
+            var val = $(this).val();
+            var $label = $("label[for='"+this.id+"']")
+            if (val < 0) {
+                funalert('El valor para ' + $label.text() + ' no puede ser negativo');
+                $('#guide_type_totalpaid').val('');
+                return false;
+            }
+            if (thistariff) {
+                calculate_all();
+            }
+        });
+
+       $('.list-packages').collection({
+            add_at_the_end: false,
+            allow_up: false,
+            allow_down: false,
+            min: 1,
+            add: '<a id="newpack"></a>',
+            /*
+            after_add: function (collection, element) {
+                var npack = $('.list-packages').find('> div').length;
+                var pos = npack-1;
+                // $(".red-star").remove();
+                // $("label.required").append('<span class="red-star" title="Campo Obligatorio"> *</span>');
+                $('#guide_type_packages_'+ pos +'_arrivedate').datepicker();
+                $('#guide_type_packages_'+ pos +'_arrivedate').val($.datepicker.formatDate('mm/dd/yy', new Date()));
+                // $('#guide_type_packages_'+ pos +'_thelabel').val('Paquete Adicional ' + npack );
+            },
+            after_remove: function (collection, element) {
+                $('#newpack').hide();
+                var npack = $('.list-packages').find('> div').length;
+                // console.log(npack);
+                if (npack == 0) {
+                    $('#sppack').show();
+                }
+            },
+            */
+        });
+
+        $('.list-packages').change(function() {
+            updatePack();
+        });
+
+        $(":file").filestyle({buttonText: "Imagen(jpg/png)", buttonName: "btn-primary", placeholder: "no seleccionado"});
+
+        var $thisCusTable=null;
+        var $thisTariffTable=null;
+        if($('#guide_type_name_addr').attr('readonly') == 'readonly'){
+            $('#cleardest').hide();
+            $('#searchdest').hide();
+            $('#citydest').hide();
+            $('#createcitydest').hide();
+        }
+        if($('#guide_type_name_sender').attr('readonly') == 'readonly'){
+            $('#clearrem').hide();
+            $('#searchrem').hide();
+            $('#cityrem').hide();
+            $('#createcityrem').hide();
+        }
+
+        $('.btariff').click(function(e) {
+            var cityid = $('#guide_type_cityid_addr').val();
+            // funalert("Ciudad" + cityid + " (" + $('#guide_type_cityname_addr').val() + ")");
+            var agencyid = $('#guide_type_agency').val();
+            $('#guide_type_measurevalue').val('');
+            if (!(agencyid)) {
+                funalert('Debe seleccionar una agencia....');
+            } else {
+                if (cityid == 0) {
+                    funalert('Debe seleccionar un destinatario o ciudad del destinatario... ');
+                } else {
+                    $('#tariffsearch').modal('show');
+                    var themessage = "Lista de tarifas"; //  a " + $('#guide_type_country_addr').val();
+                    document.getElementById("mentariff").innerHTML = themessage;
+                    var result = [];
+                    var count = 0;
+                    {% for entity in tariffs %}
+                        var tariff = [];
+                        tariff['tid'] = {{ entity.id }};
+                        tariff['name'] = "{{ entity.name }}";
+                        tariff['measure'] = "{{ entity.measure }}";
+                        tariff['insurance'] = "{{ entity.insurance }}";
+                        tariff['tax'] = "{{ entity.tax }}";
+                        tariff['insuranceper'] = "{{ entity.insuranceper }}";
+                        tariff['taxper'] = "{{ entity.taxper }}"; //TAXPER
+                        tariff['dimentional'] = "{{ entity.dimentional }}";
+                        tariff['begin'] = "{{ entity.begin }}";
+                        tariff['until'] = "{{ entity.until }}";
+                        tariff['minimun'] = "{{ entity.minimun }}";
+                        tariff['valuemeasure'] = "{{ entity.valuemeasure }}";
+                        tariff['valuemin'] = "{{ entity.valuemin }}";
+                        tariff['minimunlimit'] = "{{ entity.minimunlimit }}";
+                        tariff['volumeprice'] = "{{ entity.volumeprice }}";
+                        tariff['additional'] = "{{ entity.additional }}";
+                        tariff['labeladditional'] = "{{ entity.labeladdutional }}";
+                        result[count++]=tariff;
+                    {% endfor %}
+
+                    $.ajax({
+                        type: "GET",
+                        url: "{{ url('tariffs_select') }}?agency_id=" + agencyid + "&city_id=" + cityid,
+                        success: function(data) {
+                        if (count > 0) {
+                            data= result;
+                        }
+                        if ($thisTariffTable) {
+                            $thisTariffTable.clear();
+                            $thisTariffTable.destroy();
+                        }
+                        /*
+                        var tableHead = document.getElementById('tariffTable').getElementsByTagName('thead')[0];
+
+                        var nh = tableHead.rows.length;
+                        for (i=0; i < nh; i++) {
+                            tableHead.deleteRow(0);
+                        }
+
+                        var newhead = tableHead.insertRow(0);
+                        newhead.id="httariff";
+                        var count = 0;
+                        newhead.insertCell(count++).outerHTML = "<th><b>Servicio</b></th>";
+                        newhead.insertCell(count++).outerHTML = "<th><b>Medida</b></th>";
+                        newhead.insertCell(count++).outerHTML = "<th><b>Valor</b></th>";
+                        newhead.insertCell(count++).outerHTML = "<th><b>Seguro</b></th>";
+                        newhead.insertCell(count++).outerHTML = "<th><b>Tax</b></th>";
+                        newhead.insertCell(count++).outerHTML = "<th><b>Inicia</b></th>";
+                        newhead.insertCell(count++).outerHTML = "<th><b>Hasta</b></th>";
+                        newhead.insertCell(count++).outerHTML = "<th><b>Mínimo</b></th>";
+                        newhead.insertCell(count++).outerHTML = "<th><b>$Ini</b></th>";
+                        newhead.insertCell(count++).outerHTML = "<th><b>$Adi</b></th>";
+
+                        */
+                        var tableRef = document.getElementById('tariffTable').getElementsByTagName('tbody')[0];
+                        var nf = tableRef.rows.length;
+                        for (i=0; i < nf; i++) {
+                            tableRef.deleteRow(0);
+                        }
+                        var nc = data.length;
+                        for (i = 0; i < nc; i++) {
+                            var tid = data[i]['tid'];
+                            var nametariff = data[i]['name'];
+                            var measure = data[i]['measure'];
+
+                            if (data[i]['insurance']) {
+                                var theinsurance = true;
+                                var insurance='☑';
+                            } else {
+                                var theinsurance = false;
+                                var insurance='☒';
+                            }
+                            if (data[i]['tax']) {
+                                var thetax = true;
+                                var tax='☑';
+                            } else {
+                                var thetax = false;
+                                var tax='☒';
+                            }
+
+                            var taxper = data[i]['taxper']; //TAXPER
+                            var insuranceper = data[i]['insuranceper'];
+
+                            var dimentional = data[i]['dimentional'];
+                            var begin = data[i]['begin'];
+                            var until= data[i]['until'];
+                            var minimun = data[i]['minimun'];
+                            var valuemeasure = data[i]['valuemeasure'];
+                            var valuemin = data[i]['valuemin'];
+                            var minimunlimit = data[i]['minimunlimit'];
+                            var volumeprice = data[i]['volumeprice'];
+                            var additional = data[i]['additional'];
+                            var labeladditional = data[i]['labeladditional'];
+
+                            var newRow   = tableRef.insertRow(tableRef.rows.length);
+
+                            var newCell0  = newRow.insertCell(0);
+                            var newCell1  = newRow.insertCell(1);
+                            var newCell2  = newRow.insertCell(2);
+                            var newCell3  = newRow.insertCell(3);
+                            var newCell4  = newRow.insertCell(4);
+                            var newCell5  = newRow.insertCell(5);
+                            var newCell6  = newRow.insertCell(6);
+                            var newCell7  = newRow.insertCell(7);
+                            var newCell8  = newRow.insertCell(8);
+                            var newCell9  = newRow.insertCell(9);
+
+                            var btn = document.createElement("input");        // Create a <button> element
+                            btn.type = "button";
+                            btn.value = nametariff;
+                            btn.className = "btn btn-info btn-flat btn-xs";
+                            //TAXPER
+                            btn.onclick = (function(){var vtid = tid; var vname = nametariff; var vvalue = valuemeasure; var vmeasure = measure; var vtax = thetax; var vtaxper = taxper; var vinsurance = theinsurance; var vinsuranceper = insuranceper; return function()
+                                    {setTariffResult(vtid, vname, vvalue, vmeasure, vtax, vtaxper, vinsurance, vinsuranceper)}})();
+                            newCell0.appendChild(btn);
+
+                            // var newText0 = document.createTextNode(nametariff);
+                            // newCell0.appendChild(newText0);
+                            var newText1 = document.createTextNode(measure);
+                            newCell1.appendChild(newText1);
+                            var newText2 = document.createTextNode(valuemeasure);
+                            newCell2.appendChild(newText2);
+                            var newText3 = document.createTextNode(insurance);
+                            newCell3.appendChild(newText3);
+                            var newText4 = document.createTextNode(tax);
+                            newCell4.appendChild(newText4);
+                            var newText5 = document.createTextNode(begin);
+                            newCell5.appendChild(newText5);
+                            var newText6 = document.createTextNode(until);
+                            newCell6.appendChild(newText6);
+                            var newText7 = document.createTextNode(minimun);
+                            newCell7.appendChild(newText7);
+                            var newText8 = document.createTextNode(valuemin);
+                            newCell8.appendChild(newText8);
+                            var newText9 = document.createTextNode(additional);
+                            newCell9.appendChild(newText9);
+                        }
+                        $thisTariffTable=$('#tariffTable').DataTable({
+                            "ordering": false,
+                            "searching": true,
+                            "info":     false,
+                            "lengthChange": false,
+                            "scrollX": true,
+                            "pageLength": 10,
+                            "columns": [ null,  { "searchable": false }, { "searchable": false }, { "searchable": false }, { "searchable": false }, { "searchable": false }, { "searchable": false }, { "searchable": false }, { "searchable": false }, { "searchable": false } ],
+                            "language": {
+                                "sSearch": "Buscar",
+                                "lengthMenu": "Mostrando  _MENU_  tarifas por página",
+                                "zeroRecords": "<div style=\"color:red;\">Lo siento no se encontraron tarifas</div>",
+                                "sInfo": "Mostrando _START_ a _END_ de _TOTAL_ tarifas",
+                                "infoEmpty": "No hay registros disponibles",
+                                "infoFiltered": "(Filtradas de un total de _MAX_ )",
+                                "searchPlaceholder": "Servicio",
+                                "paginate" : {
+                                    first:    '«',
+                                    previous: '‹',
+                                    next:     '›',
+                                    last:     '»'
+                                }
+                            },
+                            "pagingType": "full_numbers",
+                            "fnDrawCallback": function(oSettings) {
+                                if (oSettings._iDisplayLength >= oSettings.fnRecordsDisplay()) {
+                                    $(oSettings.nTableWrapper).find('.dataTables_paginate').hide();
+                                } else {
+                                    $(oSettings.nTableWrapper).find('.dataTables_paginate').show();
+                                }
+                            },
+                        });
+                        // $('.dataTables_paginate').show();
+                        $("#tariffTable tr").mouseover(function() { $(this).addClass("myhover"); });
+                        $("#tariffTable tr").mouseout(function() { $(this).removeClass("myhover"); });
+                    }
+                    });
+
+                }
+            }
+            return true;
+        });
+
+        $('.bcustomer').click(function(e) {
+                e.preventDefault();
+                // var _self = $(this);
+                var thecustomer = $(this).data('thecustomer');
+                $('#guide_type_selcustomer').val(thecustomer);
+
+                $('#findcustomer').val('');
+                $('#divTable').hide();
+                $('#mensajeCus').hide();
+            return true;
+        });
+
+
+        $('#guide_type_cityname_addr').change(function() {
+            $('#guide_type_tariffname').val('');
+            $('#guide_type_tariffid').val('');
+        });
+
+        if ($('.list-packages').attr('readonly') == 'readonly'){
+            $("#newpack").hide();
+            $('.collection-remove').hide();
+        }
+        {% if entity.imageSize > 0 %}
+            $("#newpack").hide();
+        {% endif %}
+        $('#guide_type_submit').click(function(evt) {
+            // evt.preventDefault();
+            // console.log('intentando enviar....');
+            /*
+            var contain = $('#guide_type_contain').val();
+            if (contain == '') {
+                funalert('El contenido del paquete no puede estar vacío....');
+                return false;
+            }
+            */
+            var total = $('#guide_type_total').val();
+            if (total < 0) {
+                funalert('El valor total no puede ser menor a cero(0)....');
+                return false;
+            }
+            var citydes = $('#guide_type_cityid_addr').val();
+            if (citydes == 0) {
+                funalert('Seleccione la ciudad del destinatario....');
+                return false;
+            }
+            var cityrem = $('#guide_type_cityid_sender').val();
+            if (cityrem == 0) {
+                funalert('Seleccione la ciudad del remitente....');
+                return false;
+            }
+            calculate_all();
+            return true;
+        });
+
+        $('#guide_type_typecusrem_1').iCheck('check');
+        $('#guide_type_typecusrem_2').on('ifChecked', function(event){
+            $('#guide_type_lastname_sender').val('');
+            $('#guide_type_lastname_sender').prop('readonly', true);
+        });
+        $('#guide_type_typecusrem_1').on('ifChecked', function(event){
+            $('#guide_type_lastname_sender').prop('readonly', false);
+        });
+
+        $('#guide_type_typecusdes_1').iCheck('check');
+        $('#guide_type_typecusdes_2').on('ifChecked', function(event){
+            $('#guide_type_lastname_addr').val('');
+            $('#guide_type_lastname_addr').prop('readonly', true);
+        });
+        $('#guide_type_typecusdes_1').on('ifChecked', function(event){
+            $('#guide_type_lastname_addr').prop('readonly', false);
+        });
+        $("#citysender").select2({
+            placeholder: "Buscar Ciudad",
+            ajax: {
+                url: "{{ path('city_find') }}",
+                dataType: 'json',
+                delay: 250,
+                data: function (term) {
+                    return {
+                        q: term, //search term
+                    };
+                },
+                results: function (data) {
+                    return {
+                        results: data,
+                    };
+                },
+                cache: true
+                },
+             minimumInputLength: 2,
+             formatInputTooShort: function (input, min) { var n = min - input.length; return "Por favor ingrese  " + n + " carcater" + (n == 1? "" : "es") + " mas"; },
+             formatNoMatches: function () { return "No se encuentran resultados"; },
+
+        });
+
+        $('#citysender').on("change", function(e) {
+            var cityid = $('#citysender').val();
+            $('#guide_type_cityid_sender').val(cityid);
+            var cityname = $('#citysender').select2('data').text;
+            $('#guide_type_cityname_sender').val(cityname);
+        });
+
+        $("#cityaddr").select2({
+            placeholder: "Buscar Ciudad",
+            ajax: {
+                url: "{{ path('city_find') }}",
+                dataType: 'json',
+                delay: 250,
+                data: function (term) {
+                    return {
+                        q: term, //search term
+                    };
+                },
+                results: function (data) {
+                    return {
+                        results: data,
+                    };
+                },
+                cache: true
+                },
+             minimumInputLength: 2,
+             formatInputTooShort: function (input, min) { var n = min - input.length; return "Por favor ingrese  " + n + " carcater" + (n == 1? "" : "es") + " mas"; },
+             formatNoMatches: function () { return "No se encuentran resultados"; },
+
+        });
+
+        $('#cityaddr').on("change", function(e) {
+            var cityid = $('#cityaddr').val();
+            $('#guide_type_cityid_addr').val(cityid);
+            var cityname = $('#cityaddr').select2('data').text;
+            $('#guide_type_cityname_addr').val(cityname);
+        });
+
+        var citySID = $("#guide_type_cityid_sender").val();
+        var citySname = $("#guide_type_cityname_sender").val();
+        if (citySID && citySname) {
+            // console.log('Hola:  ' +  citySID + ' ' + citySname);
+            $('#citysender').select2('data', {id: citySID, text: citySname});
+        }
+        var cityAID = $("#guide_type_cityid_addr").val();
+        var cityAname = $("#guide_type_cityname_addr").val();
+        if (cityAID && cityAname) {
+            // console.log('Hola:  ' +  citySID + ' ' + citySname);
+            $('#cityaddr').select2('data', {id: cityAID, text: cityAname});
+        }
+        $('.bcopypack').click(function(e) {
+            var numcop = $('#numcopies').val();
+            var is_integer = (Math.floor(numcop) == numcop) && ($.isNumeric(numcop));
+            var outrange = (numcop < 1) || (numcop > 100);
+            if (!is_integer || outrange) {
+                funalert('Escoja un número ENTERO de copias entre 1 y 100');
+                return false;
+            }
+            //funalert(numcop);
+            var npack = $('.list-packages').find('> div').length;
+            var i = npack-1;
+            var strpeso='#guide_type_packages_'+i+'_weight';
+            var strvalor='#guide_type_packages_'+i+'_value';
+            var strlg='#guide_type_packages_'+i+'_length';
+            var strwd='#guide_type_packages_'+i+'_width';
+            var strhg='#guide_type_packages_'+i+'_height';
+            var strtrack='#guide_type_packages_'+i+'_tracking';
+            var lg = Number($(strlg).val());
+            var wd = Number($(strwd).val());
+            var hg = Number($(strhg).val());
+            var pesoi = Number($(strpeso).val());
+            var valori = Number($(strvalor).val());
+            var track = $(strtrack).val();
+            if (!(lg)) {
+                funalert('El paquete a copiar debe tener asignado el LARGO');
+                return false;
+            }
+            if (!(wd)) {
+                funalert('El paquete a copiar debe tener asignado el ANCHO');
+                return false;
+            }
+            if (!(hg)) {
+                funalert('El paquete a copiar debe tener asignado el ALTO');
+                return false;
+            }
+            if (!(pesoi)) {
+                funalert('El paquete a copiar debe tener asignado el PESO');
+                return false;
+            }
+            if (!(valori)) {
+                funalert('El paquete a copiar debe tener asignado el VALOR');
+                return false;
+            }
+            for (var i=0; i< numcop; i++) {
+                $("#newpack").click();
+                var pos = i+npack;
+                var tpos = i +2;
+                $('#guide_type_packages_'+pos+'_weight').val(pesoi);
+                $('#guide_type_packages_'+pos+'_value').val(valori);
+                $('#guide_type_packages_'+pos+'_length').val(lg);
+                $('#guide_type_packages_'+pos+'_width').val(wd);
+                $('#guide_type_packages_'+pos+'_height').val(hg);
+                if (track) {
+                    $('#guide_type_packages_'+pos+'_tracking').val(track + '-' + tpos);
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

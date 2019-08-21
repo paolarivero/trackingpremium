@@ -1,0 +1,107 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>Mostrar Empresa</title>
+{% endblock %}
+
+{% block body -%}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Información  de Empresa</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('maincompany') }}">Empresas</a></li>
+            <li class="active"> Mostrar Empresa</li>
+            </ol>
+    </div>
+    <div class="cl-mcont">
+        <div class="block-flat">
+            <div class="header">
+                <div class="row">
+                    <div class="col-sm-4 col-md-4">
+                        <h3>Datos de la Empresa </h3>
+                    </div>
+                    <div class="col-sm-8 col-md-8">
+                        {% if ((app.user.agency.type == "MASTER") and is_granted('ROLE_ADMIN_MAINCOMPANY'))  %}
+                            <div class="btn-group" style="margin-bottom: 5px;margin-top: 4px;">
+                                    <button type="button" class="btn btn-default">Opciones</button>
+                                    <button type="button" data-toggle="dropdown" class="btn btn-default dropdown-toggle">
+                                    <span class="caret"></span><span class="sr-only">Opciones</span></button>
+                                    <ul role="menu" class="dropdown-menu">
+                                            <li><a href="{{ path('maincompany_edit', {'id': entity.id }) }}">Editar</a></li>
+                                    </ul>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        <div class="content">
+            <div class="row">
+                <div class="col-sm-6 col-md-6">
+                NOMBRE: {{ entity.name}}
+                </div>
+                <div class="col-sm-6 col-md-6">
+                ACRÓNIMO: {{ entity.acronym}}
+                </div>
+            </div>
+           {#
+			<td> EMAIL: {{ entity.email}} </td>
+			<td> URL: {{ entity.url}} </td>
+			<td> Factor dimensional: {{ entity.dimfactor}} </td>
+			</tr>
+			<tr>
+			<td> Numeración inicial casilleros: {{ entity.ininum}} </td>
+			<td> Numeración inicial {% trans %}Guías{% endtrans %}: {{ entity.iniguide}} </td>
+			<td> Factor para calcular volumen: {{ entity.convertvol}} </td>
+			</tr>
+			<tr>
+			<td> Redondeo del total:
+			{% if entity.roundtotal %}
+			<input type="checkbox" name="roundmeasure" value="yes" readonly=true disabled=true checked>
+			{% else %}
+			<input type="checkbox" name="roundmeasure" readonly=true disabled=true value="no">
+			{% endif %}
+			</td>
+			<td> Redondeo por peso: {{ entity.roundweight}}</td>
+			<td> Redondeo por volumen: {{ entity.roundvol}}</td>
+			</tr>
+			<tr>
+			<td> Prefijo de {% trans %}Guías{% endtrans %}: {{ entity.prefixguide}} </td>
+			<td> Prefijo de Casilleros: {{ entity.prefixpobox}} </td>
+			<td> Prefijo de {% trans %}Consolidados{% endtrans %}: {{ entity.prefixconsol}} </td>
+			</tr>
+			<tr>
+			<td> Nombre de cliente en Dir. Casillero: {% if entity.customername %}
+                <input type="checkbox" checked="checked" disabled readonly >
+                {% else %}
+                <input type="checkbox" disabled readonly >
+                {% endif %}
+			</td>
+			<td> Nombre de Empresa en Dir. Casillero: {% if entity.companyname %} 
+                <input type="checkbox" checked="checked" disabled readonly >
+                {% else %}
+                <input type="checkbox" disabled readonly >
+                {% endif %}
+            </td>
+			<td> Número de Casillero en Dir. Casillero: {% if entity.numbername %} 
+                <input type="checkbox" checked="checked" disabled readonly >
+                {% else %}
+                <input type="checkbox" disabled readonly >
+                {% endif %}
+            </td>
+			</tr>
+			<tr>
+			<td colspan=2>MENSAJE a clientes: <br><br>  {{ entity.poboxmsg | nl2br}} </td>
+			<td>Países: 
+                <ul style="padding-left:20px">
+                {% for country in entity.countries %}
+                       <li> {{ country }} </li>
+                {% endfor %}</td>
+                </ul>
+            </td>
+            #}
+        </div>
+    </div>
+</div>
+{% endblock %}

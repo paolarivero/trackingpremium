@@ -1,0 +1,114 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>Actualizar Región</title>
+{% endblock %}
+
+{# Display the form #}
+
+{% form_theme form 'form/fields.html.twig' %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Actualizar Región</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('region') }}">Regiones</a></li>
+            <li class="active">Actualizar</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        {{ form_start(form, {attr: {novalidate: 'novalidate', 'id': 'agency_type' }}) }}
+        <div class="block-flat">
+            <div class="header">
+                <h3>Datos de la región</h3>
+            </div>
+            <div class="content">
+                <div class="row">
+                    <div class="col-sm-6 col-md-6">
+                        {{ form_row(form.name) }}
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                        {{ form_row(form.country) }}
+                    </div>
+                </div>
+                {{ form_row(form.state) }}
+                <div class="row">
+                    <div class="col-sm-6 col-md-6">
+                        {{ form_row(form.region_cities) }}
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                        {{ form_row(form.new_cities) }}
+                    </div>
+                </div>
+                <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        <td>
+
+                        </td>
+                        <td style="text-align:right;">
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-flat" >Regresar</button>
+                            {{ form_widget(form.submit, { 'attr': {'class': 'btn btn-primary btn-flat'} }) }}
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+        
+{% endblock %}
+{% block javascripts %}
+<script type="text/javascript">
+    $(document).ready(function () {
+       $('#region_type_new_cities').html('');
+       $('#region_type_state').change(function(){
+		var val = $(this).val();
+	   	var list = [];
+        var count=0;
+    	for (var i=0; i < val.length; i++) {
+			var id = Number(val[i]);
+			// console.log(mark.checked + ' ' + id);
+			list[count++]=id;
+		}
+        // console.log(list);
+        var statelist = JSON.stringify(list);
+        $.ajax({
+                type: "POST",
+                url: "{{ url('select_cities') }}?statelist=" + statelist,
+                success: function(data) {
+                    // Remove current options
+                    $('#region_type_new_cities').html('');
+                    $.each(data, function(k, v) {
+                       $('#region_type_new_cities').append('<option value="' + v + '">' + k + '</option>');
+                    });
+                }
+        });
+        return false;
+    });
+        
+        $('#region_type_submit').click(function(evt) {
+            var count1 = $('#region_type_region_cities :selected').length;
+            var count2 = $('#region_type_new_cities :selected').length;
+            console.log(count1+ ' ' + count2);
+            if ((count1 < 1) && (count2 < 1)) {
+                alert('Debe seleccionar al menos una Ciudad..');
+                return false;
+            }
+            return true;
+        });
+        
+    });
+</script>
+{% endblock %}
+

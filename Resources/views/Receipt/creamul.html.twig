@@ -1,0 +1,171 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+
+    <h1>Nuevo {% trans %}Recibo{% endtrans %} </h1>
+
+{{ form_start(form, {attr: {novalidate: 'novalidate'}}) }}
+     
+    <div class="widget-content">
+	      
+	     <table class="table table-striped table-bordered">
+                <thead>
+                  <tr>
+    			<th colspan="4"><h3>Remitente</h3></th>
+		  </tr>
+                </thead>
+       		<tbody>
+    			<td>{{ form_row(form.name_sender) }}</td>
+			<td>{{ form_row(form.lastname_sender) }}</td>
+			<td colspan="2"><a href="#" onclick="SearchSender()"><button id="sendersearch" type="button" class="btn btn-default">Buscar</button></a></td>
+			</tr>
+    			<tr> <td colspan="4">{{ form_row(form.address_sender) }}</td>
+			</tr>
+			
+			<tr> <td>{{ form_row(form.cityname_sender) }}</td>
+			     <td>{{ form_row(form.state_sender) }}</td>
+			     <td>{{ form_row(form.country_sender) }}</td>
+			     <td><a href="#" onclick="SearchCity1()"><button id="citysearch1" type="button" class="btn btn-default">Ciudad</button></a></td>
+			</tr>
+			<tr>
+			<td>{{ form_row(form.barrio_sender) }}</td>  
+			<td>{{ form_row(form.zip_sender) }}</td>
+			</tr>
+			<tr><td colspan="4"><h3>Notificaciones</h3></td></tr> 
+			<tr>
+			<td>{{ form_row(form.email_sender) }}</td>
+    			<td>{{ form_row(form.mobile_sender) }}</td>	
+			<td>{{ form_row(form.phone_sender) }}</td>  
+			</tr> 
+		
+    	</tbody>
+	
+    </table>
+              <table class="table table-striped table-bordered">
+                <thead>
+                  <tr>
+    			<th colspan="4"><h3>Destinatario</h3></th>
+		  </tr>
+                </thead>
+       		<tbody>
+			<tr>
+    			<td>{{ form_row(form.name_addr) }}</td>
+			<td>{{ form_row(form.lastname_addr) }}</td>
+			<td colspan="2"><a href="#" onclick="SearchAddr()"><button id="addrsearch" type="button" class="btn btn-default">Buscar</button></a></td>
+			</tr>
+    			<tr> <td colspan="4">{{ form_row(form.address_addr) }}</td>
+			</tr>
+			
+			<tr> <td>{{ form_row(form.cityname_addr) }}</td>
+			     <td>{{ form_row(form.state_addr) }}</td>
+			     <td>{{ form_row(form.country_addr) }}</td>
+			     <td><a href="#" onclick="SearchCity2()"><button id="citysearch1" type="button" class="btn btn-default">Ciudad</button></a></td>
+			</tr>
+			<tr>
+			<td>{{ form_row(form.barrio_addr) }}</td>  
+			<td>{{ form_row(form.zip_addr) }}</td>
+			</tr> 
+			<tr>
+			<td>{{ form_row(form.email_addr) }}</td>
+    			<td>{{ form_row(form.mobile_addr) }}</td>	
+			<td>{{ form_row(form.phone_addr) }}</td>  	
+			</tr> 
+			
+		
+    	</tbody>
+    </table>
+    <table class="table table-striped table-bordered">
+                <thead>
+                  <tr>
+    			<th colspan="4">{{ form_row(form.note) }}</th>
+		  </tr>
+                </thead>
+		<tbody>
+    	        </tbody>
+    </table>
+   
+<ul class="packages" data-prototype="{{ form_widget(form.packages.vars.prototype)|e('html_attr') }}">
+
+</ul>
+
+
+{{ form_widget(form.submit) }}
+
+{{ form_end(form) }} 
+
+<ul class="record_actions">
+    <li>
+        <a href="{{ path('receipt') }}">
+            Regresar a la lista de {% trans %}Recibos{% endtrans %}
+        </a>
+    </li>
+</ul>
+
+<script>
+function addPackageFormDeleteLink($packageFormLi) {
+    var $removeFormA = $('<a href="#">Elimine este paquete</a>');
+    $packageFormLi.append($removeFormA);
+
+    $removeFormA.on('click', function(e) {
+        // prevent the link from creating a "#" on the URL
+        e.preventDefault();
+
+        // remove the li for the package form
+        $packageFormLi.remove();
+    });
+}
+
+function addPackageForm($collectionHolder, $newLinkLi) {
+    // Get the data-prototype explained earlier
+    var prototype = $collectionHolder.data('prototype');
+
+    // get the new index
+    var index = $collectionHolder.data('index');
+  
+    // Replace '__name__' in the prototype's HTML to
+    // instead be a number based on how many items we have
+    var newForm = prototype.replace(/__name__/g, index);
+
+    // increase the index with one for the next item
+    $collectionHolder.data('index', index + 1);
+
+    // Display the form in the page in an li, before the "Add a packages" link li
+    var $newFormLi = $('<li></li>').append(newForm);
+    $newLinkLi.before($newFormLi);
+    // add a delete link to the new form
+    addPackageFormDeleteLink($newFormLi);
+}
+
+var $collectionHolder;
+
+// setup an "add a packages" link
+var $addPackageLink = $('<a href="#" class="add_packages_link">Agregue un paquete</a>');
+var $newLinkLi = $('<li></li>').append($addPackageLink);
+
+jQuery(document).ready(function() {
+    // Get the ul that holds the collection of packages
+    $collectionHolder = $('ul.packages');
+
+    // add a delete link to all of the existing package form li elements
+    $collectionHolder.find('li').each(function() {
+        addTagFormDeleteLink($(this));
+    });
+
+    // add the "add a packages" anchor and li to the packages ul
+    $collectionHolder.append($newLinkLi);
+
+    // count the current form inputs we have (e.g. 2), use that as the new
+    // index when inserting a new item (e.g. 2)
+    $collectionHolder.data('index', $collectionHolder.find(':input').length);
+
+    $addPackageLink.on('click', function(e) {
+        // prevent the link from creating a "#" on the URL
+        e.preventDefault();
+
+        // add a new packages form (see next code block)
+        addPackageForm($collectionHolder, $newLinkLi);
+    });
+});
+</script>
+
+{% endblock %}

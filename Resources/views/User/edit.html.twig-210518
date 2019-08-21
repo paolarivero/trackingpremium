@@ -1,0 +1,87 @@
+{% extends '::newbase.html.twig' %}
+{% block title %}
+    <title>Editar Usuario</title>
+{% endblock %}
+
+{% form_theme edit_form 'form/fields.html.twig' %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Editar Usuario</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('user') }}">Usuarios</a></li>
+            <li class="active">Editar</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        {{ form_start(edit_form, {attr: {novalidate: 'novalidate', 'id': 'receipt_type' }}) }}
+        <div class="block-flat">
+            <div class="header">
+                <h3>Datos del Usuario</h3>
+            </div>
+            <div class="content">
+                {{ form_row(edit_form.agency) }}
+                {{ form_row(edit_form.username) }}</td>	
+                {{ form_row(edit_form.email) }}</td>
+                {{ form_row(edit_form.name) }}
+                {{ form_row(edit_form.lastname) }}
+                {{ form_row(edit_form.password) }}
+                {{ form_row(form.image) }}
+                <div class="row">
+                    <div class="col-md-3 col-sm-3">
+                        {{ form_row(edit_form.newprofile, { 'attr': {'class': 'icheck'} }) }}
+                    </div>
+                    <div class="col-md-9 col-sm-9">
+                        {{ form_row(edit_form.profile) }}
+                    </div>
+                </div>
+                {{ form_row(edit_form.user_roles) }}
+            </div>{# FIN CONTENT #}
+        </div> {# FIN BLOCK FLAT #}
+        <table class="no-border">
+            <tbody class="no-border-y">
+                <tr>
+                <td>
+                    <button type="button" onClick="history.go(-1);return true;" class="btn btn-default" >Regresar</button>
+                </td>
+                <td style="text-align:right;">
+                    {{ form_row(edit_form.submit, { 'attr': {'class': 'btn btn-primary'} }) }}
+                </td>
+                </tr>
+            </tbody>
+        </table>
+        {{ form_end(edit_form) }}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#user_type_profile').attr('disabled', true);
+        $('#user_type_newprofile').on('ifChecked', function(event){
+            $('#user_type_profile').attr('disabled', false);
+                $('input[type=checkbox][id*=_user_roles]').each(function(){
+                    $(this).attr('disabled', true);
+                });
+        });
+        $('#user_type_newprofile').on('ifUnchecked', function(event){
+            $('#user_type_profile').attr('disabled', true);
+                $('input[type=checkbox][id*=_user_roles]').each(function(){
+                    $(this).attr('disabled', false);
+                });
+        });
+        $(":file").filestyle({buttonText: "Foto (jpg/png)", buttonName: "btn-primary", placeholder: "no seleccionado"});
+    });
+</script>
+{% endblock %}

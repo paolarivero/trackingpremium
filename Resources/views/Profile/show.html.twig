@@ -1,0 +1,83 @@
+{% extends '::newbase.html.twig' %}
+{% block title %}
+    <title>Perfil de usuario</title>
+{% endblock %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Perfil</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('profile') }}">Perfiles</a></li>
+            <li class="active">Mostrar</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        <div class="block-flat">
+            <div class="header">
+                <h3>Información de perfil</h3>
+            </div>
+            <div class="content">
+                <div class="row">
+                    <div class="col-sm-6 col-md-6">
+                        <h4><b>Nombre: </b>{{ entity.name }}</h4>
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                        <h4><b>Descripción:</b> {{ entity.description }}</h4>
+                    </div>
+                </div>
+                <h4><b>Permisos del perfil:</b> <br>
+                {% for role in entity.roles %}
+                    {{ role.name }} {{ role.description }}<br>
+                {% endfor %}  
+                </h4>
+                <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        <td>
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-flat" >Regresar</button>
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-danger btn-flat" data-toggle="modal" data-target="#deleteprofile">Eliminar</button>
+                        </td>
+                        <td style="text-align:right;">
+                            <button type="button" class="btn btn-default" onclick="location.href='{{ path('profile_edit', { 'id': entity.id } ) }}';">Editar</button>
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- Modal -->
+        <div class="modal fade colored-header md-effect-9" id="deleteprofile" role="dialog">
+            <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                <button id="closecancelbill" type="button" class="close" data-dismiss="modal">&times;</button>
+                <center> <h2 class="modal-title">Confirme la eliminación</h2></center>
+                </div>
+                <div class="modal-body">
+                <center>
+                    <h2>Desea eliminar el perfil <b>"{{ entity.name }}"</b></h2><br>
+                    
+                    {{ form(delete_form) }}
+                </center>
+                </div>
+                
+                <div class="modal-footer">
+                <button id="closedeleteprofile" type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>     
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

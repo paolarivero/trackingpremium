@@ -1,0 +1,235 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>{% trans %}Consolidar{% endtrans %} {% trans %}Guía{% endtrans %}</title>
+{% endblock %}
+
+{% block body -%}
+{% set guidelist = '["'~ entity.id ~'"]'%}
+{% set last = entity.moves|last %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>{% trans %}Consolidar{% endtrans %} {% trans %}Guía{% endtrans %}</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('guide') }}">{% trans %}Guías{% endtrans %}</a></li>
+            <li class="active"> {% trans %}Guía{% endtrans %}</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        <div class="block-flat">
+            <div class="header">
+                <h3>{% trans %}Guía{% endtrans %} {{ entity.number }} </h3>
+            </div>
+            <div class="content">
+                <div class="row" style="margin-top:-10px">
+                    <div class="col-md-6 col-sm-6">
+                        <h4>
+                        <b>Remitente:</b> {{ entity.sender.name }}  {{ entity.sender.lastname }}
+                        </h4>
+                    </div>
+                    <div class="col-md-6 col-sm-6">
+                        <h4>
+                        <b>Destinatario:</b> {{ entity.addressee.name }}  {{ entity.addressee.lastname }}
+                        </h4>
+                    </div>
+                </div>
+                {% if entity.shippingtype.name == "Aéreo" %}
+                    {% set iconvia = "fa fa-plane" %}
+                {% else %}
+                    {% set iconvia = "fa fa-ship" %}
+                {% endif %}
+                {% set pri = true %}
+                {% set volcad = '' %}
+                {% if entity.masterec %}
+                    {% set listrec = [entity.masterec] %}
+                {% else %}
+                    {% set listrec = entity.receipts %}
+                {% endif %}
+                {% for receipt in listrec %}
+                    {% set vol = (receipt.length*receipt.width*receipt.height/entity.agency.maincompany.convertvol)|number_format(2, '.', ',') %}
+                    {% set dimen = receipt.length~'X'~receipt.width~'X'~receipt.height %}
+                    {% if pri %}
+                        {% set volcad = dimen ~ '('~vol~'dimension'|trans ~')' %}
+                        {% set pri = false %}
+                    {% else %}
+                        {% set volcad =  volcad ~ ',  ' ~ dimen ~ '('~vol~'dimension'|trans ~')' %}
+                    {% endif %} 
+                {% endfor %}
+                <div class="row" style="margin-top:-10px">
+                    <div class="col-md-6 col-sm-6">
+                        <b>
+                        {% if app.user.agency.type == 'MASTER' %}
+                            <i class="fa fa-building-o"></i> Agencia: {{ entity.agency }}<BR>
+                        {% endif %}
+                        <i class="fa fa-user"></i> Recibido Por: {{ entity.processedby }}</BR>
+                        <i class="fa fa-calendar"></i> Fecha: {{ entity.creationdate|date('m/d/Y') }}<BR>
+                        <i class="fa fa-flag"></i> País destino: {{ entity.countryto }}<BR>
+                        <i class="{{ iconvia }}"></i> Vía: {{ entity.shippingtype }}<br>
+                        <i class="fa fa-calculator"></i> Tarifa: {{ entity.tariff.name }}<br>
+                        </b>
+                    </div>
+                    
+                    <div class="col-md-6 col-sm-6">
+                        <b>
+                        <i class="fa fa-eye"></i> Medida: {{ entity.tariff.measure.label }}<br>
+                        <i class="fa fa-balance-scale"></i> Peso: {{ entity.realweight }}<br>
+                        <i class="fa fa-reorder"></i> Paquetes: {{ entity.pieces }}<br>
+                        <i class="fa fa-cube"></i> Volumen: {{ volcad }}<br>
+                        <i class="fa fa-money"></i> Monto: {{ entity.totalpaid }}<br>
+                        {% if entity.bag is not null  %}
+                            <i class="fa fa-cubes"></i> Bolsa: <a  class="btn btn-default" href="{{ path('bag_show', { 'id': entity.bag.id }) }}">{{ entity.bag.number }}</a><br>
+                        {% endif %}
+                        {% if entity.consol is not null  %}
+                            <i class="fa fa-suitcase"></i> {% trans %}Consolidado{% endtrans %}: <a  class="btn btn-default" href="{{ path('consolidated_show', { 'id': entity.consol.id }) }}">{{ entity.consol.id }}</a><br>
+                        {% endif %}
+                        </b>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="block-flat">
+            <div class="header">
+                <h3>{% trans %}Consolidados{% endtrans %} Disponibles</h3>
+            </div>
+            <div class="content">
+                <div id="mydiv" style="width:70%">
+                    <table id="consolTable" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
+                    <thead>
+                    <tr>
+                        <th>Incluir</th>
+                        <th>{% trans %}Consolidado{% endtrans %} </th>
+                        <th>Remitente</th>  
+                        <th>Destinatario</th>
+                        <th>Tipo de envío</th>
+                        <th>País origen</th>
+                        <th>País destino</th>
+                        <th>Agencia</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        {% for consol in listconsol %}
+                            <tr>
+                                <td><button type="button" class="btn btn-success btn-flat btn-xs bconsol" value="{{ consol.id }}">{% trans %}Consolidar{% endtrans %}</button></td>
+                                <td style="text-align:center;"><a href="{{ path('consolidated_show', { 'id': consol.id }) }}">{{ consol.id }}</a></td>
+                                <td>{{ consol.sender }}</td>
+                                <td>{{ consol.receiver }}</td>
+                                <td>{{ consol.shippingtype }}</td>
+                                <td>{{ consol.countryfrom }}</td>
+                                <td>{{ consol.countryto }}</td>
+                                <td>{{ consol.agency }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                    </table>
+                    <table class="no-border">
+                        <tbody class="no-border-y">
+                            <tr>
+                            <td style="text-align:center;">
+                                <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-flat" >Regresar</button>
+                            </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" id="valconsol">
+        <!-- Modal -->
+        <div id="guidebag" tabindex="-1" role="dialog" class="modal fade">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button id="closeguidabag" type="button" data-dismiss="modal" aria-hidden="true" class="close">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="text-center">
+                            <div class="i-circle danger"><i class="fa fa-cubes"></i></div>
+                                <p style="font-size:16px;">La {% trans %}Guía{% endtrans %} {{ entity.number }} está en una BOLSA</p>
+                            </div>
+                            <div class="alert alert-danger">
+                                <strong>Advertencia: Todas las {% trans %}Guía{% endtrans %} de la Bolsa se inluirán en el {% trans %}Consolidado{% endtrans %}
+                            </div>
+                            <center>
+                            <button type="button" class="btn btn-info btn-flat" onclick="gotoConsol();">Confirmar</button>
+                            </center>
+                        </div>
+                        
+                        <div class="modal-footer">
+                            <div class="text-center">
+                                <button type="button" data-dismiss="modal" class="btn btn-default">Cerrar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div><!-- /.modal-content-->
+            </div><!-- /.modal-dialog-->
+        </div><!-- /.modal-->
+    </div>
+</div>
+
+{% endblock %}
+{% block javascripts %}
+<script type="text/javascript">
+    function gotoConsol() {
+        $('#closeguidabag').click();
+        var toconsol = [];
+        var guideid = {{ entity.id }};
+        var consolid = $('#valconsol').val();
+        var count = 0;
+        {% if entity.bag is not null %}
+            {% for guide in entity.bag.guides %}
+                toconsol[count++] = "{{ guide.id }}";
+            {% endfor %}
+        {% endif %}
+        var guidelist = JSON.stringify(toconsol);
+        var url = "{{ url('consolidated_guides') }}?guidelist=" + guidelist +"&idconsol=" + consolid;
+        //alert(url);
+        // return false;
+        if (consolid) {
+            if (count > 0) {
+                window.location.href = url
+            } else {
+                funalert('Debe escoger al menos 1 {% trans %}Guía{% endtrans %} ');
+            }
+        } else {
+                funalert('Debe seleccionar un  {% trans %}Consolidado{% endtrans %} ');
+        }
+        return false;
+    }
+    $(document).ready(function(){
+        $('.bconsol').click(function(e) {
+            var consol = $(this).val();
+            $('#valconsol').val(consol);
+            {% if entity.bag is not null %}
+                $('#guidebag').modal('show');
+            {% else %}
+                var toconsol = [];
+                var guideid = {{ entity.id }};
+                toconsol[0]=guideid;
+                var guidelist = JSON.stringify(toconsol);
+                if (guideid) {
+                    window.location.href = "{{ url('consolidated_guides') }}?guidelist=" + guidelist +"&idconsol=" + consol;
+                } else {
+                    alert('Debe escoger al menos 1 {% trans %}Guía{% endtrans %} ');
+                }
+                return false;
+                    alert('Consolidado: ' + consol);
+            {% endif %}
+        });
+
+        var $consolTable = $('#consolTable').DataTable({
+            paginate: false,
+            info: false,
+            searching: false,
+            ordering: false,
+        });
+        
+    });
+</script>
+{% endblock %}

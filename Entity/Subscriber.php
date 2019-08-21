@@ -1,0 +1,210 @@
+<?php
+// src/NvCarga/Bundle/Entity/Subscriber.php
+
+namespace NvCarga\Bundle\Entity;
+
+use Symfony\Component\HttpFoundation\File\File;
+use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Validator\Constraints as Assert;
+
+/**
+ * @ORM\Entity
+ * @ORM\Table(name="subscriber")
+ * @ORM\HasLifecycleCallbacks()
+ */
+class Subscriber
+{
+    /**
+     * @ORM\Id
+     * @ORM\Column(type="integer")
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    protected $id;
+    /**
+     * @ORM\OneToOne(targetEntity="Maincompany", inversedBy = "subscriber")
+     * @ORM\JoinColumn(name="maincompany_id", referencedColumnName="id")
+     */
+    protected $maincompany;
+    /**
+     * @ORM\ManyToOne(targetEntity="Plan", inversedBy="subscribers")
+     * @ORM\JoinColumn(name="plan_id", referencedColumnName="id")
+     */
+    protected $plan;
+    /**
+     * @ORM\OneToOne(targetEntity="User", inversedBy = "subscriber")
+     * @ORM\JoinColumn(name="user_id", referencedColumnName="id")
+     */
+    protected $user;
+    /**
+     * @ORM\Column(type="boolean", options={"default"=true})
+     */
+    protected $active;
+    /**
+     * @Assert\NotBlank(message = "Debe asignar el balance")
+     * @Assert\Range(
+     *      min = 0.1,
+     *      minMessage = "El valor debe ser igual o mayor a {{ limit }}$",
+     * )
+     * @ORM\Column(type="decimal", precision=10, scale=2)
+     */
+    protected $balance;
+    /** 
+    * @ORM\Column(type="string", length=255, nullable=true)
+    */ 
+    protected $subscription;
+
+    /**
+     * Get id
+     *
+     * @return integer
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set active
+     *
+     * @param boolean $active
+     *
+     * @return Subscriber
+     */
+    public function setActive($active)
+    {
+        $this->active = $active;
+
+        return $this;
+    }
+
+    /**
+     * Get active
+     *
+     * @return boolean
+     */
+    public function getActive()
+    {
+        return $this->active;
+    }
+
+    /**
+     * Set balance
+     *
+     * @param string $balance
+     *
+     * @return Subscriber
+     */
+    public function setBalance($balance)
+    {
+        $this->balance = $balance;
+
+        return $this;
+    }
+
+    /**
+     * Get balance
+     *
+     * @return string
+     */
+    public function getBalance()
+    {
+        return $this->balance;
+    }
+
+    /**
+     * Set maincompany
+     *
+     * @param \NvCarga\Bundle\Entity\Maincompany $maincompany
+     *
+     * @return Subscriber
+     */
+    public function setMaincompany(\NvCarga\Bundle\Entity\Maincompany $maincompany = null)
+    {
+        $this->maincompany = $maincompany;
+
+        return $this;
+    }
+
+    /**
+     * Get maincompany
+     *
+     * @return \NvCarga\Bundle\Entity\Maincompany
+     */
+    public function getMaincompany()
+    {
+        return $this->maincompany;
+    }
+
+    /**
+     * Set plan
+     *
+     * @param \NvCarga\Bundle\Entity\Plan $plan
+     *
+     * @return Subscriber
+     */
+    public function setPlan(\NvCarga\Bundle\Entity\Plan $plan = null)
+    {
+        $this->plan = $plan;
+
+        return $this;
+    }
+
+    /**
+     * Get plan
+     *
+     * @return \NvCarga\Bundle\Entity\Plan
+     */
+    public function getPlan()
+    {
+        return $this->plan;
+    }
+
+    /**
+     * Set user
+     *
+     * @param \NvCarga\Bundle\Entity\User $user
+     *
+     * @return Subscriber
+     */
+    public function setUser(\NvCarga\Bundle\Entity\User $user = null)
+    {
+        $this->user = $user;
+
+        return $this;
+    }
+
+    /**
+     * Get user
+     *
+     * @return \NvCarga\Bundle\Entity\User
+     */
+    public function getUser()
+    {
+        return $this->user;
+    }
+
+    /**
+     * Set subscription
+     *
+     * @param string $subscription
+     *
+     * @return Subscriber
+     */
+    public function setSubscription($subscription)
+    {
+        $this->subscription = $subscription;
+
+        return $this;
+    }
+
+    /**
+     * Get subscription
+     *
+     * @return string
+     */
+    public function getSubscription()
+    {
+        return $this->subscription;
+    }
+}

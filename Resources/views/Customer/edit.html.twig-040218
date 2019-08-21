@@ -1,0 +1,58 @@
+{% extends app.user.pobox is null
+    ? '::base.html.twig' 
+    : '::base-public.html.twig' %}
+
+{% block body -%}
+
+<div class="widget">
+    <div class="widget-header"> <i class="icon-user-md"></i>
+              <h3>Editar datos básicos del cliente</h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+    {{ form_start(edit_form, {'attr': {'novalidate': 'novalidate'}}) }}
+	     <div class="bodycontainer scrollable">
+	     <table class="table table-striped table-bordered">
+                <thead>
+                  <tr>
+    			<th colspan="4"><h4>Datos del Cliente</h4></th>
+		  </tr>
+                </thead>
+       		<tbody>
+			<tr>
+    			<td>{{ form_row(edit_form.name) }}</td>
+			<td>{{ form_row(edit_form.lastname) }}</td>
+			<td>{{ form_row(edit_form.email) }}</td>
+			<td>{{ form_row(edit_form.type) }}</td>	
+    	</tbody>
+        <tfoot>
+    	<tr>
+    	<td colspan=2>{{ form_row(edit_form.submit) }}</td>
+    	<td colspan=2 style="text-align:right;"><button type="button" class="btn btn-default" onclick="location.href='{{ path('customer_show', { 'id': entity.id }) }}';">Regresar</button></td>
+    	</tr>
+    </tfoot>
+    </table>
+
+
+
+</div>    
+    {{ form_end(edit_form) }}
+</div>
+</div>
+{% block javascript %}
+<script type="text/javascript">
+    $(document).ready(function () {
+	$('#customer_type_type').change(function() {
+		  if ($('#customer_type_type_2').is(":checked")) {
+		 	var val = '';
+			$('#customer_type_lastname').val(val); 
+			$('#customer_type_lastname').prop('readonly', true);
+		  } else {
+			$('#customer_type_lastname').prop('readonly', false);
+		  }
+	});
+	$('#customer_type_type').change();
+    });
+</script>
+{% endblock %}
+{% endblock %}

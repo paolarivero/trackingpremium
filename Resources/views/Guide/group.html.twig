@@ -1,0 +1,309 @@
+{% extends '::newbase.html.twig' %}
+
+{% block body -%}
+        <table class="table table-striped table-bordered">
+                <thead>	
+		</thead>
+       		<tbody>
+			<tr>
+            <th><h4>Número</h4></th>
+			<th><h4>Agencia</h4></th>
+			<th><h4>Fecha</h4></th>
+			<th><h4>Peso({% trans %}peso{% endtrans %})</h4></th>
+			</tr>
+			<tr>
+			<td><a  class="btn btn-success" href="{{ path('guide_show', { 'id': guide.id }) }}">{{ guide.number }}</a></td>
+			<td>{{ guide.agency }}</td>
+			<td>{{ guide.creationdate|date('Y-m-d H:i:s') }}</td>
+			<td>{{ guide.realweight }}</td>
+			</tr>
+			<tr>
+			<th><h4>Remitente</h4></th>
+			<th><h4>País origen</h4></th>
+			<th><h4>Destinatario</h4></th>
+			<th><h4>País destino</h4></th>
+			<th><h4>Tipo de envío</h4></th>
+			</tr>
+			<tr>
+			<td>{{ guide.sender }}</td>
+			<td>{{ guide.countryfrom }}</td>
+			<td>{{ guide.addressee }}</td>
+			<td>{{ guide.countryto }}</td>
+			<td>{{ guide.shippingtype }}</td>
+			</tr>
+		</tbody>
+	</table>
+    <h2>Agrupar con {% trans %}Guías{% endtrans %}</h2><br>
+    <table id="guideTable" class="table table-striped table-bordered">
+                <thead>
+		<tr>	
+		<th><h4>Id</h4></th>
+                <th><h4>Número</h4></th>
+		<th><h4>Remitente</h4></th>
+		<th><h4>Destinatario</h4></th>
+		<th><h4>Fecha</h4></th>
+		<th><h4>Peso({% trans %}peso{% endtrans %})</h4></th>
+		<th><h4>Agrupar</h4></th>
+		</tr>	
+		</thead>
+       		<tbody>
+		{% for entity in entities %}
+			<tr>
+			<td>{{ entity.id }}</td>
+			<td>{{ entity.number }}</td>
+			<td>{{ entity.sender }}</td>
+			<td>{{ entity.addressee }}</td>
+			<td>{{ entity.creationdate|date('Y-m-d H:i:s') }}</td>
+			<td>{{ entity.realweight }}</td>
+			<td style="text-align:center;"><input type="checkbox" name="agrupar" value="bag" checked></td>
+			</tr>
+		{% endfor %}
+		</tbody>
+		<tfoot>
+		<tr>
+		<td colspan="3"><button type="button" class="btn btn-default btn-lg bbag" data-toggle="modal" data-target="#createbag">Crear bolsa</button></td>
+		<td colspan="4"><center><button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-lg bback" >Regresar</button></center></td>
+		<td colspan="1"><button type="button" class="btn btn-default btn-lg bupdate" >Actualizar</button></td>
+		</tr>
+		</tfoot>
+    </table>
+    <ul class="pagination pagination-sm pager" id="myPager1"></ul>
+
+
+<!-- Modal -->
+  <div class="modal fade" id="createbag" role="dialog">
+    <div class="modal-dialog modal-lg">
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button id="closecreatebag" type="button" class="close" data-dismiss="modal">&times;</button>
+          <h2 class="modal-title">Confirme la creación de la Bolsa de {% trans %}Guías{% endtrans %}</h2>
+        </div>
+	<table class="table">
+	<tbody>
+		<tr>
+		<td style="text-align:center;"><button type="button" class="btn btn-info btn-lg gotocreate">Confirmar</button><td>
+		</tr>
+	</tbody>
+	</table>
+	{% if 'peso'|trans == 'Lb' %}
+		{% set conwei = 0.454 %}
+	{% else %}
+		{% set conwei = 1/0.454 %}
+	{% endif %}
+	{% if 'dimension'|trans == 'CF' %}
+		{% set convol = 1/35.3147 %}
+	{% else %}
+		{% set convol =  35.3147 %}
+	{% endif %}
+        <div class="modal-body">
+		<table id="guideTable1" class="table table-striped table-bordered">
+                <thead>
+		<tr>
+		<th><h4>Id</h4></th>
+                <th><h4>Número</h4></th>
+		<th><h4>Remitente</h4></th>
+		<th><h4>Destinatario</h4></th>
+		<th><h4>Fecha</h4></th>
+		<th><h4>Peso ({% trans %}peso{% endtrans %}/{% trans %}altpeso{% endtrans %})</h4></th>
+		<th><h4>Volumen ({% trans %}dimension{% endtrans %}/{% trans %}altdimension{% endtrans %})</h4></th>
+		</tr>	
+		</thead>
+       		<tbody>
+			<tr>
+			<td>{{ guide.id }}</td>
+			<td>{{ guide.number }}</td>
+			<td>{{ guide.sender }}</td>
+			<td>{{ guide.addressee }}</td>
+			<td>{{ guide.creationdate|date('m/d/Y') }}</td>
+			<td>{{ guide.realweight }}/{{ (guide.realweight*conwei)|number_format(2, '.', ',') }}</td>
+			<td>{% for receipt in guide.receipts %}
+			{% if receipt != guide.masterec %}
+				{% set volumen = receipt.length*receipt.width*receipt.height %}
+    				{% set volumen = volumen/app.user.agency.maincompany.convertvol %}
+				{{ receipt.length }}X{{ receipt.width }}X{{ receipt.height }} ({{ volumen|number_format(2, '.', ',') }}/{{ (volumen*convol)|number_format(2, '.', ',') }} )
+			{% endif %}
+			{% endfor %}	
+			</td>
+			</tr>
+		</tbody>
+	       </table>  
+	       <ul class="pagination pagination-sm pager" id="myPager2"></ul>    
+        </div>
+        
+        <div class="modal-footer">
+          <button id="closecreatebag" type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+        </div>
+      </div>     
+    </div>
+  </div>
+
+{% block javascript %}
+
+<script type="text/javascript" src="{{ asset('assets/js/jquery.dataTables.min.js') }}"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+	var $thisGuideTable=null;
+	var $thisGuideTable1=null;
+	$('.bupdate').hide();
+	$('.bbag').hide();
+
+	var tableRef = document.getElementById('guideTable').getElementsByTagName('tbody')[0];
+	var nf = tableRef.rows.length;
+	if ( nf > 0) {
+		$('.bupdate').show();
+		$('.bbag').show();
+	}
+	$thisGuideTable=$('#guideTable').DataTable({
+		searching: false,
+		"info":     false,
+		"lengthChange": false,
+		"scrollX": true,
+		pageLength: 10,
+    		language: {				
+      			emptyTable: "<div style=\"color:red;\">No hay resultados</div>",
+        		paginate: {
+				first:      'Primero',
+        			last:       'Último',
+        			previous: '‹',
+        			next:     '›'
+        		},
+        		aria: {
+        			paginate: {
+               				previous: 'Anterior',
+               				next:     'Siguiente'
+        			}
+       			}	
+    		}
+	});
+	$thisGuideTable1=$('#guideTable1').DataTable({
+		searching: false,
+		"info":     false,
+		"lengthChange": false,
+		"scrollX": true,
+		pageLength: 5,
+    		language: {				
+      			emptyTable: "<div style=\"color:red;\">No hay resultados</div>",
+        		paginate: {
+				first:      'Primero',
+        			last:       'Último',
+        			previous: '‹',
+        			next:     '›'
+        		},
+        		aria: {
+        			paginate: {
+               				previous: 'Anterior',
+               				next:     'Siguiente'
+        			}
+       			}	
+    		}
+	});
+	$('.bupdate').click(function(e) {
+	        e.preventDefault();
+    		var tableRef = document.getElementById('guideTable').getElementsByTagName('tbody')[0];
+		var nf = tableRef.rows.length;
+		var todel = [];
+    		for (i=0; i < nf; i++) {
+			var mark = tableRef.rows[i].cells[7].childNodes[0];
+			if (!mark.checked) {
+				todel[i]=true;
+			} else {
+				todel[i]=false;
+			}
+		}
+		
+		for (i=nf-1; i >=0; i--) {
+			if (todel[i]) {
+				tableRef.deleteRow(i);
+			}
+		}
+		nf = tableRef.rows.length;
+		if (nf == 0) {
+			$thisGuideTable.clear();
+			$thisGuideTable.draw();
+			// $thisGuideTable.destroy();
+			$('.bupdate').hide();
+			$('.bbag').hide();
+		} 
+		return false;
+	});
+	$('.bbag').click(function(e) {
+	        e.preventDefault();
+		var tableRef = document.getElementById('guideTable').getElementsByTagName('tbody')[0];
+		var nf = tableRef.rows.length;
+		var tableRef1 = document.getElementById('guideTable1').getElementsByTagName('tbody')[0];
+		var nn = tableRef1.rows.length;
+		for (i=nn-1; i > 0; i--) {
+			tableRef1.deleteRow(i);
+		}
+		var count=0;
+    		for (i=0; i < nf; i++) {
+			var mark = tableRef.rows[i].cells[7].childNodes[0];
+			if (mark.checked) {
+				count++;
+				var id = tableRef.rows[i].cells[0].innerHTML;
+				var number = tableRef.rows[i].cells[1].innerHTML;
+				var sender = tableRef.rows[i].cells[2].innerHTML;
+				var addr = tableRef.rows[i].cells[3].innerHTML;
+				var tdate = tableRef.rows[i].cells[4].innerHTML;
+				var weight = tableRef.rows[i].cells[5].innerHTML;
+				var vol = tableRef.rows[i].cells[6].innerHTML;
+
+				var newRow   = tableRef1.insertRow(tableRef1.rows.length);
+
+				var newCell0  = newRow.insertCell(0);
+				var newCell1  = newRow.insertCell(1);
+				var newCell2  = newRow.insertCell(2);
+				var newCell3  = newRow.insertCell(3);
+				var newCell4  = newRow.insertCell(4);
+				var newCell5  = newRow.insertCell(5);
+				var newCell6  = newRow.insertCell(6);
+				var newText0 = document.createTextNode(id);
+				newCell0.appendChild(newText0);
+				var newText1 = document.createTextNode(number);
+				newCell1.appendChild(newText1);
+				var newText2 = document.createTextNode(sender);
+				newCell2.appendChild(newText2);
+				var newText3 = document.createTextNode(addr);
+				newCell3.appendChild(newText3);
+				var newText4 = document.createTextNode(tdate);
+				newCell4.appendChild(newText4);
+				var newText5 = document.createTextNode(weight);
+				newCell5.appendChild(newText5);
+				var newText6 = document.createTextNode(vol);
+				newCell6.appendChild(newText6);
+			} 
+		}
+		if (count == 0) {
+			alert('Debe escoger al menos 1 {% trans %}Guía{% endtrans %}');
+			$("#createbag").modal().hide();
+		}
+	});
+	$('.gotocreate').click(function(e) {
+	        e.preventDefault();
+		$("#closecreatebag").click();
+		
+   		var tableRef = document.getElementById('guideTable1').getElementsByTagName('tbody')[0];
+		var nf = tableRef.rows.length;
+		var tobag = [];
+		var count=0;
+    		for (i=0; i < nf; i++) {
+			var id = tableRef.rows[i].cells[0].childNodes[0].nodeValue;
+			// console.log(mark.checked + ' ' + id);
+			tobag[count++]=id;
+		}
+		var guidelist = JSON.stringify(tobag);
+		nguides = tobag.length;
+		if (nguides > 1 ) {
+			window.location.href = "{{ url('guide_tobag') }}?guidelist=" + guidelist;
+		} else {
+			alert('Debe escoger al menos 1 {% trans %}Guía{% endtrans %}');
+		}
+		return false;
+    		
+	});
+    });
+</script>
+{% endblock %}
+
+{% endblock %}

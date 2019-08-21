@@ -1,0 +1,480 @@
+{% extends '::newbase.html.twig' %}
+
+{% block body -%}
+
+{% set last= entity.moves|last %}
+{% set status = last.status %}
+{% set guides = entity.guides|length %}
+{% set lastmove = entity.moves|last %}
+{% set status = lastmove.status.name %}
+{% if entity.isopen %}
+{% set open = 'Abierto' %}
+{% set remove = true %}
+{% else %}
+{% set open = 'Cerrado' %}
+{% set remove = false %}
+{% endif %}
+
+<div id="pcont" class="container-fluid">
+  <div class="page-head">
+    <h2>Listar un Consolidado</h2>
+    <ol class="breadcrumb">
+      <li><a href="#">Home</a></li>
+      <li><a href="#">Consolidado</a></li>
+      <li class="active">Listar</li>
+    </ol>
+  </div>
+  <div class="cl-mcont">
+    <div class="row">
+
+              <div >
+                    <div class="btn-group" style="margin-bottom: 5px;margin-top: 4px;">
+                <button type="button" class="btn btn-default">Opciones</button>
+
+
+
+                <button type="button" data-toggle="dropdown" class="btn btn-default dropdown-toggle"><span class="caret"></span><span class="sr-only">Opciones</span></button>
+                <ul role="menu" class="dropdown-menu">
+
+                   <li><a href="#">Nuevo Estatus</a></li>
+                   <li><a href="#">Limpiar Estatus</a></li>
+
+                   {% if (app.user.agency.type == "MASTER") or is_granted('ROLE_VIEW_CONSOLIDATED') %}
+                           <li><a href="#opcion1" data-toggle="tab">Impresiones</a></li>
+                   {% endif %}
+                   {% if  (app.user.agency.type == "MASTER") and ((entity.isopen == true) or (status == "Creado"))  %}
+                     <li><a href="#opcion2" data-toggle="tab">Opciones</a></li>
+                   {% endif %}
+                         {% if  (app.user.agency.type == "MASTER") and ((entity.isopen == false) and (status != "Procesado en destino")) %}
+                     <li><a href="#opcion3" data-toggle="tab">Status</a></li>
+                   {% endif %}
+
+                </ul>
+              </div>
+
+              {% if (entity.isopen) %}
+                <button type="button" class="btn btn-default"
+                onclick="location.href='{{ path('consolidated_addguides', {'id': entity.id }) }}';">Agregar {% trans %}Guías{% endtrans %} </button>
+
+                {% if guides > 0 %}
+                  <button type="button"class="btn btn-default"
+                  onclick="location.href='{{ path('consolidated_close', {'id': entity.id }) }}';">Cerrar</button>
+                {% endif %}
+              {% else %}
+                {% if status == "Creado" %}
+                  <button type="button" class="btn btn-default"
+                  onclick="location.href='{{ path('consolidated_reopen', {'id': entity.id }) }}';">Reabrir</button>
+                {% endif %}
+              {% endif %}
+              {% if guides == 0 %}
+                <button type="button" class="btn btn-default"
+                onclick="location.href='{{ path('consolidated_edit', {'id': entity.id }) }}';">Editar</button>
+                  <button type="button" class="btn btn-default"
+                onclick="location.href='{{ path('consolidated_remove', {'id': entity.id }) }}';">Anular</button>
+              {% endif %}
+
+
+
+
+
+               <button type="button" class="btn btn-default" onclick="location.href='{{ path('consolidated_print', { 'id': entity.id }) }}';" ><i class="fa fa-print"></i></button>
+                 <button type="button" class="btn btn-default" onclick="location.href='{{ path('consolidated_printpdf', { 'id': entity.id }) }}';" ><i class="fa fa-file-text"></i></button>
+                   <button type="button" class="btn btn-default" onclick="location.href='{{ path('consolidated_labelpdf', { 'id': entity.id }) }}';" ><i class="fa fa-envelope-o"></i></button>
+<br>
+  </div>
+
+  <div class="widget-content">
+
+  <!-- Tabs -->
+  <!-- Tab Content -->
+  <div class="tab-content">
+      <!-- Repo -->
+      <div class="tab-pane" id="opcion1">
+        {# <h2>Lista de acciones opción 1</h2> #}
+              <!-- Repo Tabs --->
+              <div class="btn-toolbar">
+    <button type="button" class="btn btn-success" onclick="location.href='{{ path('consolidated_print', { 'id': entity.id }) }}';">Imprimir</button>
+      <button type="button" class="btn btn-success"onclick="location.href='{{ path('consolidated_printpdf', { 'id': entity.id }) }}';">PDF</button>
+    <button type="button" class="btn btn-success" onclick="location.href='{{ path('consolidated_labelpdf', { 'id': entity.id }) }}';">Etiqueta</button>
+  </div>
+      </div>
+
+      <div class="tab-pane" id="opcion2">
+        {# <h2>Lista de acciones opción 2</h2> #}
+              <!-- Repo Tabs --->
+              <div class="btn-toolbar">
+    {% if (entity.isopen) %}
+      <button type="button" class="btn btn-success"
+      onclick="location.href='{{ path('consolidated_addguides', {'id': entity.id }) }}';">(+){% trans %}Guías{% endtrans %}  por lista</button>
+      <button type="button" class="btn btn-success"
+      onclick="location.href='{{ path('consolidated_groupconsol', {'id': entity.id }) }}';">(+){% trans %}Guías{% endtrans %}  por número</button>
+      {% if guides > 0 %}
+        <button type="button" class="btn btn-success"
+        onclick="location.href='{{ path('consolidated_close', {'id': entity.id }) }}';">Cerrar</button>
+      {% endif %}
+    {% else %}
+      {% if status == "Creado" %}
+        <button type="button" class="btn btn-success"
+        onclick="location.href='{{ path('consolidated_reopen', {'id': entity.id }) }}';">Reabrir</button>
+      {% endif %}
+    {% endif %}
+    {% if guides == 0 %}
+      <button type="button" class="btn btn-success"
+      onclick="location.href='{{ path('consolidated_edit', {'id': entity.id }) }}';">Editar</button>
+        <button type="button" class="btn btn-success"
+      onclick="location.href='{{ path('consolidated_remove', {'id': entity.id }) }}';">Anular</button>
+    {% endif %}
+  </div>
+      </div>
+     <div class="tab-pane" id="opcion3">
+        {# <h2>Lista de acciones opción 2</h2> #}
+              <!-- Repo Tabs --->
+              <div class="btn-toolbar">
+    <button type="button" class="btn btn-success"
+    onclick="location.href='{{ path('moveconsols_new', {'id': entity.id }) }}';">Nuevo status</button>
+  </div>
+      </div>
+  </div>
+
+           <div class="col-sm-12 col-md-12">
+        <div class="block-flat">
+
+
+           <h3>Consolidado {{ entity.number }}</h3>
+                     <div class="form-horizontal group-border-dashed">
+                  <div class="form-group">
+                      <div class="col-sm-6">
+
+                      <p>Remitente: {{ entity.sender }}, {{ entity.countryfrom }}<BR>
+                    Destinatario: {{ entity.receiver }}, {{ entity.countryto }}<BR>
+          </div>
+
+                    <div class="col-sm-6">
+                       Status: {{ status }}  <BR>
+                     Condicion: {{ open }}</p>
+          </div>
+            </div>
+            </div>
+          </div>
+
+          {% if 'peso'|trans == 'Lb' %}
+              {% set conwei = 0.454 %}
+          {% else %}
+              {% set conwei = 1/0.454 %}
+          {% endif %}
+
+          {% if 'dimension'|trans == 'CF' %}
+              {% set convol = 1/35.3147 %}
+          {% else %}
+              {% set convol =  35.3147 %}
+          {% endif %}
+          {% set globalpaid= 0 %}
+          {% set globalagency= 0 %}
+
+        <h3 class="spacer-bottom-sm" >Guias</h3>
+
+        <div class="block-flat" style=" padding-top: 0px;">
+            <div class="content" style=" padding-top: 0px;">
+                <div id="mydiv" style="width: 60%">
+                    <table id="guideTable" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th>Número</th>
+                                <th>Fecha</th>
+                                <th>Destinatario</th>
+                                <th>Destino</th>
+                                <th>Peso ({% trans %}peso{% endtrans %}/{% trans %}altpeso{% endtrans %})</th>
+                                <th>Volumen ({% trans %}dimension{% endtrans %}/{% trans %}altdimension{% endtrans %})</th>
+                                <th>Total</th>
+                                <th>Status</th>
+                                <th>Bolsa</th>
+
+                                <th>Agencia</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            	{% for entity in entity.guides %}
+                                {% set globalpaid = globalpaid + entity.totalpaid %}
+                                {% if entity.tariff.measure.name == "CF" %}
+                                    {% set ganancia = entity.tariff.profitag*entity.paidweight %}
+                                {% else %}
+                                    {% if entity.realweight < entity.tariff.minimun %}
+                                        {% set ganancia = entity.tariff.profitag * entity.tariff.minimum %}
+                                    {% else %}
+                                        {% set ganancia = entity.tariff.profitag * entity.realweight %}
+                                    {% endif %}
+                                    {% if entity.volfreight > 0 %}
+                                        {% set ganancia = ganancia + entity.tariff.profitagv * entity.paidweight %}
+                                    {% endif %}
+                                {% endif %}
+                                {% set paidagency = entity.totalpaid - ganancia %}
+                                {% set globalagency = globalagency + paidagency %}
+                            <tr>
+                                <td><a  class="btn btn-success btn-sm btn-flat" href="{{ path('guide_show', { 'id': entity.id }) }}">{{ entity.number }}</a>
+                                <buttom class="btn btn-danger btn-xs" href="#" title="Anular" data-toggle="modal" data-target="#removeguide" data-theguide={{ entity.id }} data-thisguide={{ entity }}><i class="fa fa-times"></i></buttom>
+                                </td>
+                                <td>{{ entity.creationdate|date('m/d/Y') }}</td>
+                                <td>{{ entity.addressee.name }} {{ entity.addressee.lastname }}</td>
+                                <td>{{ entity.addressee.city }} ({{ entity.countryto }})</td>
+                                <td>{{ entity.realweight }}/{{ (entity.realweight*conwei)|number_format(2, '.', ',') }}</td>
+                                <td>
+                                {% for receipt in entity.receipts %}
+                                {% if receipt != entity.masterec %}
+                                    {% set volumen = receipt.length*receipt.width*receipt.height %}
+                                    {% set pesod = volumen/app.user.agency.maincompany.dimfactor %}
+                                    {% set volumen = volumen/app.user.agency.maincompany.convertvol %}
+                                    {% set wkg = receipt.weight*0.454 %}
+                                    {{ receipt.length }}X{{ receipt.width }}X{{ receipt.height }} ({{ volumen|number_format(2, '.', ',') }}/{{ (volumen*convol)|number_format(2, '.', ',') }} )
+                                {% endif %}
+                                {% endfor %}
+                                </td>
+                                <td>{{ entity.totalpaid }}</td>
+                                {% set last = entity.moves|last %}
+                                <td>{{ last.status }}</td>
+
+                                {% if entity.bag is not null  %}
+                          				<td style="text-align:center;">{{ entity.bag.number }}</td>
+                          			{% else %}
+                          				<td style="text-align:center;">N/A</td>
+                          			{% endif %}
+
+
+                                <td>{{ entity.agency }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% if app.user.agency.type == "MASTER" %}
+                    <table class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%" style="    margin-top: 10px;">
+                        <thead>
+                            <tr>
+                                <th style="text-align:center;"><b>Número de {% trans %}Guías{% endtrans %}: </b>{{ entity.guides|length }}</th>
+                                <th style="text-align:center;"><b>Total cobrado:</b> {{ globalpaid|number_format(2, '.', ',')  }}</th>
+
+                            </tr>
+                        </thead>
+                    </table>
+                {% endif %}
+            </div>
+        </div>
+
+      <h3 class="spacer-bottom-sm">Estatus</h3>
+        <div class="block-flat no-padding">
+          <div class="content">
+          <table class="table table-striped table-bordered">
+                     <thead>
+     		<tr>
+     		<th colspan=4 style="text-align:center"><h4> Movimientos</h4></th>
+     		</tr>
+     		<tr>
+     		<th>Fecha</th>
+     		<th>Status</th>
+     		<th>Comentario</th>
+     		<th>Porcentaje</th>
+     		</tr>
+     		</thead>
+     		<tbody>
+     		{% for move in entity.moves %}
+     		<tr>
+     		<td>{{ move.movdate |date('m/d/Y H:i:s') }}</td>
+     		<td>{{ move.status }}</td>
+     		<td>{{ move.comment }}</td>
+     		<td>{{ move.percentage }}</td>
+     		</tr>
+     		{% endfor %}
+     		</tbody>
+          </table>
+
+
+            <table class="no-border">
+              <thead class="no-border">
+                <tr>
+                  <th style="width:10%;">Fecha</th>
+                  <th>Status</th>
+                  <th>Destinatario</th>
+                   <th>Accion</th>
+                </tr>
+              </thead>
+              <tbody class="no-border-x">
+                <tr>
+                  <td style="width:10%;">01/01/2017</td>
+                  <td>Recibido</td>
+                  <td>Bodega en USA</td>
+                   <td class="text-left"><a href="#" class="label label-default"><i class="fa fa-pencil"></i></a><a href="#" class="label label-danger"><i class="fa fa-times"></i></a></td>
+                </tr>
+                <tr>
+                  <td style="width:10%;">01/01/2017</td>
+                  <td>Recibido</td>
+                  <td>Bodega en USA</td>
+                   <td class="text-left"><a href="#" class="label label-default"><i class="fa fa-pencil"></i></a><a href="#" class="label label-danger"><i class="fa fa-times"></i></a></td>
+                </tr>
+                <tr>
+                  <td style="width:10%;">01/01/2017</td>
+                  <td>Recibido</td>
+                  <td>Bodega en USA</td>
+                   <td class="text-left"><a href="#" class="label label-default"><i class="fa fa-pencil"></i></a><a href="#" class="label label-danger"><i class="fa fa-times"></i></a></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        </div>
+      </div>
+   </div>
+</div>
+
+
+
+
+	{% set lastmove = entity.moves|last %}
+	{% set status = lastmove.status.name %}
+	{% if entity.isopen %}
+	{% set open = 'Abierto' %}
+	{% set remove = true %}
+	{% else %}
+	{% set open = 'Cerrado' %}
+	{% set remove = false %}
+	{% endif %}
+	<table class="table table-striped table-bordered">
+	<thead>
+	<tr>
+
+
+
+</div>
+</div>
+
+<input type="hidden" name="theguide" id="theguide">
+
+<!-- Modal -->
+  <div class="modal fade" id="removeguide" role="dialog">
+    <div class="modal-dialog modal-lg">
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button id="closeremguide" type="button" class="close" data-dismiss="modal">&times;</button>
+          <h2 class="modal-title">Remover {% trans %}Guía{% endtrans %}  () de {% trans %}Consolidado{% endtrans %} </h2>
+        </div>
+	<br>
+	<table class="table">
+	<thead>
+	<th> <div class="alert">  <span class="closebtn" onclick="this.parentElement.style.display='none';">&times;</span>
+  		Si {% trans %}Guía{% endtrans %} está en una bolsa, el contenido COMPLETO de la bolsa se removerán de {% trans %}Consolidado{% endtrans %} </div>
+	</th>
+	</head>
+	<tbody>
+		<tr>
+		<td style="text-align:center;"><button type="button" class="btn btn-info btn-lg gotoremoveguide">Confirmar</button><td>
+		</tr>
+	</tbody>
+	</table>
+        <div class="modal-body">
+
+        </div>
+
+        <div class="modal-footer">
+          <button id="closeremguide" type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endblock %}
+  {% block javascripts %}
+
+  <script type="text/javascript">
+
+    $(document).ready(function () {
+
+    $('#mydiv').width("100%");
+
+  	$('.bremguide').click(function(e) {
+	        e.preventDefault();
+    		var theguide = $(this).data('theguide');
+    		$('#theguide').val(theguide);
+		return true;
+	});
+
+
+  $thisGuideTable=$('#guideTable').DataTable({
+      "ordering": true,
+      "searching": true,
+      "info":     false,
+      "lengthChange": true,
+      "scrollX": true,
+      "pageLength": 30,
+      "lengthMenu": [[10, 15, 20, 25, 30, -1], [10, 15, 20, 25, 30, "Todos"]],
+      "columns": [ null, null, null, {"searchable": false}, {"searchable": false},
+                  {"searchable": false}, {"searchable": false}, {"searchable": false},
+                  {"searchable": false},
+                   null ],
+      "columnDefs": [
+          {% if app.user.agency.type != "MASTER" %}
+              {
+                  "targets": [10],
+                  "visible": false,
+                  "searchable": true
+              },
+          {% endif %}
+      ],
+      "language": {
+          "sSearch": "Buscar",
+          "lengthMenu": 'Mostrando  _MENU_  "{% trans %}Guías{% endtrans %}" por página',
+          "zeroRecords": "<div style=\"color:red;\">Lo siento no se encontraron {% trans %}Guías{% endtrans %}</div>",
+          "sInfo": "Mostrando _START_ a _END_ de _TOTAL_ {% trans %}Guías{% endtrans %}",
+          "infoEmpty": "No hay registros disponibles",
+          "infoFiltered": "(Filtradas de un total de _MAX_ )",
+          "searchPlaceholder": "Número/Remitente/Destinatario",
+          "paginate" : {
+              first:    '«',
+              previous: '‹',
+              next:     '›',
+              last:     '»'
+          }
+      },
+      "pagingType": "full_numbers",
+      "sDom": '<"top"i>rt<"bottom"lp><"clear">',
+      "fnDrawCallback": function(oSettings) {
+          if ((oSettings._iDisplayLength >= oSettings.fnRecordsDisplay()) ||  (oSettings._iDisplayLength == -1)) {
+              $(oSettings.nTableWrapper).find('.dataTables_paginate').hide();
+          } else {
+              $(oSettings.nTableWrapper).find('.dataTables_paginate').show();
+          }
+      },
+  });
+  $('#globalfilter').on( 'keyup', function () {
+      $thisGuideTable.draw();
+  } );
+  {% if app.user.agency.type == "MASTER" %}
+  $('#findAgency').change( function () {
+      if (this.value == "Todas" ) {
+          $thisGuideTable.columns( 9 ).search('').draw();
+      } else {
+          $thisGuideTable.columns( 9 ).search( this.value ).draw();
+      }
+  } );
+  {% endif %}
+  $('#mindate').change( function() { $thisGuideTable.draw(); } );
+  $('#maxdate').change( function() { $thisGuideTable.draw(); } );
+
+
+  $thisGuideTable.responsive.rebuild();
+  $thisGuideTable.responsive.recalc();
+  $thisGuideTable.draw();
+  $( window ).resize(function() {
+      $thisGuideTable.responsive.rebuild();
+      $thisGuideTable.responsive.recalc();
+      $thisGuideTable.draw();
+  });
+
+	$('.gotoremoveguide').click(function(e) {
+	        e.preventDefault();
+		$("#closeremguide").click();
+		var guideid = $('#theguide').val();
+   		window.location.href = "{{ url('consolidated_remguide') }}?guideid=" + guideid;
+		return false;
+	});
+    });
+</script>
+
+{% endblock %}

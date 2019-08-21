@@ -1,0 +1,263 @@
+{% extends '::newbase.html.twig' %}
+{% block title %}
+    <title>Crear Bolsa</title>
+{% endblock %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Crear Bolsa</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('bag') }}">Bolsas</a></li>
+            <li class="active">Crear</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    
+    <div class="cl-mcont">
+        {% set makebag = 0 %}
+        {% if 'peso'|trans == 'Lb' %}
+            {% set conwei = 0.454 %}
+        {% else %}
+            {% set conwei = 1/0.454 %}
+        {% endif %}
+        {% if 'dimension'|trans == 'CF' %}
+            {% set convol = 1/35.3147 %}
+        {% else %}
+            {% set convol =  35.3147 %}
+        {% endif %}
+        {% for key, group in allgroup %}
+            {% set fguide = group|first %}
+            {% set sizegroup = group |length %}
+            {% if sizegroup > 1 %}
+                {% set makebag = 1 %}
+                <div class="block-flat">
+                    <div class="header">
+                        <h3>
+                            <div class="row">
+                                <div class="col-sm-4 col-md-4">
+                                    Servicio : {{ fguide.shippingtype }}
+                                </div>
+                                <div class="col-sm-4 col-md-4">
+                                    País destino: {{ fguide.countryto }} 
+                                </div>
+                                <div class="col-sm-4 col-md-4">
+                                    Número de {% trans %}Guías{% endtrans %}: {{ group|length }}
+                                </div>
+                            </div>
+                        </h3>
+                    </div>
+                    <div class="content">
+                        <input id="check-all{{ key }}" type="checkbox" name="checkall{{ key }}" class="icheck checkall" data-theall="{{ key }}"><span> Todos</span>
+                        <p style="display:inline; margin: 5px;"> </p>
+                        <input id="check-none{{ key }}" type="checkbox" name="checknone{{ key }}" class="icheck checknone" data-thenone="{{ key }}"><span> Ninguno</span>
+                        <table id="guideTable{{ key }}" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Agrupar</th>
+                                <th>Número</th>	
+                                <th>Fecha</th>
+                                <th>Piezas</th>
+                                <th>Peso ({% trans %}peso{% endtrans %}/{% trans %}altpeso{% endtrans %})</th>
+                                <th>Volumen ({% trans %}dimension{% endtrans %})</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entity in group %}
+                                <tr>
+                                <td>{{ entity.id }}</td>
+                                <td style="text-align:center;"><input id="guidecheck{{ entity.id }}" type="checkbox" name="guicheck{{ entity.id }}" class="icheck checkclass{{ key }}"></td>
+                                 <td><a  class="btn btn-success btn-xs btn-flat" href="{{ path('guide_show', { 'id': entity.id }) }}">{{ entity.number }}</a></td>
+                                <td>{{ entity.creationdate|date('m/d/Y') }}</td>
+                                <td>{{ entity.pieces }}</td>
+                                <td>{{ entity.realweight }}/{{ (entity.realweight*conwei)|number_format(2, '.', ',') }}</td>
+                                {% set pri = true %}
+                                <td>
+                                    {% set volcad = '' %}
+                                    {% if entity.masterec %}
+                                        {% set listrec = [entity.masterec] %}
+                                    {% else %}
+                                        {% set listrec = entity.receipts %}
+                                    {% endif %}
+                                    {% for receipt in listrec %}
+                                        {% set vol = (receipt.length*receipt.width*receipt.height/entity.agency.maincompany.convertvol)|number_format(2, '.', ',') %}
+                                        {% if pri %}
+                                            {% set volcad = volcad ~ vol %}
+                                            {% set pri = false %}
+                                        {% else %}
+                                            {% set volcad =  volcad ~ ',  ' ~ vol  %}
+                                        {% endif %} 
+                                    {% endfor %}
+                                    {{ volcad }}
+                                </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                        </table>
+                        <table class="no-border">
+                            <tbody class="no-border-y">
+                                <tr>
+                                <td>
+                                    <button type="button" onClick="history.go(-1);return true;" class="btn btn-default" >Regresar</button>
+                                </td>
+                                <td style="text-align:right;">
+                                    <button id="gotocreate{{ key }}" type="button" class="btn btn-info btn-flat" data-thetable="{{ key }}">Crear bolsa</button>
+                                </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+        {% if makebag == 0 %}
+            <div class="block-flat">
+                    <div class="header">
+                        <h3>No hay {% trans %}Guías{% endtrans %} que puedan agruparse en una bolsa</h3>
+                    </div>
+                    <div class="content">
+                        <center>
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-flat bback" >Regresar</button>
+                        </center>
+                    </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+       
+        
+{% endblock %}
+
+{% block javascripts %}
+<script type="text/javascript">
+    $(document).ready(function () {
+        
+        {% for key, group in allgroup %}
+            {% set sizegroup = group |length %}
+            {% if sizegroup > 1 %}
+                $thisGuideTable{{ key }}=$('#guideTable{{ key }}').DataTable({
+                    "ordering": true,
+                    "searching": false,
+                    "info":     false,
+                    "lengthChange": false,
+                    "pageLength": 5,
+                    "columnDefs": [
+                            {
+                                "targets": [ 0 ],
+                                "visible": false,
+                                "searchable": false,
+                            },
+                            { "type": 'date', "targets": 3 },
+                    ],
+                    "order": [[ 3, "desc" ]],
+                    "language": {
+                        "sSearch": "Buscar",
+                        "lengthMenu": 'Mostrando  _MENU_  "{% trans %}Guías{% endtrans %}" por página',
+                        "zeroRecords": "<div style=\"color:red;\">Lo siento no se encontraron {% trans %}Guías{% endtrans %}</div>",
+                        "sInfo": "Mostrando _START_ a _END_ de _TOTAL_ {% trans %}Guías{% endtrans %}",
+                        "infoEmpty": "No hay registros disponibles",
+                        "infoFiltered": "(Filtradas de un total de _MAX_ )",
+                        "searchPlaceholder": "Número/Remitente/Destinatario",
+                        "paginate" : {
+                            first:    '«',
+                            previous: '‹',
+                            next:     '›',
+                            last:     '»'
+                        }
+                    },
+                    "pagingType": "full_numbers",
+                    "sDom": '<"top"i>rt<"bottom"lp><"clear">',
+                    "fnDrawCallback": function(oSettings) {
+                        if ((oSettings._iDisplayLength >= oSettings.fnRecordsDisplay()) ||  (oSettings._iDisplayLength == -1)) {
+                            $(oSettings.nTableWrapper).find('.dataTables_paginate').hide();
+                        } else {
+                            $(oSettings.nTableWrapper).find('.dataTables_paginate').show();
+                        }
+                    },
+                });
+                
+                $('#check-all{{ key }}').on('ifChecked', function(event){
+                    $('#check-none{{ key }}').iCheck('uncheck');
+                    $('#check-none{{ key }}').iCheck('update');
+                    
+                    var info = $thisGuideTable{{ key }}.page.info();
+                    var page = info['page'];
+                    var length = info['length'];
+                    
+                    $thisGuideTable{{ key }}.page.len( -1 ).draw();
+                    
+                    $('.checkclass{{ key }}').iCheck('check');
+                    $('.checkclass{{ key }}').iCheck('update');
+                    
+                    $thisGuideTable{{ key }}.page.len(length);
+                    $thisGuideTable{{ key }}.page(page).draw(false);
+                });
+                $('#check-none{{ key }}').on('ifChecked', function(event){
+                    $('#check-all{{ key }}').iCheck('uncheck');
+                    $('#check-all{{ key }}').iCheck('update');
+                    
+                    var info = $thisGuideTable{{ key }}.page.info();
+                    var page = info['page'];
+                    var length = info['length'];
+                    
+                    $thisGuideTable{{ key }}.page.len( -1 ).draw();
+                    
+                    $('.checkclass{{ key }}').iCheck('uncheck');
+                    $('.checkclass{{ key }}').iCheck('update');
+                    
+                    $thisGuideTable{{ key }}.page.len(length);
+                    $thisGuideTable{{ key }}.page(page).draw(false);
+                });
+                $('.checkclass{{ key }}').on('ifChecked', function(event){
+                    $('#check-none{{ key }}').iCheck('uncheck');
+                    $('#check-none{{ key }}').iCheck('update');
+                });
+                $('.checkclass{{ key }}').on('ifUnchecked', function(event){
+                    $('#check-all{{ key }}').iCheck('uncheck');
+                    $('#check-all{{ key }}').iCheck('update');
+                });
+                $('#gotocreate{{ key}}').click(function(e) {
+                    e.preventDefault();
+                    var tobag = [];
+                    var count=0;
+                    $thisGuideTable{{ key }}.$('tr').each(function(index,rowhtml){
+                        var checked = $('input[type="checkbox"]:checked',rowhtml).length;
+                        var data = $thisGuideTable{{ key }}.row(rowhtml).data();
+                        // console.log(ii + ':' + checked);
+                        if (checked==1) {
+                            tobag[count++]=data[0];
+                        } 
+                    });
+                    var guidelist = JSON.stringify(tobag);
+                    nguides = tobag.length;
+                    if (nguides > 1 ) {
+                        window.location.href = "{{ url('guide_tobag') }}?guidelist=" + guidelist;
+                    } else {
+                        funalert('Debe seleccionar al menos dos {% trans %}Guías{% endtrans %} para crear una bolsa');
+                    }
+                    return false;
+                });
+            {% endif %}
+        {% endfor %}
+        $( window ).resize(function() {
+            {% for key, group in allgroup %}
+                {% set sizegroup = group |length %}
+                {% if sizegroup > 1 %}
+                    $thisGuideTable{{ key }}.responsive.rebuild();
+                    $thisGuideTable{{ key }}.responsive.recalc();
+                    $thisGuideTable{{ key }}.draw();
+                {% endif %}
+            {% endfor %}
+        });
+        
+    });
+</script>
+
+{% endblock %}

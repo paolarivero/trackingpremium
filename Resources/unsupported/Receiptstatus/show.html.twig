@@ -1,0 +1,40 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+    <h1>Status de recibo</h1>
+
+    <table class="record_properties">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ entity.id }}</td>
+            </tr>
+            <tr>
+                <th>Nombre</th>
+                <td>{{ entity.name }}</td>
+            </tr>
+            <tr>
+                <th>Descripción</th>
+                <td>{{ entity.description }}</td>
+            </tr>
+            <tr>
+                <th>Fecha de creación</th>
+                <td>{{ entity.creationdate|date('Y-m-d H:i:s') }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+        <ul class="record_actions">
+    <li>
+        <a href="{{ path('receiptstatus') }}">
+            Regresar a la lista de status de recibo
+        </a>
+    </li>
+    <li>
+        <a href="{{ path('receiptstatus_edit', { 'id': entity.id }) }}">
+            Editar
+        </a>
+    </li>
+    <li>{{ form(delete_form) }}</li>
+</ul>
+{% endblock %}

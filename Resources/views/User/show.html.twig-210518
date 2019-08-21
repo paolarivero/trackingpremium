@@ -1,0 +1,60 @@
+{% extends app.user.pobox is null
+    ? '::newbase.html.twig' 
+    : '::newbase-public.html.twig' %}
+
+{% block title %}
+    <title>Mostrar Usuario</title>
+{% endblock %}
+
+{% block body -%}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Información  de Usuario</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('user') }}">Usuarios</a></li>
+            <li class="active"> Mostrar Usuario</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        <div class="block-flat">
+            <div class="header">
+                <h3>Usuario {{ entity.username }} </h3>
+            </div>
+
+            <div class="content">
+                <div class="row">
+                    <div class="col-md-6 col-sm-6">
+                        <b>
+                        <i class="fa fa-user"></i> Usuario: {{ entity.username }}</BR>
+                        <i class="fa fa-info"></i> Nombre: {{ entity.name }}</BR>
+                        <i class="fa fa-vcard"></i> Apellido: {{ entity.lastname }}</BR>
+                        </b>
+                    </div>
+                    <div class="col-md-6 col-sm-6">
+                        <b>
+                        <i class="fa fa-calendar"></i> Fecha: {{ entity.creationdate|date('m/d/Y') }}<BR>
+                        <i class="fa fa-envelope"></i> Email: {{ entity.email }}</BR>
+                        <i class="fa fa-tasks"></i> Roles: 
+                            {% for role in entity.userroles %}
+                                    {{ role }} 
+                            {% endfor %}
+                        </b>
+                    </div>
+                </div>
+               <div style="margin-top:10px;">
+                    <center>
+                        <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-flat" >Regresar</button>
+                    </center>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

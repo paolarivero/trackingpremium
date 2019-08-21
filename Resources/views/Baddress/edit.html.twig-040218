@@ -1,0 +1,266 @@
+{% extends app.user.pobox is null
+    ? '::base.html.twig' 
+    : '::base-public.html.twig' %}
+
+{% block body -%}
+
+<script type="text/javascript">
+    function returnSelectCity(id, vc, vs, vp){
+	$('#baddress_type_cityid').val(id);
+       	$('#baddress_type_cityname').val(vc);
+       	$('#baddress_type_state').val(vs);
+       	$('#baddress_type_country').val(vp);
+	$("#closemodalcity1").click();
+        return true;
+    }
+</script>
+<div class="widget">
+    <div class="widget-header"> <i class="icon-user-md"></i>
+              <h3>Actualización de Dirección del cliente</h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+	     <div class="bodycontainer scrollable">
+	     <table class="table table-striped table-bordered">
+                <thead>
+                  <tr>
+    			<th style="text-align:center;" colspan=4><h4>Datos del Cliente</h4></th>
+		  </tr>
+		  <tr>
+    			<th><h4>Nombre: {{ entity.customer.name }} </h4></th>
+			<th><h4>Apellido: {{ entity.customer.lastname }} </h4></th>
+			<th colspan=2><h4>EMail: {{ entity.customer.email }} </h4></th>
+		  </tr>
+                </thead>
+       		<tbody>
+			<tr>
+    			<th style="text-align:center;" colspan=4><h4>Información de la Dirección</h4></th>
+		  	</tr>
+			<tr>
+    			<td>{{ form_row(form.name) }}</td>
+			<td>{{ form_row(form.lastname) }}</td>
+			<td colspan=2>{{ form_row(form.docid) }}</td>
+			</tr>
+    			<tr> <td colspan=4>{{ form_row(form.address) }}</td>
+			</tr>
+			
+			<tr> <td>{{ form_row(form.cityname) }}</td>
+			     <td>{{ form_row(form.state) }}</td>
+			     <td>{{ form_row(form.country) }}</td>
+			     <td><button type="button" class="btn btn-info btn-lg bcity" data-toggle="modal" data-target="#citysearch" data-thecity="1" >Ciudad</button></td>
+			</tr>
+			<tr>
+			<td colspan=2>{{ form_row(form.barrio) }}</td>  
+			<td colspan=2>{{ form_row(form.zip) }}</td>
+			</tr>
+			<tr>
+    			<td colspan=2>{{ form_row(form.mobile) }}</td>	
+			<td colspan=2>{{ form_row(form.phone) }}</td>  
+			</tr> 
+			
+    	</tbody>
+        <tfoot>
+    	<tr>
+    	<td colspan=2>{{ form_row(form.submit) }}</td>
+	<td colspan=2 style="text-align:right;"><button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-lg bback" >Regresar</button></td>
+    	</tr>
+    </tfoot>
+    </table>
+
+<!-- Modal -->
+  <div class="modal fade" id="citysearch" role="dialog">
+    <div class="modal-dialog modal-lg">
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button id="closemodalcity1" type="button" class="close" data-dismiss="modal">&times;</button>
+          <h2 class="modal-title"><center>Buscar Ciudad</center></h2>
+        </div>
+        <div class="modal-body">
+	      <div class="table-responsive"> 
+	      <input type="text" class="global_filter" id="global_filter" placeholder="Nombre de ciudad">
+	      <table id="cityTable" class="table">
+                <thead>
+                  
+                </thead>
+                <tbody >
+        
+                </tbody>
+              </table>
+	      </div>
+        </div>
+        
+        <div class="modal-footer">
+          <button id="closemodalcity" type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+        </div>
+      </div>      
+    </div>
+  </div> 
+
+</div>    
+    {{ form_row(form.submit) }}
+    {{ form_end(form) }}
+</div>
+</div>
+{% block javascript %}
+
+<script type="text/javascript" src="{{ asset('assets/js/jquery.dataTables.min.js') }}"></script>
+
+<script type="text/javascript">
+    var thisCityTable= null;
+    function listCity(name) {
+	var theurl = "{{ url('city_listpobox') }}?city_name=" + name;
+	$.ajax({
+                type: "GET",
+                url: theurl,
+                success: function(data) {
+		var tableRef = document.getElementById('cityTable').getElementsByTagName('tbody')[0];
+		var nf = tableRef.rows.length;
+		for (i=0; i < nf; i++) {
+			tableRef.deleteRow(0);
+		}
+		var nc = data.length;
+		for (i = 0; i < nc; i++) {
+			var cityid = data[i]['cityid'];
+			var cityname = data[i]['cityname'];
+			var state = data[i]['state'];
+			var country = data[i]['country'];
+			// Insert a row in the table at the last row
+			var newRow   = tableRef.insertRow(tableRef.rows.length);
+						
+			// Insert a cell in the row at index 0
+			var newCell0  = newRow.insertCell(0);
+			var newCell1  = newRow.insertCell(1);
+			var newCell2  = newRow.insertCell(2);	
+			var newCell3  = newRow.insertCell(3);
+
+			// Append a text node to the cell
+			
+			var btn = document.createElement("input");        // Create a <button> element
+
+			var tag = "Ciudad_" + cityid;
+			var t = document.createTextNode(tag);
+			
+    			btn.type = "button";
+    			btn.value = tag;
+    			
+			btn.onclick = (function(){ var ci = cityid; var cn= cityname; var sn=state; var pn = country; return function() 				 {returnSelectCity(ci,cn,sn,pn)}})();  
+		 	newCell0.appendChild(btn);
+
+			var newText1 = document.createTextNode(cityname);
+			newCell1.appendChild(newText1);
+
+			var newText2 = document.createTextNode(state);
+			newCell2.appendChild(newText2);
+
+			var newText3 = document.createTextNode(country);
+			newCell3.appendChild(newText3);		
+                }
+
+		
+		thisCityTable=$('#cityTable').DataTable({
+			destroy: true,
+			"ordering": false,
+			"searching": true,
+			"info":     false,
+			"lengthChange": false,
+			"scrollX": true,
+			"pageLength": 5,
+			"columns": [ { "searchable": false }, null,  { "searchable": false }, { "searchable": false }],
+			
+			"language": {
+				"oSearch": {
+            				"bSmart": false, 
+            				"bRegex": false,
+            				"sSearch": ""                
+        			},
+            			"lengthMenu": "Mostrando  _MENU_  ciudades por página",
+            			"zeroRecords": "<div style=\"color:red;\">Lo siento no se encontraron ciudades</div>",
+				"sInfo": "Mostrando _START_ a _END_ de _TOTAL_ ciudades",
+            			"infoEmpty": "No hay registros disponibles",
+            			"infoFiltered": "(Filtradas de un total de _MAX_ )",
+				"paginate" : {
+               					first:    '«',
+            					previous: '‹',
+            					next:     '›',
+            					last:     '»'
+       				}
+        		},
+			"pagingType": "full_numbers",
+			"fnDrawCallback": function(oSettings) {
+        			if (oSettings._iDisplayLength > oSettings.fnRecordsDisplay()) {
+            				$(oSettings.nTableWrapper).find('.dataTables_paginate').hide();
+					
+        			} else {
+					$(oSettings.nTableWrapper).find('.dataTables_paginate').show();
+					
+				}
+    			},
+		});
+		$('.dataTables_filter').hide();
+	   }
+	});
+    }
+    $(document).ready(function () {
+	$('#citysearch').on('shown.bs.modal', function () {
+		$('input.global_filter').val('');
+
+		var tableHead = document.getElementById('cityTable').getElementsByTagName('thead')[0];		
+		var nh = tableHead.rows.length;
+		for (i=0; i < nh; i++) {
+			tableHead.deleteRow(0);
+		}
+		var newhead = tableHead.insertRow(0); 
+		newhead.id="htcity";
+		newhead.insertCell(0).outerHTML = "<th><h4>Id</h4></th>";
+		newhead.insertCell(1).outerHTML = "<th><h4>Nombre</h4></th>";
+		newhead.insertCell(2).outerHTML = "<th><h4>Estado</h4></th>";
+		newhead.insertCell(3).outerHTML = "<th><h4>País</h4></th>";
+
+		document.getElementById("cityTable").style.display="none";
+		document.getElementById("htcity").style.visibility = "hidden";
+
+		$('.dataTables_paginate').hide();
+		var doajax = true;
+		var oldvalue = 0;
+		$('input.global_filter').on( 'keyup click', function () {
+    			var value = jQuery.fn.DataTable.ext.type.search.string($('#global_filter').val());
+			if (value.length >= 3) {
+			    document.getElementById("cityTable").style.display="table";
+			    document.getElementById("htcity").style.visibility = "visible";
+			    if (doajax) {
+				makefind=false;
+				if (thisCityTable) {
+					thisCityTable.destroy();
+					thisCityTable = null;
+				}
+				listCity(value);
+			   } else {
+				thisCityTable.column(1).search('^' + value,true,false).draw();
+			   }
+			}
+			
+			if (thisCityTable) {
+				var data = thisCityTable.rows().data();
+				var nf = data.length;
+				if (nf < 25) {
+					doajax = false;
+				} 
+			} 	
+			if (value.length <= 2) {
+				if (thisCityTable) {
+					document.getElementById("cityTable").style.display="none";
+					document.getElementById("htcity").style.visibility = "hidden";
+        				thisCityTable.search('').draw();
+					$('.dataTables_paginate').hide();
+					doajax=true;
+				}	
+			}
+		});
+	    	return false;
+	});
+    });
+</script>
+{% endblock %}  
+{% endblock %}

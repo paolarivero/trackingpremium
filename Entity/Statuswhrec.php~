@@ -1,0 +1,46 @@
+<?php
+// src/NvCarga/Bundle/Entity/Statuswhrec.php
+
+namespace NvCarga\Bundle\Entity;
+
+
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+
+/**
+ * @ORM\Entity
+ * @ORM\Table(name="statuswhrec")
+ * @ORM\HasLifecycleCallbacks()
+ */
+class Statuswhrec
+{
+    /**
+     * @ORM\Id
+     * @ORM\Column(type="integer")
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    protected $id;
+    /**
+     * @ORM\ManyToOne(targetEntity="WHrec", inversedBy="liststatus")
+     * @ORM\JoinColumn(name="whrec_id", referencedColumnName="id")
+     */
+    protected $whrec;
+    /**
+     * @ORM\ManyToOne(targetEntity="Stepstatus")
+     * @ORM\JoinColumn(name="step_id", referencedColumnName="id")
+     */
+    protected $step;
+     /**
+     * @ORM\ManyToOne(targetEntity="City")
+     * @ORM\JoinColumn(name="place_id", referencedColumnName="id")
+     */
+    protected $place;
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    protected $date;
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    protected $comment;
+}

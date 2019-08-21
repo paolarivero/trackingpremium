@@ -1,0 +1,142 @@
+{% extends '::newbase.html.twig' %}
+
+{% block body -%}
+{% set last= guide.moves|last %}
+{% set status = last.status %}
+<div class="widget widget-primary">
+    <div class="widget-header"> <i class="icon-briefcase"></i>
+              <h3> <b>Reportar movimiento de {% trans %}Guía{% endtrans %} {{ guide.number }}</b> </h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+	<br>
+    <table id="guideTable" class="table table-striped table-bordered">
+                <thead>
+		<tr>
+		<th colspan=7><h4>Datos de la {% trans %}Guía{% endtrans %}</h4></th>	
+		</tr>
+		<tr>
+                <th><h4>Número</h4></th>
+		<th><h4>Remitente</h4></th>
+		<th><h4>Destinatario</h4></th>
+		<th><h4>Fecha</h4></th>
+		<th><h4>Peso({% trans %}peso{% endtrans %})</h4></th>
+		<th><h4>Volumen</h4></th>
+		<th><h4>Bolsa</h4></th>
+		</tr>	
+		</thead>
+       		<tbody>
+		
+			<tr>
+			<td>{{ guide.number }}</td>
+			<td>{{ guide.sender }}</td>
+			<td>{{ guide.addressee.name }} {{ guide.addressee.lastname }}</td>
+			<td>{{ guide.creationdate|date('Y-m-d H:i:s') }}</td>
+			<td>{{ guide.realweight }}</td>
+			<td>{{ guide.length }}X{{ guide.width }}X{{ guide.height }}</td>
+			{% if guide.bag is not null  %}
+				<td style="text-align:center;">{{ guide.bag.number }}</td>
+			{% else %}
+				<td style="text-align:center;">N/A</td>
+			{% endif %}	
+			</tr>
+		
+		</tbody>
+    </table>
+    
+     <table class="table table-striped table-bordered">
+                <thead>
+		<tr>
+		<th colspan=6><h4> Movimientos del {% trans %}Guía{% endtrans %} </h4></th>
+		</tr>
+		<tr>
+		<th>Fecha</th>
+		<th>Status</th>
+		<th>Comentario</th>
+		<th>Compañia</th>
+		<th>Track</th>
+		<th>Porcentaje</th>
+		</tr>
+		</thead>
+		<tbody>
+		{% for move in guide.moves %}
+		<tr>
+		<td>{{ move.movdate |date('Y-m-d H:i:s') }}</td>
+		<td>{{ move.status }}</td>
+		<td>{{ move.comment }}</td>
+		<td>{{ move.company }}</td>
+		<td>{{ move.track }}</td>
+		<td>{{ move.percentage }}</td>
+		</tr>
+		{% endfor %}
+		{% set lastmove = guide.moves|last %}
+		{% set datlast = lastmove.movdate | date() %}
+		</tbody>
+     </table>
+     {{ form_start(form, {attr: {novalidate: 'novalidate'}}) }}
+     <table class="table table-striped table-bordered">
+                <thead>
+		<tr>
+		<th colspan=3><h4> Nuevo movimiento </h4></th>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+		<td>{{ form_row(form.movdate) }}</td>
+		<td>{{ form_row(form.status) }}</td>
+		<td>{{ form_row(form.comment) }}</td>
+		</tr>
+		<tr>
+		<td>{{ form_row(form.company) }}</td>
+		<td>{{ form_row(form.track) }}</td>
+		<td>{{ form_row(form.percentage) }}</td>
+		</tr>
+		</tbody>
+		<tfoot>
+		<tr>
+		<td colspan="2">{{ form_row(form.submit) }}</td>
+		<td colspan="2" style="text-align:right;"><button type="button" onClick="history.go(-1);return true;" class="btn btn-default" >Regresar</button></td>
+		</tr>
+		</tfoot>
+     </table>
+     {{ form_end(form) }}
+</div>
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+	var lastdate = new Date("{{ datlast }}");
+	var lastper = {{ lastmove.percentage }};
+	$('#moveguides_type_movdate').datepicker();
+	$('#moveguides_type_movdate').val($.datepicker.formatDate('mm/dd/yy', new Date()));
+        /* $('#moveguides_type_movdate').change(function(){
+           var val = new Date($('#moveguides_type_movdate').val());
+	   // console.log(val);
+           if (val < lastdate) {
+		alert('La fecha del movimiento debe ser igual o posterior a la fecha del último movimiento');
+	   }
+           return false;
+        }); */
+	$('#moveguides_type_submit').click(function(evt) {
+		var now = new Date();
+    		var h = now.getHours();
+    		var m = now.getMinutes();
+    		var s = now.getSeconds();
+		
+		var movdate = new Date($('#moveguides_type_movdate').val());
+		movdate.setHours(h,m,s,0);
+		if (movdate < lastdate) {
+			alert('ERROR: La fecha del movimiento debe ser igual o posterior a la fecha del último movimiento. Por favor, corriga la fecha del movimiento');
+			return false;
+	   	}
+		if ($('#moveguides_type_percentage').val() <= lastper ) {
+			alert('ERROR: El porcentaje debe ser mayor que el porcentaje del último movimiento. Por favor, corriga el porcentaje');
+			return false;
+		} 
+		
+           	return true;
+	});
+    });
+</script>
+    
+{% endblock %}

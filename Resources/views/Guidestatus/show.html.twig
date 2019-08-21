@@ -1,0 +1,59 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+<div class="widget">
+    <div class="widget-header"> <i class="icon-asterisk"></i>
+              <h3>Status de {% trans %}Guía{% endtrans %}</h3> 
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+    <div class="bodycontainer scrollable">
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Nombre</th>
+		<th>Posición</th>
+                <th>Latitud</th>
+                <th>Longitud</th>
+                <th>Descripción/Dirección</th>
+		<th>Heredado</th>
+		<th>Envía email</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ entity.id }}</td>
+                <td>{{ entity.name }}</td>
+		<td>{{ entity.position }}</td>
+                <td>{{ entity.latitude }}</td>
+                <td>{{ entity.longitude }}</td>
+                <td>{{ entity.address }}</td>
+		<td style="text-align:center;"> 
+		{% if entity.isinherited %}
+			<input type="checkbox" checked="checked" disabled readonly >
+		 {% else %}
+			<input type="checkbox" disabled readonly >
+		{% endif %}
+		</td>
+		<td style="text-align:center;"> 
+		{% if entity.emailnoti %}
+			<input type="checkbox" checked="checked" disabled readonly >
+		 {% else %}
+			<input type="checkbox" disabled readonly >
+		{% endif %}
+		</td> 	
+            </tr>
+        </tbody>
+	<tfoot>
+	<tr>
+	<td colspan="3"><a class="btn btn-default" href="{{ path('guidestatus_edit', { 'id': entity.id }) }}">Editar</a></td>
+	<td colspan=4 style="text-align:right;"><button type="button" class="btn btn-default" onclick="location.href='{{ path('guidestatus') }}';">Regresar</button></td>
+	</tr>
+	</tfoot>
+    </table>
+    </div>
+</div>
+</div>
+{% endblock %}
+

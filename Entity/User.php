@@ -1,0 +1,716 @@
+<?php
+// src/NvCarga/Bundle/Entity/User.php
+
+namespace NvCarga\Bundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\Validator\Constraints as Assert;
+
+/**
+ * @ORM\Entity
+ * @ORM\Table(name="user")
+ * @ORM\HasLifecycleCallbacks()
+ */
+class User implements UserInterface, \Serializable
+{
+    /**
+     * @ORM\Id
+     * @ORM\Column(type="integer")
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    protected $id;
+
+    /**
+     * @Assert\NotBlank(message = "El username no puede estar vacío")
+     * @Assert\Length(
+     *      min = 3,
+     *      max = 50,
+     *      minMessage = "El username debe tener al menos {{ limit }} caracteres",
+     *      maxMessage = "El username no puede tener mas de {{ limit }} caracteres"
+     * )
+     * @ORM\Column(type="string", length=60, nullable=false)
+     */
+    protected $username;
+    /**
+     * @Assert\NotBlank(message = "El email no puede estar vacío")
+     * @ORM\Column(type="string", length=60, nullable=false)
+     */
+    protected $email;
+
+    /**
+     * @Assert\NotBlank(message = "El nombre no puede estar vacío")
+     * @Assert\Length(
+     *      min = 2,
+     *      max = 50,
+     *      minMessage = "El nombre debe tener al menos {{ limit }} caracteres",
+     *      maxMessage = "El nombre no puede tener mas de {{ limit }} caracteres"
+     * )
+     * @ORM\Column(type="string", length=50, nullable=false)
+     */
+    protected $name;
+
+     /**
+     * @Assert\Length(
+     *      min = 2,
+     *      max = 50,
+     *      minMessage = "El nombre debe tener al menos {{ limit }} caracteres",
+     *      maxMessage = "El nombre no puede tener mas de {{ limit }} caracteres"
+     * )
+     * @ORM\Column(type="string", length=50, nullable=true)
+     */
+    protected $lastname;
+
+    /**
+     * @ORM\Column(type="string")
+     */
+    protected $password;
+    /**
+     * @ORM\Column(type="string")
+     */
+    protected $salt;
+    /**
+     * @ORM\ManyToOne(targetEntity="Agency", inversedBy="users")
+     * @ORM\JoinColumn(name="agency_id", referencedColumnName="id")
+     */
+    protected $agency;
+    /**
+     * @ORM\ManyToOne(targetEntity="Userstatus", inversedBy="users")
+     * @ORM\JoinColumn(name="status_id", referencedColumnName="id")
+     */
+    protected $status;
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    protected $creationdate;
+     /**
+     * se utilizó user_roles para no hacer conflicto al aplicar ->toArray en getRoles()
+     * @ORM\ManyToMany(targetEntity="Role", inversedBy="users")
+     * @ORM\JoinTable(name="users_roles")
+     */
+    protected $user_roles;
+    /**
+     * @ORM\OneToOne(targetEntity="Pobox", mappedBy="user" )
+     * @ORM\JoinColumn(name="pobox_id", referencedColumnName="id")
+     */
+    protected $pobox;
+    /**
+     * @ORM\ManyToOne(targetEntity="Maincompany", inversedBy="users")
+     * @ORM\JoinColumn(name="maincompany_id", referencedColumnName="id")
+     */
+    protected $maincompany;
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    protected $authId;
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    protected $authProvider;
+    /**
+     * @ORM\OneToMany(targetEntity="Message", mappedBy="receiver")
+     */
+    protected $messages;
+    /** 
+    * @ORM\Column(type="string", columnDefinition="ENUM('SISTEMA', 'POBOX', 'EMPRESA')") 
+    */ 
+    protected $type;	
+    /** 
+    * @ORM\Column(type="string", length=255, nullable=true)
+    */ 
+    protected $stripeCustomer;
+    /**
+     * @ORM\OneToOne(targetEntity="Subscriber", mappedBy="user" )
+     * @ORM\JoinColumn(name="subscriber_id", referencedColumnName="id")
+     */
+    protected $subscriber;
+    
+    /**
+     * @Assert\Image(
+     *     mimeTypes = {"image/jpeg", "image/png"},
+     *     mimeTypesMessage = "Por favor, seleccione un tipo de archivo válido (png/jpg)", 
+     *     allowLandscape = false,
+     *     allowPortrait = false, 
+     *     minWidth = 50,
+     *     maxWidth = 400,
+     *     minHeight = 50,
+     *     maxHeight = 400, 
+     *     minWidthMessage = "El ancho de la foto debe ser al menos {{ min_width }}px",
+     *     minHeightMessage = "El alto de la foto debe ser al menos {{ min_height }}px",
+     *     maxWidthMessage = "El ancho de la foto debe ser a los sumo {{ max_width }}px",
+     *     maxHeightMessage = "El alto de la foto debe ser a lo sumo  {{ max_height }}px",
+     *     allowLandscapeMessage = "La foto debe se cuadrada", 
+     *     allowPortraitMessage = "La foto debe ser cuadrada",)
+    */
+    private $image;
+    
+    /**
+     * @ORM\Column(name="photo", type="string", length=255, nullable=true)
+     */
+    protected $photo;
+   /**
+     * Get password
+     *
+     * @return string
+     */
+    public function getPassword()
+    {
+        return $this->password;
+    }   
+ 
+    /**
+     * Get salt
+     *
+     * @return string
+     */
+    public function getSalt()
+    {
+        return $this->salt;
+    } 
+    /**
+     * Get username
+     *
+     * @return string
+     */
+    public function getUsername()
+    {
+        return $this->username;
+    }
+    /**
+     * Get roles
+     *
+     * @return Doctrine\Common\Collections\Collection
+     */
+    public function getRoles()
+    {
+        return $this->user_roles->toArray(); //IMPORTANTE: el mecanismo de seguridad de Sf2 requiere ésto como un array
+    }
+    /**
+     * Erases the user credentials.
+     */
+    public function eraseCredentials() {
+ 
+    }
+    public function serialize()
+    {
+        return serialize(array(
+            $this->id,
+        ));
+    }
+    public function unserialize($serialized)
+    {
+        list (
+            $this->id,
+            ) = unserialize($serialized);
+    }
+    public function __toString() {
+        return (string) $this->getUsername();
+    }
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->user_roles = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->messages = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+     * Get id
+     *
+     * @return integer
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set username
+     *
+     * @param string $username
+     *
+     * @return User
+     */
+    public function setUsername($username)
+    {
+        $this->username = $username;
+
+        return $this;
+    }
+
+    /**
+     * Set email
+     *
+     * @param string $email
+     *
+     * @return User
+     */
+    public function setEmail($email)
+    {
+        $this->email = $email;
+
+        return $this;
+    }
+
+    /**
+     * Get email
+     *
+     * @return string
+     */
+    public function getEmail()
+    {
+        return $this->email;
+    }
+
+    /**
+     * Set name
+     *
+     * @param string $name
+     *
+     * @return User
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * Get name
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Set lastname
+     *
+     * @param string $lastname
+     *
+     * @return User
+     */
+    public function setLastname($lastname)
+    {
+        $this->lastname = $lastname;
+
+        return $this;
+    }
+
+    /**
+     * Get lastname
+     *
+     * @return string
+     */
+    public function getLastname()
+    {
+        return $this->lastname;
+    }
+
+    /**
+     * Set password
+     *
+     * @param string $password
+     *
+     * @return User
+     */
+    public function setPassword($password)
+    {
+        $this->password = $password;
+
+        return $this;
+    }
+
+    /**
+     * Set salt
+     *
+     * @param string $salt
+     *
+     * @return User
+     */
+    public function setSalt($salt)
+    {
+        $this->salt = $salt;
+
+        return $this;
+    }
+
+    /**
+     * Set creationdate
+     *
+     * @param \DateTime $creationdate
+     *
+     * @return User
+     */
+    public function setCreationdate($creationdate)
+    {
+        $this->creationdate = $creationdate;
+
+        return $this;
+    }
+
+    /**
+     * Get creationdate
+     *
+     * @return \DateTime
+     */
+    public function getCreationdate()
+    {
+        return $this->creationdate;
+    }
+
+    /**
+     * Set agency
+     *
+     * @param \NvCarga\Bundle\Entity\Agency $agency
+     *
+     * @return User
+     */
+    public function setAgency(\NvCarga\Bundle\Entity\Agency $agency = null)
+    {
+        $this->agency = $agency;
+
+        return $this;
+    }
+
+    /**
+     * Get agency
+     *
+     * @return \NvCarga\Bundle\Entity\Agency
+     */
+    public function getAgency()
+    {
+        return $this->agency;
+    }
+
+    /**
+     * Set status
+     *
+     * @param \NvCarga\Bundle\Entity\Userstatus $status
+     *
+     * @return User
+     */
+    public function setStatus(\NvCarga\Bundle\Entity\Userstatus $status = null)
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    /**
+     * Get status
+     *
+     * @return \NvCarga\Bundle\Entity\Userstatus
+     */
+    public function getStatus()
+    {
+        return $this->status;
+    }
+
+    /**
+     * Add userRole
+     *
+     * @param \NvCarga\Bundle\Entity\Role $userRole
+     *
+     * @return User
+     */
+    public function addUserRole(\NvCarga\Bundle\Entity\Role $userRole)
+    {
+        $this->user_roles[] = $userRole;
+
+        return $this;
+    }
+
+    /**
+     * Remove userRole
+     *
+     * @param \NvCarga\Bundle\Entity\Role $userRole
+     */
+    public function removeUserRole(\NvCarga\Bundle\Entity\Role $userRole)
+    {
+        $this->user_roles->removeElement($userRole);
+    }
+
+    /**
+     * Get userRoles
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getUserRoles()
+    {
+        return $this->user_roles;
+    }
+
+    /**
+     * Set pobox
+     *
+     * @param \NvCarga\Bundle\Entity\Pobox $pobox
+     *
+     * @return User
+     */
+    public function setPobox(\NvCarga\Bundle\Entity\Pobox $pobox = null)
+    {
+        $this->pobox = $pobox;
+
+        return $this;
+    }
+
+    /**
+     * Get pobox
+     *
+     * @return \NvCarga\Bundle\Entity\Pobox
+     */
+    public function getPobox()
+    {
+        return $this->pobox;
+    }
+    /**
+     * Set maincompany
+     *
+     * @param \NvCarga\Bundle\Entity\Maincompany $maincompany
+     *
+     * @return Agency
+     */
+    public function setMaincompany(\NvCarga\Bundle\Entity\Maincompany $maincompany = null)
+    {
+        $this->maincompany = $maincompany;
+
+        return $this;
+    }
+
+    /**
+     * Get maincompany
+     *
+     * @return \NvCarga\Bundle\Entity\Maincompany
+     */
+    public function getMaincompany()
+    {
+        return $this->maincompany;
+    }
+
+    /**
+     * Set authId
+     *
+     * @param string $authId
+     *
+     * @return User
+     */
+    public function setAuthId($authId)
+    {
+        $this->authId = $authId;
+
+        return $this;
+    }
+
+    /**
+     * Get authId
+     *
+     * @return string
+     */
+    public function getAuthId()
+    {
+        return $this->authId;
+    }
+
+    /**
+     * Set authProvider
+     *
+     * @param string $authProvider
+     *
+     * @return User
+     */
+    public function setAuthProvider($authProvider)
+    {
+        $this->authProvider = $authProvider;
+
+        return $this;
+    }
+
+    /**
+     * Get authProvider
+     *
+     * @return string
+     */
+    public function getAuthProvider()
+    {
+        return $this->authProvider;
+    }
+
+    /**
+     * Add message
+     *
+     * @param \NvCarga\Bundle\Entity\Message $message
+     *
+     * @return User
+     */
+    public function addMessage(\NvCarga\Bundle\Entity\Message $message)
+    {
+        $this->messages[] = $message;
+
+        return $this;
+    }
+
+    /**
+     * Remove message
+     *
+     * @param \NvCarga\Bundle\Entity\Message $message
+     */
+    public function removeMessage(\NvCarga\Bundle\Entity\Message $message)
+    {
+        $this->messages->removeElement($message);
+    }
+
+    /**
+     * Get messages
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getMessages()
+    {
+        return $this->messages;
+    }
+
+    /**
+     * Set type
+     *
+     * @param string $type
+     *
+     * @return User
+     */
+    public function setType($type)
+    {
+        $this->type = $type;
+
+        return $this;
+    }
+
+    /**
+     * Get type
+     *
+     * @return string
+     */
+    public function getType()
+    {
+        return $this->type;
+    }
+
+    /**
+     * Set stripeCustomer
+     *
+     * @param string $stripeCustomer
+     *
+     * @return User
+     */
+    public function setStripeCustomer($stripeCustomer)
+    {
+        $this->stripeCustomer = $stripeCustomer;
+
+        return $this;
+    }
+
+    /**
+     * Get stripeCustomer
+     *
+     * @return string
+     */
+    public function getStripeCustomer()
+    {
+        return $this->stripeCustomer;
+    }
+
+    /**
+     * Set subscriber
+     *
+     * @param \NvCarga\Bundle\Entity\Subscriber $subscriber
+     *
+     * @return User
+     */
+    public function setSubscriber(\NvCarga\Bundle\Entity\Subscriber $subscriber = null)
+    {
+        $this->subscriber = $subscriber;
+
+        return $this;
+    }
+
+    /**
+     * Get subscriber
+     *
+     * @return \NvCarga\Bundle\Entity\Subscriber
+     */
+    public function getSubscriber()
+    {
+        return $this->subscriber;
+    }
+
+    /**
+     * Set photo
+     *
+     * @param string $photo
+     *
+     * @return User
+     */
+    public function setPhoto($photo)
+    {
+        $this->photo = $photo;
+
+        return $this;
+    }
+
+    /**
+     * Get photo
+     *
+     * @return string
+     */
+    public function getPhoto()
+    {
+        return $this->photo;
+    }
+    
+    public function getImage()
+    {
+        return $this->image;
+    }
+
+    public function setImage($image)
+    {
+        $this->image = $image;
+
+        return $this;
+    }
+    public function upload($id, $path, $fileName) {
+        
+        if (null === $fileName) {
+            return;
+        }
+        
+        // updates the 'File' property to store the PDF file name
+        // instead of its contents
+        if ($this->getPhoto() && ($this->getPhoto() != 'usuario.png')) {
+            if (file_exists($path . '/' . $this->getPhoto())) {
+                unlink($path . '/' . $this->getPhoto());
+            }
+        }
+        if (file_exists($path. '/tmp/' . $fileName)) {
+            rename($path. '/tmp/' . $fileName, $path . '/' . $fileName);
+            $this->setPhoto($fileName);
+        }
+        foreach(glob($path .'/tmp/' . $id . '-*') as $f) {
+            unlink($f);
+        }
+    }
+    
+    /**
+     * @return string
+     */
+    private function generateUniqueFileName()
+    {
+        // md5() reduces the similarity of the file names generated by
+        // uniqid(), which is based on timestamps
+        return md5(uniqid());
+        //return $this->getAcronym();
+    }
+}

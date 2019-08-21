@@ -1,0 +1,215 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>Información de {% trans %}Recibo{% endtrans %}</title>
+{% endblock %}
+
+{% block body -%}
+{% set reclist = '["'~ entity.id ~'"]'%}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Información  de {% trans %}Recibos{% endtrans %}</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('receipt') }}">{% trans %}Recibos{% endtrans %}</a></li>
+            <li class="active"> Mostrar {% trans %}Recibo{% endtrans %}</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        <div class="block-flat">
+            {# 
+            <div class="header">
+                <h3>Lista de {% trans %}Recibos{% endtrans %}</h3>
+            </div>
+            #}
+            <div class="content">
+               
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+{% block javascripts %}  
+
+<script type="text/javascripts">
+    
+</script>
+{% endblock %}
+
+
+
+<div class="widget">
+    <div class="widget-header"> <i class="icon-edit"></i>
+              <h3> {% trans %}Recibo{% endtrans %}</h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+    <ul class="nav nav-tabs" id="tabs">
+	{% if (app.user.agency.type == "MASTER") or is_granted('ROLE_VIEW_RECEIPT') %}
+        	<li><a href="#opcion1" data-toggle="tab">Impresiones</a></li>
+	{% endif %}
+        
+        {% if (entity.guide is null) and ((app.user.agency.type == "MASTER") or ((app.user.agency == entity.agency) and is_granted('ROLE_ADMIN_RECEIPT')))  %}
+		<li><a href="#opcion2" data-toggle="tab">Opciones</a></li>
+	{% endif %}
+    </ul>
+    <!-- Tabs -->
+    <!-- Tab Content -->
+    <div class="tab-content">    
+        <!-- Repo -->
+        <div class="tab-pane" id="opcion1">         
+          {# <h2>Lista de acciones opción 1</h2> #}
+                <!-- Repo Tabs --->
+                <div class="btn-group">
+ 			<button type="button" class="btn btn-success" onclick="location.href='{{ path('receipt_print', { 'id': entity.id }) }}';">Imprimir</button>
+  			<button type="button" class="btn btn-success"onclick="location.href='{{ path('receipt_printpdf', { 'id': entity.id }) }}';">PDF</button>
+			<button type="button" class="btn btn-success" onclick="location.href='{{ path('receipt_labelpdf', { 'id': entity.id }) }}';">Etiqueta</button>
+		</div>  
+        </div>
+
+        <div class="tab-pane" id="opcion2">         
+          {# <h2>Lista de acciones opción 2</h2> #}
+                <!-- Repo Tabs --->
+                <div class="btn-group">
+			{% if entity.guide is null %}
+ 				<button type="button" class="btn btn-success" 
+				onclick="location.href='{{ path('guide_receipts', {'typecus': 3, 'reclist': reclist }) }}';">Crear {% trans %}Guía{% endtrans %}</button>
+				<button type="button" class="btn btn-success" 
+				onclick="location.href='{{ path('receipt_edit', {'id': entity.id }) }}';">Editar</button>
+				<button type="button" class="btn btn-success" 
+				onclick="location.href='{{ path('receipts_showcancel', {'reclist': reclist }) }}';">Anular</button> 
+				<button type="button" class="btn btn-success" 
+				onclick="location.href='{{ path('receipt_addpacks', {'id': entity.id }) }}';">Agregar Pieza(s)</button>
+			{% endif %}	
+			
+  			
+		</div>  
+        </div>
+    </div>
+
+    <table class="table table-striped table-bordered">
+                <thead>
+		<tr>
+                <th>Número</th>
+		<th>Agencia</th>
+		<th>Track#</th>
+		<th>Fecha</th>
+		<th>Recibido por</th>
+		<th>Guía/Consol</th>
+		{% if entity.receiver.customer.pobox is not null %}
+			<th>Casillero</th>
+		{% endif %}
+		</tr>	
+		</thead>
+       		<tbody>
+			<tr>
+			<td>{{ entity.number }}</td>
+			<td>{{ entity.agency }}</td>
+			<td>{{ entity.tracking }}</td>
+			<td>{{ entity.arrivedate|date('m/d/Y') }}</td>
+			<td>{{ entity.receiptdby }}</td>
+			<td>{% if entity.guide %}
+			<a  class="btn btn-info btn-mini" href="{{ path('guide_show', { 'id': entity.guide.id }) }}">{{ entity.guide.number }}</a>
+			{# <a  class="btn btn-success" href="{{ url('guide_poboxfind') }}?guidenumber={{ entity.guide.number }}">{{ entity.guide }}</a> #}
+		   		{% if entity.guide.consol %}
+				/<a  class="btn btn-info btn-mini" href="{{ path('consolidated_show', { 'id': entity.guide.consol.id }) }}">{{ entity.guide.consol.number }}</a>
+				{% endif %}
+		    	{% else %}
+				No procesado
+		    	{% endif %}
+		</td>
+			{% if entity.receiver.customer.pobox is not null %}
+				<td>{{ entity.receiver.customer.pobox.number }}</td>
+			{% endif %}
+			</tr>
+		</tbody>
+    </table>
+
+    <table class="table table-striped table-bordered">
+                <thead>
+		<tr>
+                <th>Remitente</th>
+		<th>Destinatario</th>
+		</tr>	
+		</thead>
+       		<tbody>
+			<tr>
+			<td>{{ entity.shipper }}</td>
+			<td>{{ entity.receiver.name }} {{ entity.receiver.lastname }}</td>
+			</tr>
+			<tr>
+			<td>{{ entity.shipper.adrdefault.address }}</td>
+			<td>{{ entity.receiver.address }}</td>
+			</tr>
+			<tr>
+			<td>{{ entity.shipper.adrdefault.city }} {{ entity.shipper.adrdefault.city.state }} {{ entity.shipper.adrdefault.city.state.country }}</td>
+			<td>{{ entity.receiver.city }} {{ entity.receiver.city.state }} {{ entity.receiver.city.state.country }}</td>
+			</tr>
+			<tr>
+			<td>Tel:{{ entity.shipper.adrdefault.phone }}/Móvil:{{ entity.shipper.adrdefault.mobile }}</td>
+			<td>Tel:{{ entity.receiver.phone }}/Móvil:{{ entity.receiver.mobile }}</td>
+			</tr>
+			<tr>
+			<td>Email:{{ entity.shipper.email }}</td>
+			<td>Email:{{ entity.receiver.customer.email }}</td>
+			</tr>
+			<tr>
+			<td colspan=2>Notas: {{ entity.note }}</td>
+			</tr>
+		</tbody>
+    </table>
+    
+	{% if 'peso'|trans == 'Lb' %}
+		{% set conwei = 0.454 %}
+	{% else %}
+		{% set conwei = 1/0.454 %}
+	{% endif %}
+	{% if 'dimension'|trans == 'CF' %}
+		{% set convol = 1/35.3147 %}
+	{% else %}
+		{% set convol =  35.3147 %}
+	{% endif %}
+	{% set volfactor = app.user.agency.maincompany.convertvol %}
+	{% set dimfactor = app.user.agency.maincompany.dimfactor %}
+	{% set voldim = entity.length*entity.width*entity.height %}
+	{% set vol = voldim/volfactor %}
+	{% set volwei = voldim/dimfactor %}
+        <table class="table table-striped table-bordered">
+        <thead>
+		<tr>
+        <th>Carrier</th>
+		<th>Cantidad</th>
+		<th>Referencia</th>
+		<th>Descripción</th>
+		<th>Dimensiones</th>
+		<th>Peso ({% trans %}peso{% endtrans %}/{% trans %}altpeso{% endtrans %})</th>
+		<th>Volumen ({% trans %}dimension{% endtrans %}/{% trans %}altdimension{% endtrans %}) </th>
+		<th>Peso Volumen (Vol-{% trans %}peso{% endtrans %})</th>
+		<th>Valor</th>
+		</tr>	
+		</thead>
+       		<tbody>
+			<tr>
+			<td>{{ entity.carrier }}</td>
+			<td>{{ entity.quantity }}</td>
+			<td>{{ entity.reference }}</td>
+			<td>{{ entity.description }}</td>
+			<td>{{ entity.length }}x{{ entity.width }}x{{ entity.height }}</td>
+			<td>{{ entity.weight }}/{{ (entity.weight*conwei)|number_format(2, '.', ',') }}</td>
+			<td>{{ vol|number_format(2, '.', ',') }}/{{ (vol*convol)|number_format(2, '.', ',') }}</td>
+			<td>{{ volwei|number_format(2, '.', ',') }}</td>
+			<td>{{ entity.value }}</td>
+			</tr>
+		</tbody>
+    </table>
+</div>
+</div>
+{% endblock %}

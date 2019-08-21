@@ -1,0 +1,100 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+
+<div class="widget">
+    <div class="widget-header"> <i class="icon-list-alt"></i>
+              <h3> <b>Lista de bolsas por {% trans %}Consolidar{% endtrans %}</b> </h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+    <div class="bodycontainer scrollable">
+    {% if entities|length > 0 %}
+    {% for entity in entities %}
+    {% set head = entity.guides|first %}
+    	{% if 'peso'|trans == 'Lb' %}
+		{% set conwei = 0.454 %}
+	{% else %}
+		{% set conwei = 1/0.454 %}
+	{% endif %}
+    <table class="table table-striped table-bordered">
+                <thead>
+		<tr>
+                <th><h3>#Bolsa</h3></th>
+		<th><h3>Agencia</h3></th>
+		<th><h3>País Origen</h3></th>
+		<th><h3>País Destino</h3></th>
+		<th><h3>Servicio</h3></th>
+		<th><h3>Fecha</h3></th>
+		<th><h3>Nro de {% trans %}Guías{% endtrans %}</h3></th>
+		</tr>	
+		</thead>
+       		<tbody>
+			<tr>
+			<td>{{ entity.number }}</td>
+			<td>{{ entity.agency }}</td>
+			<td>{{ head.countryfrom }}</td>
+			<td>{{ head.countryto }}</td>
+			<td>{{ head.shippingtype }}</td>
+			<td>{{ entity.creationdate|date('m/d/Y') }}</td>
+			<td>{{ entity.guides|length }}</td>
+			</tr>
+			<tr>
+			<th colspan=7 style="text-align:center;"><h3>CONTIENE</h3></th>
+			</tr>
+			<tr>
+                	<th>Número</th>
+			<th>Peso ({% trans %}peso{% endtrans %}/{% trans %}altpeso{% endtrans %})</th>
+			<th>Volumen </th>
+			<th>Piezas</th>
+			<th>Valor</th>
+			<th>Monto</th>
+			<th>Tipo de cobro</th>
+			</tr>	
+			{% for guide in entity.guides %}
+			<tr>
+				<td><a  class="btn btn-success" href="{{ path('guide_show', { 'id': guide.id }) }}">{{ guide.number }}</a></td>
+				<td>{{ guide.realweight }}/{{ (guide.realweight*conwei)|number_format(2, '.', ',') }}  </td>
+				<td>
+				{% set pri = true %}
+				{% set volcad = '' %}
+				{% if guide.masterec %}
+					{% set listrec = [guide.masterec] %}
+				{% else %}
+					{% set listrec = guide.receipts %}
+				{% endif %}
+				{% for receipt in listrec %}
+					{% set vol = (receipt.length*receipt.width*receipt.height/guide.agency.maincompany.convertvol)|number_format(2, '.', ',') %}
+					{% if pri %}
+						{% set volcad = volcad ~ vol ~ 'dimension'|trans %}
+						{% set pri = false %}
+					{% else %}
+						{% set volcad =  volcad ~ ',  ' ~ vol ~ 'dimension'|trans %}
+					{% endif %} 
+				{% endfor %}
+				{{ volcad }}
+				</td>
+				<td>{{ guide.pieces }}</td>
+				<td>{{ guide.declared }}</td>
+				<td>{{ guide.totalpaid }}</td>
+				<td>{{ guide.cod }}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+		<tfoot>
+		<tr>
+		<td colspan="3"><button type="button" class="btn btn-default btn-lg" onClick="location.href='{{ path('bag_toconsol', {'id': entity.id }) }}';">{% trans %}Consolidar{% endtrans %}</button></td>
+		<td colspan="4" style="text-align:right;"><button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-lg bback" >Regresar</button></td>
+		</tr>
+		</tfoot>
+		
+    </table>
+    {% endfor %}
+    {% else %}
+	<h2> <b>No hay bolsas para {% trans %}Consolidar{% endtrans %}</b> </h2><br>
+	<button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-lg bback" >Regresar</button>
+    {% endif %}
+</div>
+</div>
+</div>
+{% endblock %}

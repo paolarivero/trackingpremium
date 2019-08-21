@@ -1,0 +1,208 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>{% trans %}Consolidados{% endtrans %}</title>
+{% endblock %}
+
+{% block body -%}
+
+
+
+
+
+
+<div id="pcont" class="container-fluid">
+<div class="page-head">
+  <h2>Listar todos los Consolidado</h2>
+  <ol class="breadcrumb">
+    <li><a href="#">Home</a></li>
+    <li><a href="#">Consolidado</a></li>
+    <li class="active">Listar Todos</li>
+  </ol>
+</div>
+    <div class="main-app">
+        <div class="head" >
+
+            <h3>Búsqueda</h3>
+
+            <input type="text" id="globalfilter" placeholder="Número de Consolidado" class="form-control" style="width: 30%;">
+
+        </div>
+        <div class="filters">
+            <p style="display:inline;" id="currentdate"></p>
+        </div>
+        <div class="block-flat" style=" padding-top: 0px;">
+            <div class="content" style=" padding-top: 0px;">
+                <div id="mydiv" style="width: 60%" >
+                    <table id="consolTable" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+
+                            <th>Id</th>
+
+
+                            <th>Status</th>
+
+                            <th>País destino</th>
+
+                            <th>Destinatario</th>
+
+                            <th>Tipo de envío</th>
+
+                            <th>País origen</th>
+
+
+                            </tr>
+                        </thead>
+                        <tbody>
+
+
+                        {% for entity in entities %}
+
+                        <tr>
+                            <td><a  class="btn btn-success btn-sm btn-flat" href="{{ path('consolidated_show', { 'id': entity.id }) }}">{{ entity.id }}</a></td>
+                            <td> {% if entity.isopen %}
+                                    {% set open = 'Abierto' %}
+                                 {% else %}
+                                    {% set open = 'Cerrado' %}
+                                 {% endif %}
+                                 {{ open }}
+                            </td>
+                            <td>{{ entity.receiver }})</td>
+                            <td>{{ entity.shippingtype }}</td>
+
+                            <td>{{ entity.sender }}</td>
+
+
+
+                            <td>{{ entity.countryto }})</td>
+
+
+
+
+                            </tr>
+                        {% endfor %}
+
+
+
+
+                        </tbody>
+                    </table>
+                </div>
+                {% if app.user.agency.type == "MASTER" %}
+                    <table class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%" style="    margin-top: 10px;">
+                        <thead>
+                            <tr>
+                                <th style="text-align:center;"><b>Número de {% trans %}Consolidados{% endtrans %}: </b>{{ entities|length }}</th>
+
+                            </tr>
+                        </thead>
+                    </table>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+{% block javascripts %}
+
+<script type="text/javascript">
+
+function formatDate(date) {
+    var monthNames = [
+        "Enero", "Febrero", "Marzo",
+        "Abril", "Mayo", "Junio", "Julio",
+        "Agosto", "Septiembre", "Octubre",
+        "Noviembre", "Diciembre"
+    ];
+
+    var day = date.getDate();
+    var monthIndex = date.getMonth();
+    var year = date.getFullYear();
+
+    return day + ' de ' + monthNames[monthIndex] + ' ' + year;
+}
+
+function searchBis(str_search) {
+    var ret = $($.parseHTML(str_search)).text().toLowerCase();
+    return ret.indexOf($('#globalfilter').val().toLowerCase()) != -1;
+}
+$.fn.dataTable.ext.search.push(
+    function( settings, data, dataIndex ) {
+    if ($('#globalfilter').val().trim() != '') {
+        var ret0 = searchBis(data[0]);
+        var ret2 = searchBis(data[2]);
+        // var ret3 = searchBis(data[4]);
+        // return ( ret0 || ret2 || ret3);
+        return ( ret0 || ret2 );
+    } else {
+        return true;
+    }
+
+});
+
+    document.getElementById("currentdate").innerHTML = formatDate(new Date());
+    $(document).ready(function () {
+	   $thisConsolTable=$('#consolTable').DataTable({
+     "ordering": true,
+     "searching": true,
+     "info":     false,
+     "lengthChange": true,
+     "scrollX": true,
+     "pageLength": 10,
+     "lengthMenu": [[10, 15, 20, 25, 30, -1], [10, 15, 20, 25, 30, "Todos"]],
+    "columns": [ null, null,  null,  null, { "searchable": false }, { "searchable": false }],
+     "columnDefs": [
+         {% if app.user.agency.type != "MASTER" %}
+             {
+                 "targets": [ 6 ],
+                 "visible": false,
+                 "searchable": true
+             },
+         {% endif %}
+     ],
+     "language": {
+         "sSearch": "Buscar",
+         "lengthMenu": 'Mostrando  _MENU_  "{% trans %}Guías{% endtrans %}" por página',
+         "zeroRecords": "<div style=\"color:red;\">Lo siento no se encontraron {% trans %}Guías{% endtrans %}</div>",
+         "sInfo": "Mostrando _START_ a _END_ de _TOTAL_ {% trans %}Guías{% endtrans %}",
+         "infoEmpty": "No hay registros disponibles",
+         "infoFiltered": "(Filtradas de un total de _MAX_ )",
+         "searchPlaceholder": "Número/Remitente/Destinatario",
+         "paginate" : {
+             first:    '«',
+             previous: '‹',
+             next:     '›',
+             last:     '»'
+         }
+     },
+     "pagingType": "full_numbers",
+     "sDom": '<"top"i>rt<"bottom"lp><"clear">',
+     "fnDrawCallback": function(oSettings) {
+         if ((oSettings._iDisplayLength >= oSettings.fnRecordsDisplay()) ||  (oSettings._iDisplayLength == -1)) {
+             $(oSettings.nTableWrapper).find('.dataTables_paginate').hide();
+         } else {
+             $(oSettings.nTableWrapper).find('.dataTables_paginate').show();
+         }
+     },
+ });
+
+ $('#globalfilter').on( 'keyup', function () {
+     $thisConsolTable.draw();
+ } );
+
+    $('#mydiv').width("100%");
+    $thisConsolTable.responsive.rebuild();
+    $thisConsolTable.responsive.recalc();
+    $thisConsolTable.draw();
+    $( window ).resize(function() {
+        $thisConsolTable.responsive.rebuild();
+        $thisConsolTable.responsive.recalc();
+        $thisConsolTable.draw();
+        });
+    });
+
+</script>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+<div class="widget">
+    <div class="widget-header"> <i class="icon-folder-close"></i>
+              <h3>Nueva servicio para la agencia {{ agency.name }}</h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+    <div class="bodycontainer scrollable">
+
+    {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+	      
+	     <table class="table table-striped table-bordered">
+                <thead>
+                  <tr>
+    			<th colspan="3"><h4>Datos del Servicio</h4></th>
+		  </tr>
+                </thead>
+       		<tbody>
+			<tr>
+    			<td>{{ form_row(form.name) }}</td>
+			<td>{{ form_row(form.status) }}</td>
+			<td>{{ form_row(form.shippingtype) }}</td>
+			</tr>
+    	</tbody>
+        <tfoot>
+    	<tr>
+    	<td>{{ form_row(form.submit) }}</td>
+    	<td colspan=2 style="text-align:right;"><button type="button" class="btn btn-default" onclick="location.href='{{ path('servicetype', { 'idag': agency.id }) }}';">Regresar a lista</button></td>
+    	</tr>
+    </tfoot>
+    </table>
+    {{ form_end(form) }}
+</div>
+</div>   
+</div>
+{% block javascript %}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+	$("label.required").append('<span class="red-star" title="Campo Obligatorio"> *</span>');
+    });
+</script>
+{% endblock %}
+{% endblock %}

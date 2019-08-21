@@ -1,0 +1,279 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>Editar Tarifa</title>
+{% endblock %}
+
+{# Display the form #}
+
+{% form_theme edit_form 'form/fields.html.twig' %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Editar Tarifa</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ path('homepage') }}">Home</a></li>
+            <li><a href="{{ path('tariff', {'idag': app.user.agency.id }) }}">Tarifas</a></li>
+            <li class="active">Editar</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+
+        {{ form_start(edit_form, {attr: {novalidate: 'novalidate', 'id': 'tariff_type' }}) }}
+        <div class="block-flat">
+                    <div class="header">
+                        <h3>Agencia</h3>
+                    </div>
+                    <div class="content">
+                        {{ form_widget(edit_form.agency) }}
+                    </div>
+        </div>
+        <div class="block-flat">
+            <div class="header">
+                <div class="row">
+                    <div class="col-sm-4 col-md-4">
+                        <h3>Datos de la tarifa</h3>
+                    </div>
+                    <div class="col-sm-4 col-md-4">
+                        {{ form_row(edit_form.country) }}
+                    </div>
+                    <div class="col-sm-4 col-md-4">
+                        {{ form_row(edit_form.active, { 'attr': {'class': 'icheck'} }) }}
+                    </div>
+                </div>
+            </div>
+            <div class="content">
+                <div class="row">
+                    <div class="col-sm-6 col-md-6">
+                        {{ form_row(edit_form.name) }}
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                        {{ form_row(edit_form.region) }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6 col-md-6">
+                        {{ form_row(edit_form.shippingtype) }}
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                        {{ form_row(edit_form.measure) }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6 col-md-6">
+                        {{ form_row(edit_form.value_measure) }}
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                        {{ form_row(edit_form.profit_ag) }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6 col-md-6">
+                        {{ form_row(edit_form.weightpay) }}
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                        {{ form_row(edit_form.cost) }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6 col-md-6">
+                        {{ form_row(edit_form.begin) }}
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                        {{ form_row(edit_form.until) }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6 col-md-6">
+                        {{ form_row(edit_form.insurance, { 'attr': {'class': 'icheck'} }) }}
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                        {{ form_row(edit_form.insurance_per) }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6 col-md-6">
+                        {{ form_row(edit_form.tax, { 'attr': {'class': 'icheck'} }) }}
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                        {{ form_row(edit_form.tax_per) }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4 col-md-4">
+                        {{ form_row(edit_form.minimun_limit) }}
+                    </div>
+                    <div class="col-sm-4 col-md-4">
+                        {{ form_row(edit_form.minimun) }}
+                    </div>
+                    <div class="col-sm-4 col-md-4">
+                        {{ form_row(edit_form.value_min) }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4 col-md-4">
+                        {{ form_row(edit_form.dimentional, { 'attr': {'class': 'icheck'} }) }}
+                    </div>
+                    <div class="col-sm-4 col-md-4">
+                        {{ form_row(edit_form.volume_price) }}
+                    </div>
+                    <div class="col-sm-4 col-md-4">
+                        {{ form_row(edit_form.profit_agv) }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6 col-md-6">
+                        {{ form_row(edit_form.additional) }}
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                        {{ form_row(edit_form.label_additional) }}
+                    </div>
+                </div>
+                <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        <td>
+
+                        </td>
+                        <td style="text-align:right;">
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-flat" >Cancelar</button>
+                            {{ form_widget(edit_form.submit, { 'attr': {'class': 'btn btn-primary btn-flat'} }) }}
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>{# FIN CONTENT #}
+        </div> {# FIN BLOCK FLAT #}
+        {% do edit_form.country.setRendered %}
+        {{ form_end(edit_form) }}
+    </div>
+</div>
+{% endblock %}
+{% block javascripts %}
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#tariff_type_country').prop('disabled', true);
+        $('#tariff_type_region').prop('disabled', true);
+        var val = $('#tariff_type_measure option:selected').text();
+        if (( val == "Lb" ) || (val == "Kg")) {
+            $('#tariff_type_dimentional').prop('disabled', false);
+            $('#tariff_type_weightpay').prop('disabled', false);
+        } else {
+            $('#tariff_type_dimentional').iCheck('uncheck');
+            $('#tariff_type_dimentional').iCheck('update');
+            $('#tariff_type_dimentional').prop('disabled', true);
+            $('#tariff_type_weightpay').prop('disabled', true);
+        }
+        if ($('#tariff_type_dimentional').is(":checked")) {
+            $('#tariff_type_volume_price').prop('readonly', false);
+            $('#tariff_type_profit_agv').prop('readonly', false);
+        } else {
+            $('#tariff_type_volume_price').prop('readonly', true);
+            $('#tariff_type_profit_agv').prop('readonly', true);
+        }
+        if ($('#tariff_type_minimun_limit>option:selected').text() != 'Ninguno') {
+            $('#tariff_type_minimun').prop('readonly', false);
+            $('#tariff_type_value_min').prop('readonly', false);
+        } else {
+            $('#tariff_type_minimun').prop('readonly', true);
+            $('#tariff_type_value_min').prop('readonly', true);
+        }
+        if ($('#tariff_type_insurance').is(":checked")) {
+            $('#tariff_type_insurance_per').prop('readonly', false);
+        } else {
+            $('#tariff_type_insurance_per').prop('readonly', true);
+        }
+        if ($('#tariff_type_tax').is(":checked")) {
+            $('#tariff_type_tax_per').prop('readonly', false);
+        } else {
+            $('#tariff_type_tax_per').prop('readonly', true);
+        }
+        $('#tariff_type_measure').change(function() {
+            var val = $('#tariff_type_measure option:selected').text();
+            if (( val == "Lb" ) || (val == "Kg")) {
+                $('#tariff_type_dimentional').prop('disabled', false);
+                $('#tariff_type_weightpay').prop('disabled', false);
+            } else {
+                $('#tariff_type_dimentional').iCheck('uncheck');
+                $('#tariff_type_dimentional').iCheck('update');
+                $('#tariff_type_dimentional').prop('disabled', true);
+                $('#tariff_type_weightpay').prop('disabled', true);
+            }
+            
+        });
+        $('#tariff_type_dimentional').on('ifChecked', function(event){
+                $('#tariff_type_volume_price').prop('readonly', false);
+                $('#tariff_type_profit_agv').prop('readonly', false);
+        });
+        
+        $('#tariff_type_dimentional').on('ifUnchecked', function(event){
+                $('#tariff_type_volume_price').prop('readonly', true);
+                $('#tariff_type_profit_agv').prop('readonly', true);
+        });
+        
+        $('#tariff_type_minimun_limit').change(function() {
+            if ($('#tariff_type_minimun_limit>option:selected').text() != 'Ninguno') {
+                $('#tariff_type_minimun').prop('readonly', false);
+                $('#tariff_type_value_min').prop('readonly', false);
+            } else {
+                $('#tariff_type_minimun').prop('readonly', true);
+                $('#tariff_type_value_min').prop('readonly', true);
+            }
+        });
+        $('#tariff_type_insurance').on('ifChecked', function(event){
+            $('#tariff_type_insurance_per').prop('readonly', false);
+        });
+        $('#tariff_type_insurance').on('ifUnchecked', function(event){
+            $('#tariff_type_insurance_per').prop('readonly', true);
+        });
+        $('#tariff_type_tax').on('ifChecked', function(event){
+            $('#tariff_type_tax_per').prop('readonly', false);
+        });
+        $('#tariff_type_tax').on('ifUnchecked', function(event){
+            $('#tariff_type_tax_per').prop('readonly', true);
+        });
+        $('#tariff_type_submit').click(function(evt) {
+            var begin = Number($('#tariff_type_begin').val());
+            var until = Number($('#tariff_type_until').val());
+            if (until <= begin) {
+                funalert('ERROR: El valor de INICIO debe ser menor que el valor HASTA..');
+                return false;
+            }
+            $('#tariff_type_country').prop('disabled', false);
+            $('#tariff_type_region').prop('disabled', false);
+            return true;
+        });
+        $('#tariff_type_country').change(function(){
+            var val = $(this).val();
+            if (val > 0) {
+                $.ajax({
+                    type: "POST",
+                    url: "{{ url('select_regions') }}?country_id=" + val,
+                    success: function(data) {
+                        // Remove current options
+                        $('#tariff_type_region').html('');
+                        if (!data || !Object.keys(data).length) {
+                            $('#tariff_type_region').append('<option value="' + 0 + '">' + '-- Seleccione primero el País --' + '</option>');
+                        } else {
+                            $.each(data, function(k, v) {
+                                $('#tariff_type_region').append('<option value="' + v + '">' + k + '</option>');
+                            });
+                        }
+                    }
+                });
+            } else {
+                $('#tariff_type_region').html('');
+                
+            }
+            return false;
+        });
+    });
+</script>
+{% endblock %}

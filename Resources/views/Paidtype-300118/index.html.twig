@@ -1,0 +1,101 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+<div class="widget">
+    <div class="widget-header"> <i class="icon-user-md"></i>
+              <h3>Lista de tipos de pago <a href="{{ path('paidtype_new') }}" class="btn btn-default">Crear nuevo</a></h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+
+    <table id="paidTable" class="table table-striped table-bordered" cellspacing="0" width="100%" >
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Descripción</th>
+		<th>Activo</th>
+                <th>Fecha de creación</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for entity in entities %}
+            <tr>
+                <td>{{ entity.name }}</td>
+                <td>{{ entity.description }}</td>
+		<td style="text-align:center;">{% if entity.active %}
+			<input type="checkbox" checked="checked" disabled readonly >
+		    {% else %}
+			<input type="checkbox" disabled readonly >
+		    {% endif %}</td>
+              
+                <td>{% if entity.creationdate %}{{ entity.creationdate|date('m/d/Y') }}{% endif %}</td>
+		<td>
+                <ul>
+                    <li>
+                        <a href="{{ path('paidtype_edit', { 'id': entity.id }) }}">Editar</a>
+                    </li>
+                </ul>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+	<tfoot>
+	<tr>
+		<td colspan=5 style="text-align:center;"><button type="button" class="btn btn-default" onclick="location.href='{{ path('config') }}';">Regresar</button></td>
+	</tr>
+	</tfoot>
+    </table>
+</div>
+</div>  
+{% block javascript %}
+
+<script type="text/javascript" src="{{ asset('assets/js/jquery.dataTables.min.js') }}"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+	$thisPaidTable=$('#paidTable').DataTable({
+		searching: true,
+		"info":     true,
+		"lengthChange": true,
+		"scrollX": true,
+		pageLength: 10,
+		"columns": [ { "searchable": false }, null, null, null ],
+		"pagingType": "full_numbers",
+		"fnDrawCallback": function(oSettings) {
+        		if (oSettings._iDisplayLength >= oSettings.fnRecordsDisplay()) {
+            			$(oSettings.nTableWrapper).find('.dataTables_paginate').hide();
+		
+        		} else {
+				$(oSettings.nTableWrapper).find('.dataTables_paginate').show();
+			
+			}
+    		},
+    		language: {				
+      			emptyTable: "<div style=\"color:red;\">No hay clientes</div>",
+			"sSearch": "Buscar",
+            		"lengthMenu": "Mostrando  _MENU_  Tipos de pago por página",
+            		"zeroRecords": "<div style=\"color:red;\">Lo siento no se encontraron tipos de pago</div>",
+			"sInfo": "Mostrando _START_ a _END_ de _TOTAL_ tipos de pago",
+            		"infoEmpty": "No hay registros disponibles",
+            		"infoFiltered": "(Filtrados de un total de _MAX_ )",
+			"searchPlaceholder": "Nombre",
+        		paginate: {
+				first:      '<<',
+        			last:       '>>',
+        			previous: '<',
+        			next:     '>'
+        		},
+        		aria: {
+        			paginate: {
+               				previous: 'Anterior',
+               				next:     'Siguiente'
+        			}
+       			}	
+    		}
+	});
+});
+</script>
+{% endblock %}
+{% endblock %}
+

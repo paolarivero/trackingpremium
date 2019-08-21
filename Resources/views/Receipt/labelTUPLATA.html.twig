@@ -1,0 +1,80 @@
+{% extends '::layout-pdf.html.twig' %}
+
+{% block body %}
+<style type="text/css">
+    html *
+    {
+    font-size: 20px !important;
+    }
+</style>
+<div class="container">
+    <table class="no-border">
+        <tr>
+            <td>
+            <p style="width:300px;line-height: 1.2;"> 
+            <b>DESTINATARIO</b><br>
+            
+            {{ entity.receiver.name }} {{ entity.receiver.lastname }}<br>
+            {{ entity.receiver.address }}<br>
+            {{ entity.receiver.city }} {{ entity.receiver.city.state }} {{ entity.receiver.city.state.country }}<br><br>
+            <b>REMITENTE</b><br>
+            {{ entity.shipper }}<br>
+            {{ entity.shipper.adrdefault.address }}<br>
+            {{ entity.shipper.adrdefault.city }} {{ entity.shipper.adrdefault.city.state }} {{ entity.shipper.adrdefault.city.state.country }}<br>
+            </p>
+            </td>
+            <td>
+                {% if entity.maincompany.logo %}
+                    {% set name = companies_logos ~ entity.maincompany.logo %}
+                {% else %}
+                    {% set name = companies_logos ~ 'default.png' %}
+                {% endif %}
+                <div style="width:200px;"> 
+                <img src="{{ absolute_url(asset(name)) }}" alt="Logo" style="width:100%;padding: 0 !important; margin-left:10px">
+                <p>
+            </td>
+        </tr>
+    </table>
+</div>
+<br>
+
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+        <th>WHR</th>
+        <th>FECHA</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+        <td>{{ entity.number }}</td>
+        <td>{{ entity.arrivedate|date('Y-m-d') }}</td>
+        </tr>
+    </tbody>
+</table>
+
+
+<center>
+    
+    <div id="demo"></div>
+    {{ entity.number }}<br>
+    <br>
+    {% if entity.tracking and entity.tracking != ' ' %}
+    
+        TRACK: {{ entity.tracking }}
+    {% endif %}
+</center>
+<script type="text/javascript">
+    $(document).ready(function () {
+		var thecode= {{ entity.number|json_encode|raw }};
+		$("#demo").barcode(
+			thecode, // Value barcode (dependent on the type of barcode)
+			"code128", // type (string)
+			{ barWidth: 3, barHeight: 70, showHRI: false}
+		);
+    });
+</script>
+{% endblock %} 
+
+

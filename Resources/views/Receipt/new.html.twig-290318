@@ -1,0 +1,521 @@
+{% extends '::newbase.html.twig' %}
+{% block title %}
+    <title>{{ nameform }}</title>
+{% endblock %}
+
+{% form_theme form 'form/fields.html.twig' %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>{{ nameform }}</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('receipt') }}">{% trans %}Recibos{% endtrans %}</a></li>
+            <li class="active">{{ nameform }}</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+            {% for flashMessage in app.session.flashbag.get('warning') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        {{ form_start(form, {attr: {novalidate: 'novalidate', 'id': 'receipt_type' }}) }}
+        <div class="row">
+            <div class="col-sm-6 col-md-6">{# Columna para REMITENTE #}
+                <div class="block-flat">
+                    <div class="header">
+                        <h3>Remitente</h3>
+                    </div>
+                    <div class="content">
+                        {{ form_widget(form.typecus_sender) }}
+
+                        <button id="search_sender" style="margin-top: 13px;" type="button" class="btn btn-primary bcustomer" data-toggle="modal" data-target="#customersearch" data-thecustomer="1" >Buscar</button>
+                        <button id="clear_sender" type="button" style="margin-top: 13px;"  class="btn btn-default" onclick="utilityLib.ClearRem('{{ form.vars.id }}');">Limpiar</button>
+
+                        {{ form_row(form.name_sender) }}
+                        {{ form_row(form.lastname_sender) }}
+                        {{ form_row(form.email_sender) }}
+                        {{ form_row(form.address_sender) }}
+                        {{ form_row(form.zip_sender) }}
+                        {{ form_row(form.mobile_sender) }}
+                        {{ form_row(form.phone_sender) }}
+                        
+                        <div class="form-group">
+                            <div class="row">
+                            {#
+                                    <div class="col-md-2">
+                                        <label>Ciudad</label>
+                                    </div>
+                            #}
+                                    <div class="col-md-12">
+                                        <input type="hidden" id="citysender" style="width:100%;" />
+                                    </div>
+                            </div>
+                        </div>
+                        {{ form_row(form.country_sender) }}
+                        {{ form_row(form.state_sender) }}
+                        {{ form_row(form.cityname_sender) }}
+                        
+                        {{ form_row(form.noti_sender) }}
+                    </div>{# FIN CONTENT #}
+                </div> {# FIN BLOCK FLAT #}
+            </div> {# FIN DEL REMITENTE #}
+            <div class="col-sm-6 col-md-6">{# Columna para DESTINATARIO #}
+                <div class="block-flat">
+                    <div class="header">
+                        <h3>Destinatario</h3>
+                    </div>
+                    <div class="content">
+                        {{ form_widget(form.typecus_addr) }}
+
+                        <button id="search_addr" style="margin-top: 13px;" type="button" class="btn btn-primary bcustomer" data-toggle="modal" data-target="#customersearch" data-thecustomer="2" >Buscar</button>
+                        <button id="clear_addr" type="button" style="margin-top: 13px;"  class="btn btn-default" onclick="utilityLib.ClearDest('{{ form.vars.id }}');">Limpiar</button>
+
+                        {{ form_row(form.name_addr) }}
+                        {{ form_row(form.lastname_addr) }}
+                        {{ form_row(form.email_addr) }}
+                        {{ form_row(form.address_addr) }}
+                        {{ form_row(form.zip_addr) }}
+                        {{ form_row(form.mobile_addr) }}
+                        {{ form_row(form.phone_addr) }}
+                        
+                        <div class="form-group">
+                            <div class="row">
+                            {#
+                                    <div class="col-md-2">
+                                        <label>Ciudad</label>
+                                    </div>
+                            #}
+                                    <div class="col-md-12">
+                                        <input type="hidden" id="cityaddr" style="width:100%;" />
+                                    </div>
+                            </div>
+                        </div>
+                        {{ form_row(form.country_addr) }}
+                        {{ form_row(form.state_addr) }}
+                        {{ form_row(form.cityname_addr) }}
+                        {{ form_row(form.noti_addr) }}
+                    </div>{# FIN CONTENT #}
+                </div> {# FIN BLOCK FLAT #}
+            </div> {# FIN DEL REMITENTE #}
+        </div>
+        <div class="block-flat">
+            <div class="content">
+                <h3>{{ form_row(form.note) }}</h3>
+             </div>
+        </div> 
+        <div class="block-flat">
+            <div class="header">
+                <h3>Paquetes</h3>
+            </div>
+            <div class="content">
+                <div class="row marginRow">
+                    <div class="col-sm-6 col-md-6" style="padding-left: 7px;padding-right: 7px; padding-bottom: 7px;">
+                        {{ form_label(form.carrier) }}
+                        {{ form_widget(form.carrier) }}
+                        {{ form_errors(form.carrier) }}
+                    </div>
+                    <div class="col-sm-6 col-md-6" style="padding-left: 7px; padding-right: 7px;padding-bottom: 7px;">
+                        {{ form_label(form.tracking) }}
+                        {{ form_widget(form.tracking) }}
+                        {{ form_errors(form.tracking) }}
+                    </div>
+                </div>
+                <div class="row marginRow">
+                    <div class="col-sm-6 col-md-6" style="padding-left: 7px;padding-right: 7px; padding-bottom: 7px;">
+                        {{ form_label(form.packtype) }}
+                        {{ form_widget(form.packtype) }}
+                        {{ form_errors(form.packtype) }}
+                    </div>
+                    <div class="col-sm-6 col-md-6" style="padding-left: 7px; padding-right: 7px;padding-bottom: 7px;">
+                        {{ form_label(form.npack) }}
+                        {{ form_widget(form.npack) }}
+                        {{ form_errors(form.npack) }}
+                    </div>
+                </div>
+                <div class="row marginRow">
+                    <div class="col-sm-3 col-md-3" style="padding-left: 7px;padding-right: 7px; padding-bottom: 7px;">
+                        {{  form_label(form.height) }}
+                        {{  form_widget(form.height) }}
+                        {{ form_errors(form.height) }}
+                    </div>
+                    <div class="col-sm-3 col-md-3" style="padding-left: 7px;padding-right: 7px; padding-bottom: 7px;">
+                        {{  form_label(form.width) }}
+                        {{  form_widget(form.width) }}
+                        {{  form_errors(form.width) }}
+                    </div>
+                    <div class="col-sm-3 col-md-3" style="padding-left: 7px;padding-right: 7px; padding-bottom: 7px;">
+                        {{  form_label(form.length) }}
+                        {{  form_widget(form.length) }}
+                        {{  form_errors(form.length) }}
+                    </div>
+                    <div class="col-sm-3 col-md-3" style="padding-left: 7px;padding-right: 7px; padding-bottom: 7px;">
+                        {{  form_label(form.weight) }}
+                        {{  form_widget(form.weight) }}
+                        {{  form_errors(form.weight) }}
+                    </div>
+                </div>
+                <div class="row marginRow">
+                    <div class="col-sm-3 col-md-3" style="padding-left: 7px;padding-right: 7px; padding-bottom: 7px;">
+                        {{  form_label(form.arrivedate) }}
+                        {{  form_widget(form.arrivedate) }}
+                        {{  form_errors(form.arrivedate) }}
+                    </div>
+                    <div class="col-sm-3 col-md-3" style="padding-left: 7px;padding-right: 7px; padding-bottom: 7px;">
+                        {{  form_label(form.description) }}
+                        {{  form_widget(form.description) }}
+                        {{  form_errors(form.description) }}
+                    </div>
+                    <div class="col-sm-3 col-md-3" style="padding-left: 7px;padding-right: 7px; padding-bottom: 7px;">
+                        {{ form_label(form.value) }}
+                        {{ form_widget(form.value) }}
+                        {{ form_errors(form.value) }}
+                    </div>
+                    <div class="col-sm-3 col-md-3" style="padding-left: 7px;padding-right: 7px; padding-bottom: 7px;">
+                        {% if form.packages is defined %}
+                            <center>
+                                <br>
+                                <a href="#"  id="sppack" class="btn btn-flat btn-primary" style="text-align:center;">+</a>
+                            </center>
+                        {% endif %}
+                    </div>
+                </div>
+                {% if form.packages is defined %}
+                    {{ form_row(form.packages) }}
+                {% endif %}
+    
+                
+                <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        <td>
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default" >Cancelar</button>
+                        </td>
+                        <td style="text-align:right;">
+                            {{ form_row(form.submit, { 'attr': {'class': 'btn btn-primary'} }) }}
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+            </div>
+        </div>
+        {{ form_end(form) }}
+        <!-- Modal --> {# BUSCAR CLIENTE #}
+        <div class="modal fade colored-header md-effect-9" id="customersearch" role="dialog">
+            <div class="modal-dialog modal-md">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button id="closemodalcus1" type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h2 class="modal-title">Buscar Cliente  
+                        </h2>
+                    </div>
+
+                    <div class="modal-body form">
+
+                        Buscar: <br><input style="display:inline; width:100%" type="text" placeholder="Nombre/Apellido/Casillero" id="findcustomer" onkeyup="utilityLib.SearchCustomer(event, '{{ form.vars.id }}', '{{ url('listcustomer') }}', '{{ url('select_states') }}')" autocomplete="off"  />
+
+                        <center>
+                        <div id="mensajeCus">
+                            <h3 style="color:red;">NO SE ENCONTRARON CLIENTES</h3>
+                        </div>
+                        </center>
+                        <div id="divTable">
+                        <table id="customerTable" class="row-border hover order-column" cellspacing="0" width="100%">
+                            <thead class="no-border-y">
+
+                            <tr>
+                                <th><b>Nombre</b></th>
+                                <th><b>Apellido</b></th>
+                                <th><b>Casillero</b></th>
+                                <th><b>Ciudad</b></th>
+                            </tr>
+
+                            </thead>
+                            <tbody class="no-border-y">
+                            </tbody>
+                        </table>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" id="closemodalcus1" data-dismiss="modal" class="btn btn-default btn-flat md-close">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div> {# FIN MODAL DE BUSCAR CLIENTES #}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+
+<script src="{{ asset('assets/mylibs/utilityLib.js') }}?n=1" type="text/javascript"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('.md-trigger').modalEffects();
+        
+        $('#receipt_type_typecus_sender_1').iCheck('check');
+        $('#receipt_type_typecus_sender_2').on('ifChecked', function(event){
+            $('#receipt_type_lastname_sender').val('');
+            $('#receipt_type_lastname_sender').prop('readonly', true);
+        });
+        $('#receipt_type_typecus_sender_1').on('ifChecked', function(event){
+            $('#receipt_type_lastname_sender').prop('readonly', false);
+        });
+        
+        $('#receipt_type_typecus_addr_1').iCheck('check');
+        $('#receipt_type_typecus_addr_2').on('ifChecked', function(event){
+            $('#receipt_type_lastname_addr').val('');
+            $('#receipt_type_lastname_addr').prop('readonly', true);
+        });
+        $('#receipt_type_typecus_addr_1').on('ifChecked', function(event){
+            $('#receipt_type_lastname_addr').prop('readonly', false);
+        });
+       
+        
+        $("#citysender").select2({
+            placeholder: "Buscar Ciudad",
+            ajax: {
+                url: "{{ path('city_find') }}",
+                dataType: 'json',
+                delay: 250,
+                data: function (term) {
+                    return {
+                        q: term, //search term
+                    };
+                },
+                results: function (data) {
+                    return {
+                        results: data,
+                    };
+                },
+                cache: true
+                },
+             minimumInputLength: 2,
+             formatInputTooShort: function (input, min) { var n = min - input.length; return "Por favor ingrese  " + n + " carcater" + (n == 1? "" : "es") + " mas"; },
+             formatNoMatches: function () { return "No se encuentran resultados"; },
+             
+        });
+        $('#citysender').on("change", function(e) { 
+            var cityid = $('#citysender').val();
+            $('#receipt_type_cityid_sender').val(cityid);
+            var complete = $('#citysender').select2('data').text;
+            var ini1 = complete.lastIndexOf('(');
+            var ini2 = complete.lastIndexOf(',');
+            var end = complete.lastIndexOf(')');
+            var state = complete.substring(ini1+1,ini2);
+            var country = complete.substring(ini2+2,end);
+            // $('#receipt_type_country_sender').val('');
+            $('#receipt_type_country_sender option').map(function () {
+                if ($(this).text() == country) return this;
+            }).prop('selected', 'selected');
+            utilityLib.statesbyname('#receipt_type_state_sender', '#receipt_type_country_sender', state, "{{ url('select_states') }}"); 
+            $('#receipt_type_cityname_sender').val(complete.substring(0,ini1-1));
+        });
+        
+        $("#cityaddr").select2({
+            placeholder: "Buscar Ciudad",
+            ajax: {
+                url: "{{ path('city_find') }}",
+                dataType: 'json',
+                delay: 250,
+                data: function (term) {
+                    return {
+                        q: term, //search term
+                    };
+                },
+                results: function (data) {
+                    return {
+                        results: data,
+                    };
+                },
+                cache: true
+                },
+             minimumInputLength: 2,
+             formatInputTooShort: function (input, min) { var n = min - input.length; return "Por favor ingrese  " + n + " carcater" + (n == 1? "" : "es") + " mas"; },
+             formatNoMatches: function () { return "No se encuentran resultados"; },
+             
+        });
+        
+        $('#cityaddr').on("change", function(e) { 
+            var cityid = $('#cityaddr').val();
+            $('#receipt_type_cityid_addr').val(cityid);
+            var complete = $('#cityaddr').select2('data').text;
+            var ini1 = complete.lastIndexOf('(');
+            var ini2 = complete.lastIndexOf(',');
+            var end = complete.lastIndexOf(')');
+            var state = complete.substring(ini1+1,ini2);
+            var country = complete.substring(ini2+2,end);
+            // $('#receipt_type_country_addr').val('');
+            $('#receipt_type_country_addr option').map(function () {
+                if ($(this).text() == country) return this;
+            }).prop('selected', 'selected');
+            utilityLib.statesbyname('#receipt_type_state_addr', '#receipt_type_country_addr', state, "{{ url('select_states') }}"); 
+            $('#receipt_type_cityname_addr').val(complete.substring(0,ini1-1));
+        });
+        
+        $(function() {
+            $('#receipt_type_arrivedate').datepicker();
+                /*
+                startDate: '-180d',
+                endDate: '+1d',
+                autoclose: true);
+                */
+            $('#receipt_type_arrivedate').val($.datepicker.formatDate('mm/dd/yy', new Date()));
+        });
+        $('.list-packages').collection({
+            add_at_the_end: false,
+            allow_up: false,
+            allow_down: false,
+            min: 0,
+            add: '<a id="newpack"></a>',
+            after_add: function (collection, element) {
+                var npack = $('.list-packages').find('> div').length;
+                var pos = npack-1;
+                // $(".red-star").remove();
+                // $("label.required").append('<span class="red-star" title="Campo Obligatorio"> *</span>');
+                $('#receipt_type_packages_'+ pos +'_arrivedate').datepicker();
+                $('#receipt_type_packages_'+ pos +'_arrivedate').val($.datepicker.formatDate('mm/dd/yy', new Date()));
+                // $('#receipt_type_packages_'+ pos +'_thelabel').val('Paquete Adicional ' + npack );
+            },
+            after_remove: function (collection, element) {
+                $('#newpack').hide();
+                var npack = $('.list-packages').find('> div').length;
+                // console.log(npack);
+                if (npack == 0) {
+                    $('#sppack').show();
+                }
+            },
+        });
+
+        $('#newpack').hide();
+
+        $('#sppack').click(function(e) {
+            e.preventDefault();
+            $('#newpack').click();
+            $('#sppack').hide();
+        });
+
+        $('#receipt_type_packages').change(function() {
+            $('#newpack').hide();
+        });
+        var $thisCusTable=null;
+        $('.bcustomer').click(function(e) {
+            e.preventDefault();
+            var thecustomer = $(this).data('thecustomer');
+            $('#receipt_type_selcustomer').val(thecustomer);
+            $('#findcustomer').val('');
+            $('#divTable').hide();
+            $('#mensajeCus').hide();
+            return true;
+        });
+        $('#receipt_type_submit').click(function(evt) {
+            var bultos = $('#receipt_type_npack').val();
+            if (!bultos) {
+                $('#receipt_type_npack').val(1);
+            }
+            $("input[id*=_addr]").prop('disabled',false);
+            $("#cityaddr").select2('enable',true);
+            $("select[id*=_addr]").prop('disabled',false);
+            $("input[id*=_sender]").prop('disabled',false);
+            $("#citysender").select2('enable',true);
+            $("select[id*=_sender]").prop('disabled',false);
+            /*
+            var citysender = $('#receipt_type_cityname_sender').val();
+            var statesender = $('#receipt_type_state_sender').val();
+            var cityaddr = $('#receipt_type_cityname_addr').val();
+            var stateaddr = $('#receipt_type_state_addr').val();
+
+            if ((!citysender) || (!statesender)) {
+                funalert('Debe seleccionar la ciudad del Remitente');
+                return false;
+            }
+            if ((!cityaddr) || (!stateaddr)) {
+                funalert('Debe seleccionar la ciudad del Destinatario');
+                return false;
+            }
+            */
+            var formcontent = $('#receipt_type').serializeArray();
+            for (var x = 0; x < formcontent.length; x++) {
+                if (formcontent[x].name.indexOf("carrier") >= 0) {
+                    var carrier = formcontent[x].value;
+                    var track = formcontent[x+1].value;
+                    // console.log('Tracking: ' +  track + '. Carrier: ' + carrier);
+                    if ((track) && (carrier)) {
+                        $.ajax({
+                            url: "{{ url('alert_search') }}?tracking=" + track + "&carrier=" + carrier,
+                            success: function(data) {
+                                if (data['id'] != 0) {
+                                    var mensaje = 'El paquete con el tracking: ' + track + ' y el carrier: ' + data['carrier'] + ' tiene una alerta de casillero ' + data['pobox'] + '. Verificar!!!!';
+                                    funalert(mensaje);
+                                }
+                            }
+                        });
+                    }
+                }
+            }
+            return true;
+        });
+        $('#receipt_type_country_sender').change(function(){
+           var val = "#receipt_type_country_sender";
+           utilityLib.statesbyname('#receipt_type_state_sender', val, '', "{{ url('select_states') }}");
+           return false;
+        });
+        $('#receipt_type_country_addr').change(function(){
+            var val = "#receipt_type_country_addr";
+            utilityLib.statesbyname('#receipt_type_state_addr', val, '', "{{ url('select_states') }}");
+            return false;
+        });
+        $('#receipt_type_state_sender').change(function(){
+            // console.log('CAMBIO el estado');
+            $('#receipt_type_cityid_sender').val(0);
+            utilityLib.showCity('{{ form.vars.id }}','sender');
+            return false;
+        });
+        $('#receipt_type_state_addr').change(function(){
+            $('#receipt_type_cityid_addr').val(0);
+            utilityLib.showCity('{{ form.vars.id }}','addr');
+            return false;
+        });
+        utilityLib.showCity('{{ form.vars.id }}','addr');
+        utilityLib.showCity('{{ form.vars.id }}','sender');
+        {% if edition %}
+            $('#receipt_type_edition').val(1);
+            {% set rem = entity.shipper %}
+            {% set des = entity.receiver %}
+            $('#receipt_type_selcustomer').val(1); 
+            utilityLib.returnSelectCustomer('{{ form.vars.id }}', {{ rem.id }}, '{{ rem.adrdefault.name }}', 
+            '{{ rem.adrdefault.lastname }}', '{{ rem.type.name }}', '{{ rem.adrdefault.address }}', {{ rem.adrdefault.city.id }}, '{{ rem.adrdefault.city.name }}' , 
+            '{{ rem.adrdefault.city.state.name }}', '{{ rem.adrdefault.city.state.country.name }}', 
+            '{{ rem.adrdefault.phone }}', '{{ rem.adrdefault.mobile }}', '{{ rem.adrdefault.barrio }}', '{{ rem.email }}', '{{ rem.adrdefault.zip }}', '{{ url('select_states') }}');    
+            $('#receipt_type_selcustomer').val(2); 
+            utilityLib.returnSelectCustomer('{{ form.vars.id }}', {{ des.id }},'{{ des.name }}', 
+            '{{ des.lastname }}', '{{ des.customer.type.name }}','{{ des.address }}', {{ des.city.id }}, '{{ des.city.name }}' , 
+            '{{ des.city.state.name }}', '{{ des.city.state.country.name }}', 
+            '{{ des.phone }}', '{{ des.mobile }}', '{{ des.barrio }}', '{{ des.customer.email }}', '{{ des.zip }}', '{{ url('select_states') }}'); 
+        {% endif %}
+        {% if readonly is defined %}
+            {% if readonly %}
+                $("input[id*=_addr]").prop('disabled',true);
+                $("#cityaddr").select2('enable',false);
+                $("select[id*=_addr]").prop('disabled',true);
+                $("input[id*=_sender]").prop('disabled',true);
+                $("#citysender").select2('enable',false);
+                $("select[id*=_sender]").prop('disabled',true);
+                $("button[id*=sender]").hide();
+                $("button[id*=addr]").hide();
+            {% endif %}
+        {% endif %}
+    });
+</script>
+{% endblock %}

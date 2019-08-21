@@ -1,0 +1,61 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+<div class="widget">
+    <div class="widget-header"> <i class="icon-asterisk"></i>
+              <h3>Status de {% trans %}Consolidado{% endtrans %}</h3> 
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+   
+    <table class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Nombre</th>
+		<th>Posición</th>
+                <th>Latitud</th>
+                <th>Longitud</th>
+                <th>Descripción/Dirección</th>
+		<th>País</th>
+		<th>{% trans %}Guías{% endtrans %} heredan</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>{{ entity.id }}</td>
+                <td>{{ entity.name }}</td>
+		<td>{{ entity.position }}</td>
+                <td>{{ entity.latitude }}</td>
+                <td>{{ entity.longitude }}</td>
+                <td>{{ entity.address }}</td>
+		<td>{{ entity.country }}</td>
+		<td> 
+		{% if entity.inherited %}
+			Si
+		{% else %}
+			No
+		{% endif %}
+		</td> 	
+            </tr>
+        </tbody>
+	<tfoot>
+	<tr>
+	<td colspan="4"><a class="btn btn-default" href="{{ path('consolidatedstatus_edit', { 'id': entity.id }) }}">Editar</a></td>
+        <td colspan="4" style="text-align:right;"><button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-lg bback" >Regresar</button></td>
+	</tr>
+	</tfoot>
+    </table>
+</div>
+</div>
+{% block javascript %}
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+	
+    });
+</script>
+{% endblock %}
+
+{% endblock %}

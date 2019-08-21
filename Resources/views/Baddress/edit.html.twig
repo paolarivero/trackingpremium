@@ -1,0 +1,138 @@
+{% extends app.user.pobox is null
+    ? '::newbase.html.twig' 
+    : '::base-public.html.twig' %}
+
+{% block title %}
+    <title>Editar Dirección de Cliente</title>
+{% endblock %}
+
+{# Display the form #}
+
+{% form_theme form 'form/fields.html.twig' %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Editar Dirección de Cliente</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('customer') }}">Clientes</a></li>
+            <li class="active">Editar</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+
+        {{ form_start(form, {attr: {novalidate: 'novalidate', 'id': 'baddress_type' }}) }}
+        <div class="block-flat">
+            <div class="header">
+                <h3>Datos del cliente</h3>
+                <h4>
+                <div class="row">
+                    <div class="col-sm-4 col-md-4">
+                        Nombre: {{ entity.customer.name }} 
+                    </div>
+                    <div class="col-sm-4 col-md-4">
+                        Apellido: {{ entity.customer.lastname }}
+                    </div>
+                    <div class="col-sm-4 col-md-4">
+                        Email: {{ entity.customer.email }}
+                    </div>
+                    {#
+                    <div class="col-sm-3 col-md-3">
+                        Tipo: {{ entity.customer.type }}
+                    </div>
+                    #}
+                </div>
+                </h4>
+            </div>
+            <div class="content">
+                {{ form_row(form.name) }}
+                {{ form_row(form.lastname) }}
+                {{ form_row(form.docid) }}
+                {{ form_row(form.address) }}
+                {{ form_row(form.zip) }}
+                {{ form_row(form.mobile) }}
+                {{ form_row(form.phone) }}
+                <div class="form-group">
+                    <div class="row">
+                            <div class="col-md-2">
+                                <label>Ciudad</label>
+                            </div>
+                            <div class="col-md-10">
+                                <input type="hidden" id="citycustomer" style="width:100%;" />
+                            </div>
+                    </div>
+                </div>
+                {{ form_row(form.cityname) }}
+                <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        <td>
+
+                        </td>
+                        <td style="text-align:right;">
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-flat" >Regresar</button>
+                            {{ form_widget(form.submit, { 'attr': {'class': 'btn btn-primary btn-flat'} }) }}
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>{# FIN CONTENT #}
+        </div> {# FIN BLOCK FLAT #}
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}
+{% block javascripts %}
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#baddress_type_cityid').val({{ entity.city.id }});
+        var cityname = "{{ entity.city.name }} ({{ entity.city.state.name }}, {{ entity.city.state.country.name }})";
+        $('#baddress_type_cityname').val(cityname);
+        $("#citycustomer").select2({
+            placeholder: "Buscar Ciudad",
+            ajax: {
+                url: "{{ path('city_find') }}",
+                dataType: 'json',
+                delay: 250,
+                data: function (term) {
+                    return {
+                        q: term, //search term
+                    };
+                },
+                results: function (data) {
+                    return {
+                        results: data,
+                    };
+                },
+                cache: true
+                },
+             minimumInputLength: 2,
+             formatInputTooShort: function (input, min) { var n = min - input.length; return "Por favor ingrese  " + n + " carcater" + (n == 1? "" : "es") + " mas"; },
+             formatNoMatches: function () { return "No se encuentran resultados"; },
+
+        });
+
+        $('#citycustomer').on("change", function(e) {
+            var cityid = $('#citycustomer').val();
+            $('#baddress_type_cityid').val(cityid);
+            var cityname = $('#citycustomer').select2('data').text;
+            $('#baddress_type_cityname').val(cityname);
+        });
+        var citySID = $("#baddress_type_cityid").val();
+        var citySname = $("#baddress_type_cityname").val();
+        if (citySID && citySname) {
+            // console.log('Hola:  ' +  citySID + ' ' + citySname);
+            $('#citycustomer').select2('data', {id: citySID, text: citySname});
+        }
+    });
+</script>
+{% endblock %}
+
+

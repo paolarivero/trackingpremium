@@ -1,0 +1,70 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>{{ nameform }}</title>
+{% endblock %}
+
+{% form_theme form 'form/fields.html.twig' %}
+{% block body -%}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>{{ nameform }}</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('labelconf') }}">Etiquetas </a></li>
+            <li class="active">{{ nameform }}</li>
+            </ol>
+             {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+            {% for flashMessage in app.session.flashbag.get('warning') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        {{ form_start(form, {attr: {novalidate: 'novalidate', 'id': 'labelconf_type' }}) }}
+        <div class="block-flat">
+            <div class="header">
+            <h2>Datos del Etiqueta</h2>
+            </div>
+            <div class="content">
+                {{ form_row(form.tableclass) }}
+                {{ form_row(form.width) }}
+                {{ form_row(form.height) }}
+                <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        <td>
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default" >Regresar</button>
+                        </td>
+                        <td style="text-align:right;">
+                            {{ form_row(form.submit, { 'attr': {'class': 'btn btn-primary'} }) }}
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {{ form_end(form)}}
+</div>
+
+{% endblock %}
+{% block javascripts %}
+<script type="text/javascript">
+     $(document).ready(function () {
+        $('#labelconf_type_submit').click(function(evt) {
+                var dt = new Date();
+                var time = dt.getHours() + ":" + dt.getMinutes() + ":" + dt.getSeconds();
+                $('#labelconf_type_clock').val(time);
+                // console.log(time);
+                return true;
+        });
+    });
+</script>
+{% endblock %}

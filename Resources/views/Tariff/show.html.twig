@@ -1,0 +1,164 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>Mostrar Tarifa</title>
+{% endblock %}
+
+{# Display the form #}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Mostrar Tarifa</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ path('homepage') }}">Home</a></li>
+            <li><a href="{{ path('tariff', {'idag': app.user.agency.id }) }}">Tarifas</a></li>
+            <li class="active">Mostrar</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        <div class="block-flat">
+                    <div class="header">
+                        <h3>Agencia</h3>
+                    </div>
+                    <div class="content">
+                        {{ entity.agency }}
+                    </div>
+        </div>
+        <div class="block-flat">
+            <div class="header">
+                <h3>Datos de la tarifa</h3>
+            </div>
+            <div class="content">
+                <h4>
+                <div class="row">
+                    <div class="col-sm-6 col-md-6">
+                        <b>Nombre: </b>{{ entity.name }}
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                        <b>Región: </b>{{ entity.region }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6 col-md-6">
+                        <b>Tipo de Envío: </b>{{ entity.shippingtype }}
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                        <b>Medida: </b>{{ entity.measure }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6 col-md-6">
+                        <b>Valor de medida ($): </b>{{ entity.valuemeasure }}
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                        <b>Ganancia de agencia ($): </b>{{ entity.profitag }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6 col-md-6">
+                        <b>Cobrar peso: </b>{{ entity.weightpay }}
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                        <b>Costo: </b>{{ entity.cost }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6 col-md-6">
+                        <b>Inicio: </b>{{ entity.begin }}
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                        <b>Hasta: </b>{{ entity.until }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6 col-md-6">
+                        <b>Seguro: </b> 
+                        {% if entity.insurance %}
+                            <input type="checkbox" checked="checked" class="icheck" disabled readonly >
+                        {% else %}
+                            <input type="checkbox" disabled class="icheck" readonly >
+                        {% endif %}
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                        <b>% Seguro: </b> {{ entity.insuranceper }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6 col-md-6">
+                        <b>Impuesto: </b> 
+                        {% if entity.tax %}
+                            <input type="checkbox" checked="checked" class="icheck" disabled readonly >
+                        {% else %}
+                            <input type="checkbox" disabled class="icheck" readonly >
+                        {% endif %}
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                        <b>% Impuesto: </b> {{ entity.taxper }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4 col-md-4">
+                        <b>Cobrar mínimo: </b> 
+                        {% if entity.minimunlimit %}
+                            <input type="checkbox" checked="checked" class="icheck" disabled readonly >
+                        {% else %}
+                            <input type="checkbox" disabled class="icheck" readonly >
+                        {% endif %}
+                    </div>
+                    <div class="col-sm-4 col-md-4">
+                        <b>Límite mínimo: </b> {{ entity.minimun }}
+                    </div>
+                    <div class="col-sm-4 col-md-4">
+                         <b>Valor mínimo ($): </b> {{ entity.valuemin }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4 col-md-4">
+                        <b>Dimensional: </b> 
+                        {% if entity.dimentional %}
+                            <input type="checkbox" checked="checked" class="icheck" disabled readonly >
+                        {% else %}
+                            <input type="checkbox" disabled class="icheck" readonly >
+                        {% endif %}
+                    </div>
+                    <div class="col-sm-4 col-md-4">
+                        <b>Precio volumen ($): </b>  {{ entity.volumeprice }}
+                    </div>
+                    <div class="col-sm-4 col-md-4">
+                        <b>Ganancia volumen ($): </b> {{ entity.profitagv }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6 col-md-6">
+                        <b>Cobro adicional ($): </b> {{ entity.additional }}
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                        <b>Etiqueta adicional: </b> {{ entity.labeladditional }}
+                    </div>
+                </div>
+                </h4>
+                <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        <td>
+
+                        </td>
+                        <td style="text-align:right;">
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-flat" >Regresar</button>
+                            <button type="button" class="btn btn-primary btn-flat" onclick="location.href='{{ path('tariff_edit', { 'id': entity.id }) }}';">Editar</button>
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>{# FIN CONTENT #}
+        </div> {# FIN BLOCK FLAT #}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,176 @@
+{% extends '::base.html.twig' %}
+
+{# Display the form #}
+{% block body -%}
+
+<div class="widget">
+    <div class="widget-header"> <i class="icon-adjust"></i>
+              <h3>Modificar tarifa para la agencia {{ app.user.agency.name }}</h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+	<div class="bodycontainer scrollable">
+     {{ form_start(edit_form, {'attr': {'novalidate': 'novalidate'}}) }}
+	<table class="table table-striped table-bordered" style="table-layout: fixed;">
+                <thead>
+                  <tr>
+    			<th colspan="3"><h4>Datos de la Tarifa</h4></th>
+		  </tr>
+                </thead>
+       		<tbody>
+			<tr>
+    			<td>{{ form_row(edit_form.name) }}</td>
+			<td>{{ form_row(edit_form.region) }}</td>
+			<td>{{ form_row(edit_form.shippingtype) }}</td>
+			</tr>
+
+			<tr>
+			<td>{{ form_row(edit_form.measure) }}</td>
+			<td>{{ form_row(edit_form.value_measure) }}</td>
+			<td>{{ form_row(edit_form.profit_ag) }}</td>
+			</tr>
+			<tr>
+			<td colspan=2>{{ form_row(edit_form.weightpay) }}</td>
+			<td>{{ form_row(edit_form.active) }}</td>
+			</tr>
+			<tr>
+    			<td>{{ form_row(edit_form.cost) }}</td>
+			<td>{{ form_row(edit_form.begin) }}</td>
+			<td>{{ form_row(edit_form.until) }}</td>
+			</tr>
+
+			<tr>
+			<td>{{ form_row(edit_form.minimun_limit) }}</td>
+			<td>{{ form_row(edit_form.minimun) }}</td>
+			<td>{{ form_row(edit_form.value_min) }}</td>
+			</tr>
+
+			<tr>
+			<td>{{ form_row(edit_form.dimentional) }}</td>
+			<td>{{ form_row(edit_form.volume_price) }}</td>
+			<td>{{ form_row(edit_form.profit_agv) }}</td>
+			</tr>
+			 	
+			<tr>
+    			<td>{{ form_row(edit_form.insurance) }}</td>
+			<td colspan=2 style="text-align:center;">{{ form_row(edit_form.insurance_per) }}</td>
+			</tr>
+
+			<tr>
+    			<td>{{ form_row(edit_form.tax) }}</td>
+			<td colspan=2 style="text-align:center;">{{ form_row(edit_form.tax_per) }}</td>
+			</tr>
+			
+			<tr>
+			<td>{{ form_row(edit_form.additional) }}</td>
+			<td colspan=2 style="text-align:center;">{{ form_row(edit_form.label_additional) }}</td>
+			</tr>
+    		</tbody>
+        	<tfoot>
+    		<tr>
+    		<td>{{ form_row(edit_form.submit) }}</td>
+    		<td colspan=2 style="text-align:right;"><button type="button" class="btn btn-default" onclick="location.href='{{ path('tariff', { 'idag': app.user.agency.id }) }}';">Regresar a lista</button></td>
+    		</tr>
+	    	</tfoot>
+	</table>
+		
+     {{ form_end(edit_form) }}
+	    
+</div>
+</div>
+</div>
+{% block javascript %}
+<script type="text/javascript">
+    $(document).ready(function () {
+	var val = $('#tariff_type_measure option:selected').text();
+	// console.log(val);
+	if (( val == "Lb" ) || (val == "Kg")) {
+		$('#tariff_type_dimentional').prop('disabled', false);
+		$('#tariff_type_weightpay').prop('disabled', false);
+	} else {
+		$('#tariff_type_dimentional').prop('disabled', true);
+		$('#tariff_type_weightpay').prop('disabled', true);
+	}
+	if ($('#tariff_type_dimentional').is(":checked")) {
+		$('#tariff_type_volume_price').prop('readonly', false);
+		$('#tariff_type_profit_agv').prop('readonly', false);
+	} else {
+		$('#tariff_type_volume_price').prop('readonly', true);
+		$('#tariff_type_profit_agv').prop('readonly', true);
+	}
+	if ($('#tariff_type_minimun_limit>option:selected').text() != 'Ninguno') {
+		$('#tariff_type_minimun').prop('readonly', false);
+		$('#tariff_type_value_min').prop('readonly', false);
+	} else {
+		$('#tariff_type_minimun').prop('readonly', true);
+		$('#tariff_type_value_min').prop('readonly', true);
+	}
+	if ($('#tariff_type_insurance').is(":checked")) {
+		$('#tariff_type_insurance_per').prop('readonly', false);
+	} else {
+		$('#tariff_type_insurance_per').prop('readonly', true);
+	}
+	if ($('#tariff_type_tax').is(":checked")) {
+		$('#tariff_type_tax_per').prop('readonly', false);
+	} else {
+		$('#tariff_type_tax_per').prop('readonly', true);
+	}
+	$('#tariff_type_measure').change(function() {
+		var val = $('#tariff_type_measure option:selected').text();
+		if (( val == "Lb" ) || (val == "Kg")) {
+			$('#tariff_type_dimentional').prop('disabled', false);
+			$('#tariff_type_weightpay').prop('disabled', false);
+		} else {
+			$('#tariff_type_dimentional').prop('disabled', true);
+			$('#tariff_type_weightpay').prop('disabled', true);
+		}
+		
+	});
+	$('#tariff_type_dimentional').change(function() {
+		if ($('#tariff_type_dimentional').is(":checked")) {
+			$('#tariff_type_volume_price').prop('readonly', false);
+			$('#tariff_type_profit_agv').prop('readonly', false);
+		} else {
+			$('#tariff_type_volume_price').prop('readonly', true);
+			$('#tariff_type_profit_agv').prop('readonly', true);
+		}
+	});
+	$('#tariff_type_minimun_limit').change(function() {
+		if ($('#tariff_type_minimun_limit>option:selected').text() != 'Ninguno') {
+			$('#tariff_type_minimun').prop('readonly', false);
+			$('#tariff_type_value_min').prop('readonly', false);
+		} else {
+			$('#tariff_type_minimun').prop('readonly', true);
+			$('#tariff_type_value_min').prop('readonly', true);
+		}
+	});
+	$('#tariff_type_insurance').change(function() {
+		if ($('#tariff_type_insurance').is(":checked")) {
+			$('#tariff_type_insurance_per').prop('readonly', false);
+		} else {
+			$('#tariff_type_insurance_per').prop('readonly', true);
+		}
+	});
+	$('#tariff_type_tax').change(function() {
+		if ($('#tariff_type_tax').is(":checked")) {
+			$('#tariff_type_tax_per').prop('readonly', false);
+		} else {
+			$('#tariff_type_tax_per').prop('readonly', true);
+		}
+	});
+	$('#tariff_type_submit').click(function(evt) {
+		var begin = Number($('#tariff_type_begin').val());
+		var until = Number($('#tariff_type_until').val());
+    		
+		// console.log(begin + ':' + until);
+		
+		if (until <= begin) {
+			alert('ERROR: El valor de INICIO debe ser menor que el valor HASTA..');
+			return false;
+	   	}
+           	return true;
+	});
+    });
+</script>
+{% endblock %}
+{% endblock %}

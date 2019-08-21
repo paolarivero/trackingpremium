@@ -1,0 +1,71 @@
+{% extends '::newbase.html.twig' %}
+
+{% block body -%}
+<div id="pcont" class="container-fluid">
+  <div class="page-head">
+    <h2>Crear un Consolidado</h2>
+    <ol class="breadcrumb">
+      <li><a href="#">Home</a></li>
+      <li><a href="#">Consolidado</a></li>
+      <li class="active">Crear</li>
+    </ol>
+  </div>
+  <div class="cl-mcont">
+
+
+            <div class="row">
+      <div class="col-md-12">
+
+       <div class="block-flat">
+          <div class="header">
+            <h3>Detalles</h3>
+          </div>
+          <div class="content">
+          {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+
+                <div class="col-sm-3" style="padding-left: 7px;margin-bottom: 10px;">
+                {{ form_widget(form.shippingtype) }}
+                </div>
+
+                 <div class="col-sm-3" style="padding-left: 7px;margin-bottom: 10px;">
+
+
+
+                  {{ form_widget(form.agency) }}
+                </div>
+
+                 <div class="col-sm-3" style="padding-left: 7px;margin-bottom: 10px;">
+                  {{ form_widget(form.sender) }}
+                </div>
+
+                  <div class="col-sm-3" style="padding-left: 7px;margin-bottom: 10px;">
+
+                    {{ form_widget(form.receiver) }}
+
+                </div>
+
+           <BR><BR><BR> <BR><BR>
+
+          </div>
+
+        </div>
+
+
+    </div>
+  </div>
+
+      <div class="col-md-12"><span class="pull-right">
+
+         <button type="button" onClick="history.go(-1);return true;" class="btn btn-default">Cancelar</button>
+        {{ form_row(form.submit) }}
+     </span>
+     </div>
+</div>
+</div>
+
+
+
+
+{{ form_end(form) }}
+{% endblock %}

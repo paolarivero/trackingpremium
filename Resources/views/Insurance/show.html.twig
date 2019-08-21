@@ -1,0 +1,40 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+    <h1>Seguro de agencia</h1>
+
+    <table class="record_properties">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ entity.id }}</td>
+            </tr>
+	    <tr>
+                <th>Agencia (%)</th>
+                <td>{{ entity.agency }}</td>
+            </tr>
+            <tr>
+                <th>Seguro agencia master (%)</th>
+                <td>{{ entity.masterins }}</td>
+            </tr>
+            <tr>
+                <th>Seguro de agencia (%)</th>
+                <td>{{ entity.agencyins }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+        <ul class="record_actions">
+    <li>
+        <a href="{{ path('insurance') }}">
+            Regresar a la lista de seguros de agencia
+        </a>
+    </li>
+    <li>
+        <a href="{{ path('insurance_edit', { 'id': entity.id }) }}">
+            Editar
+        </a>
+    </li>
+    <li>{{ form(delete_form) }}</li>
+</ul>
+{% endblock %}

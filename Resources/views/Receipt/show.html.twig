@@ -1,0 +1,405 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>Mostrar {% trans %}Recibo{% endtrans %}</title>
+{% endblock %}
+
+{% block body -%}
+{% set reclist = '["'~ entity.id ~'"]'%}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Información  de {% trans %}Recibo{% endtrans %}</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('receipt') }}">{% trans %}Recibos{% endtrans %}</a></li>
+            <li class="active"> Mostrar {% trans %}Recibo{% endtrans %}</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        <div class="block-flat">
+            <div class="header">
+                <div class="row">
+                    <div class="col-sm-6 col-md-6">
+                        <h3>{% trans %}Recibo{% endtrans %} {{ entity.number }} </h3>
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                        <div class="btn-group" style="margin-bottom: 5px;margin-top: 4px;">
+                            {% if (entity.guide is null)  and  (entity.whrec is null)  and (entity.status != 'Reempacado') %}
+                                <button type="button" class="btn btn-default">Opciones</button>
+                                <button type="button" data-toggle="dropdown" class="btn btn-default dropdown-toggle">
+                                <span class="caret"></span><span class="sr-only">Opciones</span></button>
+                                <ul role="menu" class="dropdown-menu">
+                                        <li><a href="{{ path('guide_receipts', {'typecus': 3, 'reclist': reclist }) }}">Crear {% trans %}Guía{% endtrans %}</a></li>
+                                        <li><a href="{{ path('receipt_edit', {'id': entity.id }) }}">Editar</a></li>
+                                        <li><a class="bcancel" data-toggle="modal" data-target="#cancelrec" href="#">Anular</a></li>
+                                        {#
+                                        <li><a href="{{ path('receipts_showcancel', {'reclist': reclist }) }}">Anular</a></li> 
+                                        #}
+                                        <li><a href="{{ path('receipt_addpacks', {'id': entity.id }) }}">Agregar Pieza(s)</a></li>
+                                </ul>
+                            {% endif %}
+                        </div>
+                        <div class="btn-group" style="margin-bottom: 5px;margin-top: 4px;">
+                                <button type="button" class="btn btn-default">Status</button>
+                                <button type="button" data-toggle="dropdown" class="btn btn-default dropdown-toggle">
+                                <span class="caret"></span><span class="sr-only">Status</span></button>
+                                <ul role="menu" class="dropdown-menu">
+                                    <li><a href="{{ path('statusreceipt_new', {'id': entity.id }) }}">{% trans %}Nuevo Status{% endtrans %}</a></li>
+                                </ul>
+                            </div>
+                        <button type="button" title="Imprimir" class="btn btn-default" onclick="location.href='{{ path('receipt_print', { 'id': entity.id }) }}';"><i class="fa fa-print"></i></button>
+                        <button type="button" title="Generar PDF" class="btn btn-default" onclick="location.href='{{ path('receipt_printpdf', { 'id': entity.id }) }}';"><i class="fa fa-file-text"></i></button>
+                        {% if entity.guide is null %}
+                            <button type="button" title="Etiqueta" class="btn btn-default" onclick="location.href='{{ path('receipt_labelpdf', { 'id': entity.id }) }}';"><i class="fa fa-tag"></i></button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="content">
+                <div class="row">
+                    <div class="col-md-6 col-sm-6">
+                    <b>
+                    {% if app.user.agency.type == 'MASTER' %}
+                        <i class="fa fa-building-o"></i> Agencia: {{ entity.agency }}<BR>
+                    {% endif %}
+                    <i class="fa fa-user"></i> Recibido Por: {{ entity.receiptdby }}</BR>
+                    <i class="fa fa-calendar"></i> Fecha: {{ entity.arrivedate|date('m/d/Y') }}<BR>
+                    </b>
+                    </div>
+                    <div class="col-md-6 col-sm-6">
+                    <b>
+                    <i class="fa fa-truck"></i> Carrier: {{ entity.carrier }}<br>
+                    {% if entity.tracking %}
+                         <i class="fa fa-barcode"></i> Tracking: {{ entity.tracking }}<br>
+                    {% endif %}
+                    {% if entity.whrec %}
+                        <i class="fa fa-pencil-square"></i> {% trans %}Warehouse{% endtrans %}: <button type="button" class="btn btn-success btn-xs" onclick="location.href='{{ path('whrec_show', { 'id': entity.whrec.id }) }}';">{{ entity.whrec.number }}</button><br>
+                    {% endif %}
+                    {% if entity.guide %}
+                        <i class="fa fa-pencil-square-o"></i> {% trans %}Guía{% endtrans %}: <button type="button" class="btn btn-success btn-xs" onclick="location.href='{{ path('guide_show', { 'id': entity.guide.id }) }}';">{{ entity.guide.number }}</button><br>
+                        {% if entity.guide.consol %}
+                            <i class="fa fa-suitcase"></i> {% trans %}Consolidado{% endtrans %}: <button type="button" class="btn btn-success btn-xs" onclick="location.href='{{ path('consolidated_show', { 'id': entity.guide.consol.id }) }}';">{{ entity.guide.consol.id }}</button><br>
+                        {% endif %}
+                    {% endif %}
+                    <i class="fa fa-check-square-o"></i> Status: {{ entity.status.name }}</b>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6 col-md-6">
+                <div class="block-flat">
+                    <div class="header">
+                        <h3>Remitente</h3>
+                    </div>
+                    <div class="content">
+                        <b>{{ entity.shipper.name }}  {{ entity.shipper.lastname }}</b>
+                        <p>{{ entity.shipper.adrdefault.address }} <BR>
+                        {{ entity.shipper.adrdefault.city }}, {{ entity.shipper.adrdefault.city.state }}, {{ entity.shipper.adrdefault.city.state.country.code }} 
+                        {% if entity.shipper.adrdefault.zip %}
+                            ({{ entity.shipper.adrdefault.zip }})
+                        {% endif %}<BR>
+                        {{ entity.shipper.email }} <BR>
+                        {% if entity.shipper.adrdefault.phone  %}
+                            Teléfono:  {{ entity.shipper.adrdefault.phone }} <BR>
+                        {% endif %}
+                        {% if entity.shipper.adrdefault.mobile %}
+                            Móvil:  {{ entity.shipper.adrdefault.mobile }} <BR>
+                        {% endif %} 
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-6">
+                <div class="block-flat">
+                    <div class="header">
+                        <h3>Destinatario</h3>
+                    </div>
+                    <div class="content">
+                        <b>{{ entity.receiver.name }}  {{ entity.receiver.lastname }}</b>
+                        <p>{{ entity.receiver.address }} <BR>
+                        {{ entity.receiver.city }}, {{ entity.receiver.city.state }}, {{ entity.receiver.city.state.country.code }}  
+                        {% if entity.receiver.zip %}
+                            ({{ entity.receiver.zip }})
+                        {% endif %}<BR>
+                        {{ entity.receiver.customer.email }} <BR>
+                        {% if entity.receiver.phone  %}
+                            Teléfono:  {{ entity.receiver.phone }} <BR>
+                        {% endif %}
+                        {% if entity.receiver.mobile %}
+                            Móvil:  {{ entity.receiver.mobile }} <BR>
+                        {% endif %} 
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% if 'peso'|trans == 'Lb' %}
+            {% set conwei = 0.454 %}
+        {% else %}
+            {% set conwei = 1/0.454 %}
+        {% endif %}
+        {% if 'dimension'|trans == 'CF' %}
+            {% set convol = 1/35.3147 %}
+        {% else %}
+            {% set convol =  35.3147 %}
+        {% endif %}
+        {% set volfactor = app.user.agency.maincompany.convertvol %}
+        {% set dimfactor = app.user.agency.maincompany.dimfactor %}
+        {% set voldim = entity.length*entity.width*entity.height %}
+        {% set vol = (voldim/volfactor)|number_format(2, '.', ',') %}
+        {% set volwei = voldim/dimfactor %}
+        {% set altpeso = entity.weight * conwei %}
+        {% set altvol = vol * convol %}
+        <div class="block-flat">
+            <div class="header">
+                <h3>Detalles del paquete</h3>
+            </div>
+            <div class="content">
+                <b>
+                <div>
+                    Descripción: {{ entity.description }} 
+                </div>
+                <div>
+                    Peso: {{ entity.weight }} {% trans %}peso{% endtrans %} ({{ altpeso }} {% trans %}altpeso{% endtrans %})
+                </div>
+                <div>
+                    Volumen: {{ entity.length }}x{{ entity.width }}x{{ entity.height }} 
+                ({{ vol }} {% trans %}dimension{% endtrans %}/{{ altvol|number_format(2, '.', ',') }} {% trans %}altdimension{% endtrans %})
+                </div>
+                <div>
+                    Peso dimensional: {{ volwei|number_format(2, '.', ',') }}
+                </div>
+                <div>
+                    Bultos: {{ entity.npack }}
+                </div>
+                <div>
+                    Tipo de paquete: {{ entity.packtype }}
+                </div>
+                </b>
+            </div>
+        </div>
+        {% if entity.type == 'Master' %}
+        <div class="block-flat">
+            <div class="header">
+                <h3>Paquete(s) Reempacados en un solo paquete</h3>
+            </div>
+            <div class="content">
+                <table id="receiptTable"  class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%" style="padding-top: 0px !important; margin-top: -40px !important;">
+                <thead>
+                    <tr>
+                        <th>{% trans %}Recibo{% endtrans %} </th>
+                        <th>Volumen ({% trans %}dimension{% endtrans %}/{% trans %}altdimension{% endtrans %})</th>
+                        <th>Peso ({% trans %}peso{% endtrans %}/{% trans %}altpeso{% endtrans %})</th>
+                        <th>Peso Vol (Vol-{% trans %}peso{% endtrans %})</th>
+                        <th>Tipo</th>
+                        <th>Bultos</th>
+                        <th>Valor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for receipt in entity.receipts %}
+                            {% set volumen = receipt.length*receipt.width*receipt.height %}
+                            {% set pesod = volumen/dimfactor %}
+                            {% set volumen = volumen/volfactor %}
+                            <tr>
+                                <td><a  class="btn btn-success btn-sm btn-flat" href="{{ path('receipt_show', { 'id': receipt.id }) }}">{{ receipt.number }}</a></td>
+                                <td>{{ receipt.length }}X{{ receipt.width }}X{{ receipt.height }} ({{ volumen|number_format(2, '.', ',') }}/{{ (volumen*convol)|number_format(2, '.', ',') }} )</td>
+                                <td>{{ receipt.weight }}/{{ (receipt.weight*conwei)|number_format(2, '.', ',') }}</td>
+                                <td>{{ pesod|number_format(2, '.', ',') }}</td>
+                                <td>{{ receipt.packtype }}</td>
+                                <td>{{ receipt.npack }}</td>
+                                <td>{{ receipt.value }}</td>
+                            </tr>
+                    {% endfor %}
+                </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+        <div class="block-flat">
+            <div class="header">
+                <div class="row">
+                    <div class="col-sm-12 col-md-12">
+                        <h3>Status del {% trans %}Recibo{% endtrans %} {{ entity.number }}</h3>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6 col-md-6">
+                        {% if entity.statuswhrec %}
+                            <label>Mostrar status {% trans %}Warehouse{% endtrans %} </label> <input id="statuswhrec" type="checkbox" class="icheck" checked="checked">
+                        {% else %}
+                            <label>Mostrar status {% trans %}Warehouse{% endtrans %} </label> <input id="statuswhrec" type="checkbox" class="icheck">
+                        {% endif %}
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                        {% if entity.statusguide %}
+                            <label>Mostrar status {% trans %}Guía{% endtrans %} </label> <input id="statusguide" type="checkbox" class="icheck" checked="checked">
+                        {% else %}
+                            <label>Mostrar status {% trans %}Guía{% endtrans %} </label> <input id="statusguide" type="checkbox" class="icheck">
+                        {% endif %}
+                    </div>
+                </div>
+                
+            </div>
+            <div class="content">
+                <table id="statusTable" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%" style="padding-top: 0px !important; margin-top: -40px !important;">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Fecha</th>
+                        <th>{% trans %}Paso{% endtrans %}</th>
+                        <th>Porcentaje</th>
+                        <th>Lugar</th>
+                        <th>Comentario</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for move in entity.liststatus %}
+                        <tr>
+                            <td><buttom class="btn btn-primary btn-xs" title="Editar" onclick="location.href='{{ path('statusreceipt_edit', { 'id': move.id }) }}';"><i class="fa fa-pencil"></i></buttom></td>
+                            <td>{{ move.date |date('d/m/Y H:i:s') }}</td>
+                            <td>{{ move.step.name }}</td>
+                            <td>{{ move.step.percentage }}</td>
+                            <td>{{ move.place }} ({{ move.place.state }})</td>
+                            <td>{{ move.comment }}</td>
+                        </tr>   
+                    {% endfor %}
+                    {% if entity.statuswhrec  and entity.whrec is not null %}
+                        {% set whrec = entity.whrec %}
+                        {% for move in whrec.liststatus %}
+                            <tr>
+                                <td><i class="fa fa-list"></td>
+                                <td>{{ move.date |date('d/m/Y H:i:s') }}</td>
+                                <td>{{ move.step.name }}</td>
+                                <td>{{ move.step.percentage }}</td>
+                                <td>{{ move.place }} ({{ move.place.state }})</td>
+                                <td>{{ move.comment }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
+                    {% if entity.statusguide  and entity.guide is not null %}
+                        {% set guide = entity.guide %}
+                        {% for move in guide.liststatus %}
+                            <tr>
+                                <td><i class="fa fa-list-alt"></td>
+                                <td>{{ move.date |date('d/m/Y H:i:s') }}</td>
+                                <td>{{ move.step.name }}</td>
+                                <td>{{ move.step.percentage }}</td>
+                                <td>{{ move.place }} ({{ move.place.state }})</td>
+                                <td>{{ move.comment }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% endif %}
+                </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Modal -->
+        <div id="cancelrec" tabindex="-1" role="dialog" class="modal fade">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button id="closecancelrec" type="button" data-dismiss="modal" aria-hidden="true" class="close">×</button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="text-center">
+                            <div class="i-circle danger"><i class="fa fa-times"></i></div>
+                                <p style="font-size:16px;">Confirme la anulación del {% trans %}Recibo{% endtrans %} {{ entity.number }}</p>
+                            </div>
+                            <div class="alert alert-danger">
+                                <strong>Advertencia: </strong>Los {% trans %}Recibos{% endtrans %} contenidos en un REEMPAQUE quedarán "Por Procesar"
+                            </div>
+                            <center>
+                            <button type="button" class="btn btn-info btn-flat gotocancel">Confirmar</button>
+                            </center>
+                        </div>
+                        
+                        <div class="modal-footer">
+                            <div class="text-center">
+                                <button type="button" data-dismiss="modal" class="btn btn-default">Cerrar</button>
+                            </div>
+                        </div>
+                    </div>
+                </div><!-- /.modal-content-->
+            </div><!-- /.modal-dialog-->
+        </div><!-- /.modal-->
+        
+    </div>
+</div>
+
+{% endblock %}
+{% block javascripts %}
+<script type="text/javascript">
+    $(document).ready(function(){
+        $('.gotocancel').click(function(e) {
+            e.preventDefault();
+            $('#closecancelrec').click();
+            // funalert('cancelar recibo {{ entity.number }}');
+            var tocreate = ['{{ entity.id }}'];
+            var reclist = JSON.stringify(tocreate);
+            var nrec = tocreate.length;
+            var url="{{ url('receipts_cancel') }}?reclist=" + reclist;
+            if (nrec == 0 ) {
+                funalert('Debe seleccionar algún "{% trans %}Recibo{% endtrans %}" para anular');
+            } else { 
+                window.location.href = url;
+            }
+            return false;
+        });
+        {% if entity.type == 'Master' %}
+            var $receiptTable = $('#receiptTable').DataTable({
+                paginate: false,
+                info: false,
+                searching: false,
+                ordering: false,
+            });
+        {% endif %}
+        $thisMovTable=$('#statusTable').DataTable({
+            "responvise": true,
+            "searching": false,
+            "info":     false,
+            "lengthChange": false,
+            "paginate": false,
+            "language": {
+                "zeroRecords": "<div style=\"color:red;\">Lo siento no se encontraron Status</div>",
+                },
+            "columnDefs": [
+                { "type": 'date', "targets": 1 },
+            ],
+            "order": [[ 1, "desc" ]],
+        });
+        $('#statuswhrec').on('ifChecked', function(event){
+            var path = "{{ url('receipt_whrecadd', { 'id': entity.id }) }}";
+            //console.log(path);
+            window.location.href = path;
+            return false;
+        });
+        $('#statuswhrec').on('ifUnchecked', function(event){
+            var path = "{{ url('receipt_whrecremove', { 'id': entity.id }) }}";
+            //console.log(path);
+            window.location.href = path;
+            return false;
+        });
+        $('#statusguide').on('ifChecked', function(event){
+            var path = "{{ url('receipt_guideadd', { 'id': entity.id }) }}";
+            //console.log(path);
+            window.location.href = path;
+            return false;
+        });
+        $('#statusguide').on('ifUnchecked', function(event){
+            var path = "{{ url('receipt_guideremove', { 'id': entity.id }) }}";
+            //console.log(path);
+            window.location.href = path;
+            return false;
+        });
+    });
+</script>
+{% endblock %}

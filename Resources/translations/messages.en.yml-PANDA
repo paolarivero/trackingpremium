@@ -1,0 +1,28 @@
+labels:
+        name_sender: Nombre
+        guide: Warehouse
+        guides: Warehouse
+        receipt: Prewarehouse
+        receipts: Prewarehouses
+        consolidated: Manifiesto de Carga
+        prefixconsols: Prefijo de Manifiestos de Carga
+        prefixguides: Prefijo de Warehouse
+        emailagency: Enviar copia de Warehouse
+        inheretedconsol: Warehouse heredan este status
+        statusguide: Status del Warehouse
+        guidenumber: Número del Warehouse
+        iniguide: Numeración inicial de Warehouse
+
+peso: Lb
+altpeso: Kg
+dimension: CF
+altdimension: Mt3
+mconsoldate: M
+tailcolor: red
+Recibo: Prewarehouse
+Recibos: Prewarehouses
+Guía: Warehouse
+Guías: Warehouses
+Consolidados: Manifiestos de Carga
+Consolidado: Manifiesto de Carga
+Consolidar: Incluir MC

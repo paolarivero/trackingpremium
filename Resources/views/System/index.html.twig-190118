@@ -1,0 +1,229 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+    {% if app.user is null %}
+        <script>window.location.href = "{{ path('login') }}"</script>
+    {% endif %}
+    
+    {% if app.user.pobox is not null %}
+        <script>window.location.href = "{{ path('pobox_menu', { 'id': app.user.pobox.id }) }}"</script>
+    {% endif %}
+
+<style type="text/css">
+.table {
+    border: 0px solid black;
+}
+
+.table td {
+    border: 0px solid black;
+}
+
+.btn-default:hover, .btn-default:focus, .btn-default:active, .btn-default.active, .open .dropdown-toggle.btn-default {
+  background-color: #AED6F1;
+  /*  background-color: #2980B9;*/
+ }
+
+.btn
+{
+  background-color: #FFFFFF;
+}
+</style>
+
+<div class="row">
+<div class="span5">
+<div class="widget">
+    <div class="widget-header"> <i class="icon-edit"></i>
+              <h3>{% trans %}Recibos{% endtrans %} </h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+    <div class="table-responsive">
+    <table class="table table-sm">
+    <tbody>
+    <tr>
+    <td style="text-align:center;">
+        <button class="btn btn-default" type="button" onclick="location.href='{{ path('receipt_new') }}';">
+	<span class="icon  icon-pencil" style="font-size:5em; color:#2980B9;"></span><br>Nuevo</button>
+    </td>
+   <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('receipt') }}';">
+	<span class="icon icon-list-ol" style="font-size:5em; color:#2980B9;"></span><br>Listar</button>
+    </td>
+    <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('receipt_wg') }}';">
+	<span class="icon icon-reorder" style="font-size:5em; color:#2980B9;"></span><br>Sin guía</button>
+    </td>
+    <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('receipt_search') }}';">
+	<span class="icon icon-search" style="font-size:5em; color:#2980B9;"></span><br>Buscar</button>
+    </td>
+    </tr>
+    </tbody>
+    </table>  
+    </div>
+   </div>
+</div>
+</div>
+
+<div class="span5">
+<div class="widget">
+    <div class="widget-header"> <i class="icon-list-alt"></i>
+              <h3>{% trans %}Guías{% endtrans %} </h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+    <div class="table-responsive">
+    <table class="table table-sm">
+    <tbody>
+    <tr>
+    <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('guide_new') }}';">
+	<span class="icon  icon-pencil" style="font-size:5em; color:#2980B9;"></span><br>Nueva</button>
+    </td>
+   <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('guide') }}';">
+	<span class="icon icon-list-alt" style="font-size:5em; color:#2980B9;"></span><br>Listar</button>
+    </td>
+    <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('receipt_search') }}';">
+	<span class="icon icon-indent-right" style="font-size:5em; color:#2980B9;"></span><br>{% trans %}Consolidar{% endtrans %}</button>
+    </td>
+     <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('guide_search') }}';">
+	<span class="icon icon-search" style="font-size:5em; color:#2980B9;"></span><br>Buscar</button>
+    </td>
+    </tr>
+    </tbody>
+    </table>  
+    </div>
+   </div>
+</div>
+</div>
+</div>
+
+
+<div class="row">
+<div class="span5">
+<div class="widget">
+    <div class="widget-header"> <i class="icon-cloud"></i>
+              <h3>BOLSAS</h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+    <div class="table-responsive">
+    <table class="table table-sm">
+    <tbody>
+    <tr>
+    <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('bag_new') }}';">
+	<span class="icon  icon-cloud" style="font-size:5em; color:#2980B9;"></span><br>Crear</button>
+    </td>
+   <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('bag_listtomaster') }}';">
+	<span class="icon  icon-download-alt" style="font-size:5em; color:#2980B9;"></span><br>Recibir</button>
+    </td>
+    <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('bag_listtoconsol') }}';">
+	<span class="icon icon-table" style="font-size:5em; color:#2980B9;"></span><br>{% trans %}Consolidar{% endtrans %}</button>
+    </td>
+    </tr>
+    </tbody>
+    </table>  
+    </div>
+   </div>
+</div>
+</div>
+<div class="span5">
+<div class="widget">
+    <div class="widget-header"> <i class="icon-briefcase"></i>
+              <h3>{% trans %}Consolidados{% endtrans %} </h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+    <div class="table-responsive">
+    <table class="table table-sm">
+    <tbody>
+    <tr>
+    <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('consolidated_new') }}';">
+	<span class="icon  icon-briefcase" style="font-size:5em; color:#2980B9;"></span><br>Crear</button>
+    </td>
+   <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('consolidated') }}';">
+	<span class="icon  icon-list" style="font-size:5em; color:#2980B9;"></span><br>Listar</button>
+    </td>
+    </tr>
+    </tbody>
+    </table>  
+    </div>
+   </div>
+</div>
+</div>
+</div>
+
+<div class="row">
+<div class="span5">
+<div class="widget">
+    <div class="widget-header"> <i class="icon-list-alt"></i>
+              <h3>Facturación de {% trans %}Guías{% endtrans %}</h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+    <div class="table-responsive">
+    <table class="table table-sm">
+    <tbody>
+    <tr>
+    <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('bill_wlist') }}';">
+	<span class="icon  icon-money" style="font-size:5em; color:#2980B9;"></span><br>Con Factura</button>
+    </td>
+   <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('bill_list') }}';">
+	<span class="icon  icon-credit-card" style="font-size:5em; color:#2980B9;"></span><br>Por Facturar</button>
+    </td>
+    </tr>
+    </tbody>
+    </table>  
+    </div>
+   </div>
+</div>
+</div>
+<div class="span5">
+<div class="widget">
+    <div class="widget-header"> <i class="icon-inbox"></i>
+              <h3>CASILLEROS </h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+    <div class="table-responsive">
+    <table class="table table-sm">
+    <tbody>
+     <tr>
+    <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('pobox_new') }}';">
+	<span class="icon  icon-inbox" style="font-size:5em; color:#2980B9;"></span><br>Nuevo</button>
+    </td>
+   <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('pobox') }}';">
+	<span class="icon icon-columns" style="font-size:5em; color:#2980B9;"></span><br>Listar</button>
+    </td>
+    <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('pobox_search') }}';">
+	<span class="icon  icon-eye-open" style="font-size:5em; color:#2980B9;"></span><br>Buscar</button>
+    </td>
+    
+    <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('alert') }}';"> 
+	<span class="icon icon-bell" style="font-size:5em; color:#2980B9;"></span><br>Alertas</button>
+    </td>
+    
+    </tr>
+    </tbody>
+    </table>  
+    </div>
+   </div>
+</div>
+</div>
+</div>
+{% endblock %}
+

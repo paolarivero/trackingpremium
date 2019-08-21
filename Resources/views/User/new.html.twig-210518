@@ -1,0 +1,71 @@
+{% extends '::newbase.html.twig' %}
+{% block title %}
+    <title>Crear Usuario</title>
+{% endblock %}
+
+{% form_theme form 'form/fields.html.twig' %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Crear Usuario</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('user') }}">Usuarios</a></li>
+            <li class="active">Crear</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger alert-white rounded">
+                    <button type="button" data-dismiss="alert" aria-hidden="true" class="close">×</button>
+                    <div class="icon">
+                        <i class="fa fa-warning"></i>
+                    </div>
+                    <strong>Alerta! </strong> {{ flashMessage|raw }} 
+                    </strong>
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        {{ form_start(form, {attr: {novalidate: 'novalidate', 'id': 'receipt_type' }}) }}
+        <div class="block-flat">
+            <div class="header">
+                <h3>Datos del Usuario</h3>
+            </div>
+            <div class="content">
+                {{ form_row(form.agency) }}
+                {{ form_row(form.username) }}</td>	
+                {{ form_row(form.email) }}</td>
+                {{ form_row(form.name) }}
+                {{ form_row(form.lastname) }}
+                {{ form_row(form.password) }}
+                {{ form_row(form.profile) }}
+            <table class="no-border">
+            <tbody class="no-border-y">
+                <tr>
+                <td>
+                    <button type="button" onClick="history.go(-1);return true;" class="btn btn-default" >Regresar</button>
+                </td>
+                <td style="text-align:right;">
+                    {{ form_row(form.submit, { 'attr': {'class': 'btn btn-primary'} }) }}
+                </td>
+                </tr>
+            </tbody>
+        </table>
+            </div>{# FIN CONTENT #}
+        </div> {# FIN BLOCK FLAT #}
+        
+        {{ form_end(form) }}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        
+    });
+</script>
+{% endblock %}

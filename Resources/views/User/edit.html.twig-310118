@@ -1,0 +1,68 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+<div class="widget">
+    <div class="widget-header"> <i class="icon-user"></i>
+              <h3>Edición del usuario "{{ entity.username }}"</h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+    {{ form_start(edit_form, {'attr': {'novalidate': 'novalidate'}}) }}
+    <div class="bodycontainer scrollable">
+    <table class="table table-striped table-bordered">
+    <thead>
+	<tr>
+	<th colspan=2><h4>Datos del usuario</h4></th>
+	</tr>
+    </thead>
+    <tbody>
+	<tr>
+	<td>{{ form_row(edit_form.username) }}</td>	
+	<td>{{ form_row(edit_form.email) }}</td>
+	</tr>
+	<tr>
+	<td>{{ form_row(edit_form.name) }}</td>	
+	<td>{{ form_row(edit_form.lastname) }}</td>
+	</tr>
+	<tr>
+	<td>{{ form_row(edit_form.newprofile) }}</td>		
+	<td>{{ form_row(edit_form.profile) }}</td>
+	</tr>
+	<tr>
+	<td  style="vertical-align: top;">{{ form_row(edit_form.password) }}</td>		
+	<td>{{ form_row(edit_form.user_roles) }}</td>
+	</tr>
+    </tbody>
+    <tfoot>
+    	<tr>
+    	<td>{{ form_row(edit_form.submit) }}</td>
+    	<td><button type="button" class="btn btn-default" onclick="location.href='{{ path('user') }}';">Regresar a lista</button></td>
+    	</tr>
+    </tfoot>
+    </table>
+
+    {{ form_end(edit_form) }}
+    </div>
+</div>
+</div>
+{% block javascript %}
+<script type="text/javascript">
+$(document).ready(function () {
+    $('#user_type_newprofile').change(function(){
+            if  ($('#user_type_newprofile').is(":checked")) {
+                $('#user_type_profile').attr('disabled', false);
+                $('input[type=checkbox][id*=_user_roles]').each(function(){
+                    $(this).attr('disabled', true);
+                });
+            } else {
+                $('#user_type_profile').attr('disabled', true);
+                $('input[type=checkbox][id*=_user_roles]').each(function(){
+                    $(this).attr('disabled', false);
+                });
+            }
+    });
+    $('#user_type_newprofile').change();
+});
+</script>
+{% endblock %}
+{% endblock %}

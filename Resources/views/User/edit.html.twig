@@ -1,0 +1,145 @@
+{% extends '::newbase.html.twig' %}
+{% block title %}
+    <title>Editar Usuario</title>
+{% endblock %}
+
+{% form_theme edit_form 'form/fields.html.twig' %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Editar Usuario</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('user') }}">Usuarios</a></li>
+            <li class="active">Editar</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        {{ form_start(edit_form, {attr: {novalidate: 'novalidate', 'id': 'user_type' }}) }}
+        <div class="block-flat">
+            <div class="header">
+                <h3>Datos del Usuario</h3>
+            </div>
+            <div class="content">
+                {{ form_row(edit_form.agency) }}
+                {{ form_row(edit_form.username) }}</td>	
+                {{ form_row(edit_form.email) }}</td>
+                {{ form_row(edit_form.name) }}
+                {{ form_row(edit_form.lastname) }}
+                {{ form_row(edit_form.thepassword) }}
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <label class="control-label required" for="">Foto</label>
+                        </div>
+                        <div class="col-sm-10">
+                            <div class="dropzone">
+                                <div class="dz-message">
+                                    <h3> Suelta el archivo aquí o haz clic para cargar (JPG/PNG) (<= 1Mb)</h3>
+                                    <span class="note">Se recomienda que la imagen tenga las mismas dimensiones de ancho y alto, para su adecuada visualización. Ejemplo: 200px200px</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% if entity.photo %}
+                    <center>
+                    {% set photo = users_photos ~ entity.photo %}
+                    <img src="{{ asset(photo) }}" alt="Photo" style="height:100px;" >
+                    </center>
+                {% endif %}
+                <div class="row">
+                    <div class="col-md-3 col-sm-3">
+                        {{ form_row(edit_form.newprofile, { 'attr': {'class': 'icheck'} }) }}
+                    </div>
+                    <div class="col-md-9 col-sm-9">
+                        {{ form_row(edit_form.profile) }}
+                    </div>
+                </div>
+                {{ form_row(edit_form.user_roles) }}
+                <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        <td>
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default" >Regresar</button>
+                        </td>
+                        <td style="text-align:right;">
+                            {{ form_row(edit_form.submit, { 'attr': {'class': 'btn btn-primary'} }) }}
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>{# FIN CONTENT #}
+        </div> {# FIN BLOCK FLAT #}
+        <input type="hidden" id="acepted">
+        {{ form_end(edit_form) }}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#user_type_profile').attr('disabled', true);
+        $('#user_type_newprofile').on('ifChecked', function(event){
+            $('#user_type_profile').attr('disabled', false);
+                $('input[type=checkbox][id*=_user_roles]').each(function(){
+                    $(this).attr('disabled', true);
+                });
+        });
+        $('#user_type_newprofile').on('ifUnchecked', function(event){
+            $('#user_type_profile').attr('disabled', true);
+                $('input[type=checkbox][id*=_user_roles]').each(function(){
+                    $(this).attr('disabled', false);
+                });
+        });
+        Dropzone.autoDiscover = false;
+        var dropzone_default = new Dropzone(".dropzone", {
+            url: '{{ path('loaduserphoto') }}',
+            maxFiles: 1,
+            uploadMultiple: false,
+            dictMaxFilesExceeded: 'Solo puede seleccionar un (1) archivo',
+            acceptedFiles: 'image/*',
+            dictInvalidFileType: 'No se permiten archivos de este tipo',
+            maxFilesize: 1,  // in Mb
+            dictFileTooBig: "El tamaño del archivo ({{ '{{' ~ 'filesize' ~ '}}' }}Mb) excede el máximo permitido ({{ '{{' ~ 'maxFilesize' ~ '}}' }}Mb)",
+            addRemoveLinks: true,
+            dictRemoveFile: 'Eliminar archivo',
+            init: function () {
+                this.on("error", function(file, message, xhr) { 
+                    if (xhr == null) this.removeFile(file); // perhaps not remove on xhr errors
+                    funalert(message);
+                });
+                this.on("sending", function(file, xhr, formData) {
+                    // send additional data with the file as POST data if needed.
+                    // formData.append("key", "value");  
+                });
+                this.on("success", function(file, response) {
+                    if (response.uploaded) 
+                        $('#user_type_fileName').val(response.fileName);
+                        $('#acepted').val(file.name);
+                        //alert('File Uploaded: ' + response.fileName);
+                });
+                this.on("removedfile", function(file) {
+                    //var num = dropzone_default.getUploadingFiles().length;
+                    //x = confirm('¿Quiere eliminar el archivo? ' + num);
+                    //if(!x)  return false;
+                    //console.log(num + '->' + $('#user_type_fileName').val() + '==' + file.name);
+                    if ($('#acepted').val() == file.name) {
+                        $('#user_type_fileName').val('');
+                    }
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

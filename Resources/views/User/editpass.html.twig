@@ -1,0 +1,53 @@
+{% extends app.user.pobox is null
+    ? '::newbase.html.twig' 
+    : '::base-public.html.twig' %}
+
+{% block title %}
+    <title>Cambiar Password</title>
+{% endblock %}
+
+{% form_theme edit_form 'form/fields.html.twig' %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Nuevo password de Usuario</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('user') }}">Usuarios</a></li>
+            <li class="active">Cambiar password</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        {{ form_start(edit_form, {attr: {novalidate: 'novalidate', 'id': 'receipt_type' }}) }}
+        <div class="block-flat">
+            <div class="header">
+                <h3>Actualizar password del usuario: {{ theuser.username }}</h3>
+            </div>
+            <div class="content">
+                {{ form_row(edit_form.password) }}
+            </div>{# FIN CONTENT #}
+        </div> {# FIN BLOCK FLAT #}
+        <table class="no-border">
+            <tbody class="no-border-y">
+                <tr>
+                <td>
+                    <button type="button" onClick="history.go(-1);return true;" class="btn btn-default" >Regresar</button>
+                </td>
+                <td style="text-align:right;">
+                    {{ form_row(edit_form.submit, { 'attr': {'class': 'btn btn-primary'} }) }}
+                </td>
+                </tr>
+            </tbody>
+        </table>
+        {{ form_end(edit_form) }}
+    </div>
+</div>
+
+{% endblock %}

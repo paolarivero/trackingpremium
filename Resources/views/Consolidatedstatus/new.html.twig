@@ -1,0 +1,69 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+<style>
+label1 {
+  display: inline-block;
+}
+</style>
+<div class="widget">
+    <div class="widget-header"> <i class="icon-asterisk"></i>
+              <h3>Nuevo status de {% trans %}Consolidado{% endtrans %}</h3> 
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+{{ form_start(form, {attr: {novalidate: 'novalidate'}}) }}
+
+{% set laststatus = status|last %}
+{% set poslast = laststatus.position + 1 %}
+<div class="bodycontainer scrollable">
+<table class="table table-striped table-bordered">
+	<tbody>
+	<tr>
+	<td>{{ form_row(form.name) }}</td>
+	<td>{{ form_row(form.address) }}</td>
+	</tr>	
+	<tr>
+	<td>{{ form_row(form.latitude) }}</td>
+	<td>{{ form_row(form.longitude) }}</td>
+	</tr>
+	<tr>
+	<td>{{ form_row(form.country) }}</td>
+	<td>{{ form_row(form.inherited) }}</td>
+	</tr>
+	<tr>
+	<td colspan=2> <b><h4>Posición en los movimientos: </h4></b>
+	{% for statu in status %}
+		<input type="radio" class="radio" name="position" value="{{ statu.position }}" id="{{ statu.position }}" />
+    <label1 for="{{ statu.position }}">{{ statu.name }}</label1>
+	{% endfor %}<input type="radio"  checked="checked" class="radio" name="position" value="{{ poslast }}" id="{{ poslast }} />
+    <label1 for="{{ poslast }}"></label1> </td>
+	
+	</tr>
+	</tbody>
+	<tfoot>
+	<tr>
+	<td>{{ form_row(form.submit) }}</td>
+	<td style="text-align:right;"><button type="button" class="btn btn-default" onclick="location.href='{{ path('consolidatedstatus') }}';">Regresar</button></td>
+	</tr>
+	</tfoot>
+</table>
+{{ form_end(form) }}
+</div>
+</div>
+</div>
+
+<script type="text/javascript">
+$(document).ready(function () {
+	var pos = $('input[name=position]:checked').val();
+	$('#consolidatedstatus_type_thepos').val(pos);
+	//console.log($('#consolidatedstatus_type_thepos').val());
+	$('input[name=position]').change(function () {
+	   var pos = $('input[name=position]:checked').val();
+	   $('#consolidatedstatus_type_thepos').val(pos);
+	   //console.log($('#consolidatedstatus_type_thepos').val());
+	});
+});
+    
+</script>
+{% endblock %}

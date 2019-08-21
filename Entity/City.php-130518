@@ -1,0 +1,322 @@
+<?php
+// src/NvCarga/Bundle/Entity/City.php
+
+namespace NvCarga\Bundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+
+use JMS\Serializer\Annotation\ExclusionPolicy;
+use JMS\Serializer\Annotation\Expose;
+/**
+ * @ORM\Entity()
+ * @ORM\Table(name="city")
+ * @ORM\HasLifecycleCallbacks()
+ * @ExclusionPolicy("all")
+ */
+class City
+{
+    /**
+     * @ORM\Id
+     * @ORM\Column(type="integer")
+     * @ORM\GeneratedValue(strategy="AUTO")
+     * @Expose
+     */
+    protected $id;
+     /**
+     * @Assert\NotBlank(message = "El Nombre de la ciudad no puede estar vacío")
+     * @Assert\Length(
+     *      min = 3,
+     *      max = 40,
+     *      minMessage = "El nombre de la ciudad debe tener al menos {{ limit }} caracteres",
+     *      maxMessage = "El nombre de la ciudad no puede tener mas de {{ limit }} caracteres"
+     * )
+     * @ORM\Column(type="string", length=40, nullable=false)
+     * @Expose
+     */
+    protected $name;
+     /**
+     * @ORM\ManyToOne(targetEntity="State", inversedBy="cities")
+     * @ORM\JoinColumn(name="state_id", referencedColumnName="id")
+     */
+    protected $state;
+    /**
+     * @ORM\Column(type="decimal", precision=10, scale=6, nullable=true)
+     */
+    protected $latitude;
+    /**
+     * @ORM\Column(type="decimal", precision=10, scale=6, nullable=true)
+     */
+    protected $longitude;
+     /**
+     * @ORM\ManyToMany(targetEntity="Region", mappedBy="region_cities")
+     */
+    protected $regions;
+    /**
+     * @ORM\OneToMany(targetEntity="Agency", mappedBy="city")
+     */
+    protected $agencies;
+   /**
+     * @ORM\OneToMany(targetEntity="Baddress", mappedBy="city")
+     */
+    protected $customers;
+    /**
+     * @ORM\OneToMany(targetEntity="Warehouse", mappedBy="city")
+     */
+    protected $warehouses;
+
+    public function __toString() {
+        return (string) $this->getName();
+    }
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->agencies = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->customers = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->warehouses = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->regions = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+     * Get id
+     *
+     * @return integer
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set name
+     *
+     * @param string $name
+     *
+     * @return City
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    /**
+     * Get name
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    /**
+     * Set state
+     *
+     * @param \NvCarga\Bundle\Entity\State $state
+     *
+     * @return City
+     */
+    public function setState(\NvCarga\Bundle\Entity\State $state = null)
+    {
+        $this->state = $state;
+
+        return $this;
+    }
+
+    /**
+     * Get state
+     *
+     * @return \NvCarga\Bundle\Entity\State
+     */
+    public function getState()
+    {
+        return $this->state;
+    }
+
+    /**
+     * Add agency
+     *
+     * @param \NvCarga\Bundle\Entity\Agency $agency
+     *
+     * @return City
+     */
+    public function addAgency(\NvCarga\Bundle\Entity\Agency $agency)
+    {
+        $this->agencies[] = $agency;
+
+        return $this;
+    }
+
+    /**
+     * Remove agency
+     *
+     * @param \NvCarga\Bundle\Entity\Agency $agency
+     */
+    public function removeAgency(\NvCarga\Bundle\Entity\Agency $agency)
+    {
+        $this->agencies->removeElement($agency);
+    }
+
+    /**
+     * Get agencies
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getAgencies()
+    {
+        return $this->agencies;
+    }
+
+    /**
+     * Add customer
+     *
+     * @param \NvCarga\Bundle\Entity\Baddress $customer
+     *
+     * @return City
+     */
+    public function addCustomer(\NvCarga\Bundle\Entity\Baddress $customer)
+    {
+        $this->customers[] = $customer;
+
+        return $this;
+    }
+
+    /**
+     * Remove customer
+     *
+     * @param \NvCarga\Bundle\Entity\Baddress $customer
+     */
+    public function removeCustomer(\NvCarga\Bundle\Entity\Baddress $customer)
+    {
+        $this->customers->removeElement($customer);
+    }
+
+    /**
+     * Get customers
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getCustomers()
+    {
+        return $this->customers;
+    }
+
+    /**
+     * Add warehouse
+     *
+     * @param \NvCarga\Bundle\Entity\Warehouse $warehouse
+     *
+     * @return City
+     */
+    public function addWarehouse(\NvCarga\Bundle\Entity\Warehouse $warehouse)
+    {
+        $this->warehouses[] = $warehouse;
+
+        return $this;
+    }
+
+    /**
+     * Remove warehouse
+     *
+     * @param \NvCarga\Bundle\Entity\Warehouse $warehouse
+     */
+    public function removeWarehouse(\NvCarga\Bundle\Entity\Warehouse $warehouse)
+    {
+        $this->warehouses->removeElement($warehouse);
+    }
+
+    /**
+     * Get warehouses
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getWarehouses()
+    {
+        return $this->warehouses;
+    }
+    /**
+     * Add region
+     *
+     * @param \NvCarga\Bundle\Entity\Region $region
+     *
+     * @return City
+     */
+    public function addRegion(\NvCarga\Bundle\Entity\Region $region)
+    {
+        $this->regions[] = $region;
+
+        return $this;
+    }
+
+    /**
+     * Remove region
+     *
+     * @param \NvCarga\Bundle\Entity\Region $region
+     */
+    public function removeRegion(\NvCarga\Bundle\Entity\Region $region)
+    {
+        $this->regions->removeElement($region);
+    }
+
+    /**
+     * Get Regions
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getRegions()
+    {
+        return $this->regions;
+    }
+
+    /**
+     * Set latitude
+     *
+     * @param string $latitude
+     *
+     * @return City
+     */
+    public function setLatitude($latitude)
+    {
+        $this->latitude = $latitude;
+
+        return $this;
+    }
+
+    /**
+     * Get latitude
+     *
+     * @return string
+     */
+    public function getLatitude()
+    {
+        return $this->latitude;
+    }
+
+    /**
+     * Set longitude
+     *
+     * @param string $longitude
+     *
+     * @return City
+     */
+    public function setLongitude($longitude)
+    {
+        $this->longitude = $longitude;
+
+        return $this;
+    }
+
+    /**
+     * Get longitude
+     *
+     * @return string
+     */
+    public function getLongitude()
+    {
+        return $this->longitude;
+    }
+}

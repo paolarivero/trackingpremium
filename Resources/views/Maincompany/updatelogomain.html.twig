@@ -1,0 +1,127 @@
+{% extends '::newbase.html.twig' %}
+{% block title %}
+    <title>Actualizar Logo </title>
+{% endblock %}
+
+{% form_theme form 'form/fields.html.twig' %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Actualizar logo del sistema</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('maincompany') }}">Empresa</a></li>
+            <li class="active">Logo del sistema</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        {{ form_start(form, {attr: {novalidate: 'novalidate', 'id': 'user_type' }}) }}
+        <div class="block-flat">
+            <div class="header">
+                <h3>Logo del sistema para la empresa  <b>"{{ entity.name }}"</b></h3>
+            </div>
+            <div class="content">
+                {% if entity.logomain %}
+                    {% set logomain = companies_logosmain ~ entity.logomain %}
+                {% else %}
+                    {% set logomain = companies_logosmain ~ 'logo.png' %}
+                {% endif %}
+                
+                <div class="block-flat profile-info">
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <div class="avatar"><img src="{{ asset(logomain) }}" class="profile-avatar" style="width: 300px;margin-top: 15px; margin-left: 35px;">
+                            </div>
+                        </div>
+                        <div class="col-sm-7">
+                            <div class="personal">
+                                <h3 class="name">Logo del Sistema</h3>
+                                <p class="description">Imagen que se mostrará en las páginas de inicio, creación de casilleros, recuperación de contraseña, panel de control de casilleros y panel del control del administrador.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        <div class="dropzone" id="dropzonelogomain">
+                            <div class="dz-message">
+                                <h3> Suelta el archivo aquí o haz clic para cargar (JPG/PNG) (<= 1Mb)</h3>
+                                <span class="note">Se recomienda que la imagen tenga las siguientes dimensiones: 200x200px</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        <td>
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default" >Regresar</button>
+                        </td>
+                        <td style="text-align:right;">
+                            {{ form_row(form.submit, { 'attr': {'class': 'btn btn-primary'} }) }}
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>{# FIN CONTENT #}
+        </div> {# FIN BLOCK FLAT #}
+        <input type="hidden" id="acceptedLogomain">
+        {{ form_end(form) }}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#maincompany_type_fileLogomain').val('');
+        Dropzone.autoDiscover = false;
+        var dropzoneLogomain = new Dropzone("#dropzonelogomain", {
+            url: '{{ path('loadlogomain') }}',
+            maxFiles: 1,
+            uploadMultiple: false,
+            dictMaxFilesExceeded: 'Solo puede seleccionar un (1) archivo',
+            acceptedFiles: 'image/*',
+            dictInvalidFileType: 'No se permiten archivos de este tipo',
+            maxFilesize: 1,  // in Mb
+            dictFileTooBig: "El tamaño del archivo ({{ '{{' ~ 'filesize' ~ '}}' }}Mb) excede el máximo permitido ({{ '{{' ~ 'maxFilesize' ~ '}}' }}Mb)",
+            addRemoveLinks: true,
+            dictRemoveFile: 'Eliminar archivo',
+            init: function () {
+                this.on("error", function(file, message, xhr) { 
+                    if (xhr == null) this.removeFile(file); // perhaps not remove on xhr errors
+                    funalert(message);
+                });
+                this.on("sending", function(file, xhr, formData) {
+                    // send additional data with the file as POST data if needed.
+                    // formData.append("key", "value");  
+                });
+                this.on("success", function(file, response) {
+                    if (response.uploaded) {
+                        $('#maincompany_type_fileLogomain').val(response.fileName);
+                        $('#acceptedLogomain').val(file.name);
+                        //alert('File Uploaded: ' + response.fileName);
+                    }
+                });
+                this.on("removedfile", function(file) {
+                    if ($('#acceptedLogomain').val() == file.name) {
+                        $('#maincompany_type_fileLogomain').val('');
+                    }
+                });
+            }
+        });
+        
+    });
+</script>
+{% endblock %}

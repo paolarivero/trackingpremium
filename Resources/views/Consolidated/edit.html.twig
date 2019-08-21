@@ -1,0 +1,64 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>{{ accion }}  {% trans %}Consolidado{% endtrans %}</title>
+{% endblock %}
+
+
+{% block body -%}
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>{{ accion }} {% trans %}Consolidado{% endtrans %}</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('consolidated') }}">{% trans %}Consolidado{% endtrans %}</a></li>
+            <li class="active">{{ accion }}</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger alert-white rounded">
+                    <button type="button" data-dismiss="alert" aria-hidden="true" class="close">×</button>
+                    <div class="icon">
+                        <i class="fa fa-warning"></i>
+                    </div>
+                    <strong>Alerta! </strong> {{ flashMessage|raw }} 
+                    </strong>
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        <div class="block-flat">
+            <div class="header">
+                <h3>Detalles</h3>
+            </div>
+            <div class="content">
+                {{ form_start(edit_form, {'attr': {'novalidate': 'novalidate'}}) }}
+                <div class="row">
+                    <div class="col-sm-3" style="padding-left: 7px;margin-bottom: 10px;">
+                        {{ form_widget(edit_form.shippingtype) }}
+                    </div>
+                    <div class="col-sm-3" style="padding-left: 7px;margin-bottom: 10px;">
+                        {{ form_widget(edit_form.agency) }}
+                    </div>
+                    <div class="col-sm-3" style="padding-left: 7px;margin-bottom: 10px;">
+                        {{ form_widget(edit_form.sender) }}
+                    </div>
+                    <div class="col-sm-3" style="padding-left: 7px;margin-bottom: 10px;">
+                        {{ form_widget(edit_form.receiver) }}
+                    </div>
+                </div>
+                <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                            <td style="text-align:right;">
+                                <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-flat" >Regresar</button>
+                                {{ form_widget(edit_form.submit, { 'attr': {'class': 'btn btn-primary btn-flat'} }) }}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                {{ form_end(edit_form) }}
+          </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

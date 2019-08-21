@@ -1,0 +1,43 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+    <h1>Listado de impuestos de agencias</h1>
+
+    <table class="records_list">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Impuesto de agencia master</th>
+                <th>Impuesto de agencia</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for entity in entities %}
+            <tr>
+                <td><a href="{{ path('tax_show', { 'id': entity.id }) }}">{{ entity.id }}</a></td>
+                <td>{{ entity.mastertax }}</td>
+                <td>{{ entity.agencytax }}</td>
+                <td>
+                <ul>
+                    <li>
+                        <a href="{{ path('tax_show', { 'id': entity.id }) }}">Mostrar</a>
+                    </li>
+                    <li>
+                        <a href="{{ path('tax_edit', { 'id': entity.id }) }}">Editar</a>
+                    </li>
+                </ul>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+        <ul>
+        <li>
+            <a href="{{ path('tax_new') }}">
+                Crear un nuevo impuesto
+            </a>
+        </li>
+    </ul>
+    {% endblock %}

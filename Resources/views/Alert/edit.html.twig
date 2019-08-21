@@ -1,0 +1,124 @@
+{% extends app.user.pobox is null
+    ? '::newbase.html.twig' 
+    : '::newbase-public.html.twig' %}
+
+{% block title %}
+    <title>Editar Alerta de Paquete</title>
+{% endblock %}
+
+{# Display the form #}
+
+{% form_theme form 'form/fields.html.twig' %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Editar Alerta de Paquete</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('alert') }}">Alertas</a></li>
+            <li class="active">Editar</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+
+        {{ form_start(form, {attr: {novalidate: 'novalidate', 'id': 'alert_type' }}) }}
+        <div class="block-flat">
+            <div class="header">
+                <div class="row">
+                    <div class="col-sm-6 com-md-6">
+                        <h3>Dirección envío</h3>
+                    </div>
+                    <div class="col-sm-6 com-md-6">
+                        <a href="{{ path('baddress_new', { 'id': app.user.pobox.customer.id, 'type': 2 }) }}" class="btn btn-info btn-sm btn-flat">Agregar Dirección</a>
+                    </div>
+                </div>
+                
+            </div>
+            <div class="content">
+                {{ form_row(form.baddress) }}
+            </div>{# FIN CONTENT #}
+        </div> {# FIN BLOCK FLAT #}
+        <div class="block-flat">
+            <div class="header">
+                <h3>Datos del paquete</h3>
+            </div>
+            <div class="content">
+                <div class="row">
+                    <div class="col-sm-4 com-md-4">
+                        {{ form_row(form.carrier) }}
+                    </div>
+                    <div class="col-sm-4 com-md-4">
+                        {{ form_row(form.tracking) }}
+                    </div>
+                    <div class="col-sm-4 com-md-4">
+                        {{ form_row(form.arrivedate, {attr: {'data-date-inline-picker':"true"}, }) }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4 com-md-4">
+                        {{ form_row(form.pieces) }}
+                    </div>
+                    <div class="col-sm-4 com-md-4">
+                        {{ form_row(form.weight) }}
+                    </div>
+                    <div class="col-sm-4 com-md-4">
+                        {{ form_row(form.value) }}
+                    </div>
+                </div>
+                {{ form_row(form.description) }}
+                <div class="row">
+                    <div class="col-sm-6 com-md-6">
+                        {{ form_row(form.shippingtype) }}
+                    </div>
+                    <div class="col-sm-6 com-md-6">
+                        {{ form_row(form.instructions) }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6 com-md-6">
+                        {{ form_row(form.file) }}
+                        {% if entity.imageSize > 0 %}
+                            <img style="width:200px;" alt="Imagen del paquete" src="data:{{ entity.imageType }};base64,{{ image }}" />
+                        {% endif %}
+                    </div>
+                    <div class="col-sm-6 com-md-6">
+                        {{ form_row(form.insurance) }}
+                    </div>
+                </div>
+                <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        <td>
+
+                        </td>
+                        <td style="text-align:right;">
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-flat" >Regresar</button>
+                            {{ form_widget(form.submit, { 'attr': {'class': 'btn btn-primary btn-flat'} }) }}
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>{# FIN CONTENT #}
+        </div> {# FIN BLOCK FLAT #}
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}
+{% block javascripts %}
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#alert_type_arrivedate').datepicker();
+        // $("#alert_type_arrivedate").val($.datepicker.formatDate('mm/dd/yy', new Date()));
+        $(":file").filestyle({buttonText: "Archivo", buttonName: "btn-primary", placeholder: "no seleccionado"});
+    });
+</script>
+{% endblock %}
+
+

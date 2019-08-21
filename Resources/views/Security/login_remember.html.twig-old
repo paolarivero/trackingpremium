@@ -1,0 +1,22 @@
+{# src/NvCarga/Bundle/Resources/views/Security/login_remember.html.twig #}
+{% extends '::layout_min.html.twig' %}
+
+{% block body -%}
+
+<center>
+	{% for flashMessage in app.session.flashbag.get('info') %}
+
+	<div class="alert alert-danger">
+    		<strong><h2>{{ flashMessage }}</h2></strong>
+	</div>
+
+        {% endfor %}
+	
+	<br>
+	<a  class="btn btn-success" href="{{ path('login') }}">Volver a ingresar</a>
+				
+	
+</center>
+	
+
+{% endblock %}

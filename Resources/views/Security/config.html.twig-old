@@ -1,0 +1,309 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+    {% if not is_granted('ROLE_ADMIN') %}
+	<script>window.location.href = "{{ url('exit') }}";</script>
+    {% endif %}
+
+<style type="text/css">
+.table {
+    border: 0px solid black;
+}
+
+.table td {
+    border: 0px solid black;
+}
+
+.btn-default:hover, .btn-default:focus, .btn-default:active, .btn-default.active, .open .dropdown-toggle.btn-default {
+  background-color: #AED6F1;
+  /*  background-color: #2980B9;*/
+ }
+
+.btn
+{
+  background-color: #FFFFFF;
+}
+</style>
+
+<div class="widget">
+<div class="widget-header"> <i class="icon-wrench"></i>
+              <h3>CONFIGURACIÓN </h3>
+</div>
+
+<div class="widget-content">
+<div class="row">
+<div class="span5">
+<div class="widget">
+    <div class="widget-header"> <i class="icon-columns"> </i>
+              <h3>AGENCIAS </h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+    <div class="table-responsive">
+    <table class="table table-sm">
+    <tbody>
+    <tr>
+    
+   <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('agency') }}';">
+	<span class="fa fa-building-o" style="font-size:5em; color:#2980B9;"></span><br>Agencias</button>
+    </td>
+    <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('adservice') }}';">
+	<span class="fa fa-plus-square" style="font-size:5em; color:#2980B9;"></span><br>Adicionales</button>
+    </td>
+    <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('servicetype', { 'idag': app.user.agency.id }) }}';">
+	<span class="fa fa-plus-circle" style="font-size:5em; color:#2980B9;"></span><br>Servicios</button>
+    </td>
+    <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('tariff', { 'idag': app.user.agency.id }) }}';">
+	<span class="fa fa-dollar" style="font-size:5em; color:#2980B9;"></span><br>Tarifas</button>
+    </td>
+    </tr>
+    </tbody>
+    </table>  
+    </div>
+   </div>
+</div>
+</div>
+
+<div class="span4">
+<div class="widget">
+    <div class="widget-header"> <i class="icon-user-md"></i>
+              <h3>USUARIOS y PERFILES </h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+    <div class="table-responsive">
+    <table class="table table-sm">
+    <tbody>
+    <tr>
+    
+   <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('user') }}';">
+	<span class="icon icon-list-alt" style="font-size:5em; color:#2980B9;"></span><br>Listar</button>
+    </td>
+    <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('user_new') }}';">
+	<span class="fa fa-user-o" style="font-size:5em; color:#2980B9;"></span><br>Crear</button>
+    </td>
+    </td>
+    <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('profile') }}';">
+	<span class="fa fa-user-plus" style="font-size:5em; color:#2980B9;"></span><br>Perfiles</button>
+    </td>
+    </tr>
+    </tbody>
+    </table>  
+    </div>
+   </div>
+</div>
+</div>
+</div>
+
+<div class="row">
+<div class="span4">
+<div class="widget">
+    <div class="widget-header"> <i class="icon-user"></i>
+              <h3>CLIENTES</h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+    <div class="table-responsive">
+    <table class="table table-sm">
+    <tbody>
+    <tr>
+   <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('customer') }}';">
+	<span class="fa fa-list" style="font-size:5em; color:#2980B9;"></span><br>Listar</button>
+    </td>
+    <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('customer_new') }}';">
+	<span class="fa fa-user-circle" style="font-size:5em; color:#2980B9;"></span><br>Crear</button>
+    </td>
+    </tr>
+    </tbody>
+    </table>  
+    </div>
+   </div>
+</div>
+</div>
+
+<div class="span5">
+<div class="widget">
+    <div class="widget-header"> <i class="icon-edit"></i>
+              <h3>STATUS</h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+    <div class="table-responsive">
+    <table class="table table-sm">
+    <tbody>
+    <tr>
+    <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('receiptstatus') }}';">
+	<span class="fa fa-info-circle" style="font-size:5em; color:#2980B9;"></span><br>{% trans %}Recibos{% endtrans %}</button>
+    </td>
+    <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('guidestatus') }}';">
+	<span class="fa fa-map-pin" style="font-size:5em; color:#2980B9;"></span><br>{% trans %}Guías{% endtrans %}</button>
+    </td>
+        <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('consolidatedstatus') }}';">
+	<span class="fa fa-pinterest" style="font-size:5em; color:#2980B9;"></span><br>{% trans %}Consolidados{% endtrans %}</button>
+    </td>
+  {#  <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('receipttype') }}';">
+	<span class="fa fa-object-group" style="font-size:5em; color:#2980B9;"></span><br>Tipos</button>
+    </td> #}
+    </tr>
+    </tbody>
+    </table>  
+    </div>
+   </div>
+</div>
+</div>
+</div>
+
+<div class="row">
+<div class="span5">
+<div class="widget">
+    <div class="widget-header"> <i class="icon-tags"></i>
+              <h3>LUGARES</h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+    <div class="table-responsive">
+    <table class="table table-sm">
+    <tbody>
+    <tr>
+    <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('country') }}';">
+	<span class="fa fa-flag-o" style="font-size:5em; color:#2980B9;"></span><br>Países</button>
+    </td>
+    <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('region') }}';">
+	<span class="fa fa-flag-checkered" style="font-size:5em; color:#2980B9;"></span><br>Regiones</button>
+    </td>
+    <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('state') }}';">
+	<span class="fa fa-map-signs" style="font-size:5em; color:#2980B9;"></span><br>Estados</button>
+    </td>
+        <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('city') }}';">
+	<span class="fa fa-map-marker" style="font-size:5em; color:#2980B9;"></span><br>Ciudades</button>
+        </td>
+    </tr>
+    </tbody>
+    </table>  
+    </div>
+   </div>
+</div>
+</div>
+
+<div class="span4">
+<div class="widget">
+    <div class="widget-header"> <i class="icon-truck"></i>
+              <h3>TRANSPORTISTAS </h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+    <div class="table-responsive">
+    <table class="table table-sm">
+    <tbody>
+    <tr>
+    
+   <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('carrier') }}';">
+	<span class="fa fa-car" style="font-size:5em; color:#2980B9;"></span><br>Carrier</button>
+    </td>
+{#    
+    <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('transporter') }}';">
+	<span class="fa fa-user-o" style="font-size:5em; color:#2980B9;"></span><br>Carga</button>
+    </td>
+#}
+    <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('localcompany') }}';">
+	<span class="fa fa-bus" style="font-size:5em; color:#2980B9;"></span><br>Local</button>
+    </td>
+    </tr>
+    </tbody>
+    </table>  
+    </div>
+   </div>
+</div>
+</div>
+</div>
+
+<div class="row">
+<div class="span5">
+<div class="widget">
+    <div class="widget-header"> <i class="icon-money"></i>
+              <h3><button class="btn btn-default"  type="button" onclick="location.href='{{ path('maincompany_show', { 'id': app.user.maincompany.id }) }}';">EMPRESA</button> </h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+    <div class="table-responsive">
+    <table class="table table-sm">
+    <tbody>
+    <tr>
+    {% if is_granted('ROLE_ADMIN') and  (app.user.agency.type == "MASTER") %}
+    <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('company') }}';">
+	<span class="fa fa-building" style="font-size:5em; color:#2980B9;"></span><br>Sucursales</button>
+    </td>
+   <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('account') }}';">
+	<span class="fa fa-bank" style="font-size:5em; color:#2980B9;"></span><br>Cuentas</button>
+    </td>
+    <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('termcond') }}';">
+	<span class="fa fa-gavel" style="font-size:5em; color:#2980B9;"></span><br>Términos</button>
+    </td>
+    {% endif %}
+    </tr>
+    </tbody>
+    </table>  
+    </div>
+   </div>
+</div>
+</div>
+<div class="span4">
+<div class="widget">
+    <div class="widget-header"> <i class="icon-adjust"></i>
+              <h3>PAGOS</h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+    <div class="table-responsive">
+    <table class="table table-sm">
+    <tbody>
+    <tr>
+    <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('paidtype') }}';">
+	<span class="fa fa-money" style="font-size:5em; color:#2980B9;"></span><br>T. Pagos</button>
+    </td>
+    <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('payment') }}';">
+	<span class="fa fa-list-ul" style="font-size:5em; color:#2980B9;"></span><br>Listar</button>
+    </td>
+    <td style="text-align:center;">
+        <button class="btn btn-default"  type="button" onclick="location.href='{{ path('payment_byverify') }}';">
+	<span class="fa fa-ticket" style="font-size:5em; color:#2980B9;"></span><br>Procesar</button>
+    </td>
+    </tr>
+    </tbody>
+    </table>  
+    </div>
+   </div>
+</div>
+</div>
+
+</div>
+
+</div>
+</div>
+{% endblock %}
+

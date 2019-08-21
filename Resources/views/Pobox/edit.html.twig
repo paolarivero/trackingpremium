@@ -1,0 +1,244 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+<script type="text/javascript">
+    function returnSelectCity(id, vc, vs, vp){
+	$('#pobox_type_cityid_customer').val(id);
+       	$('#pobox_type_cityname_customer').val(vc);
+       	$('#pobox_type_state_customer').val(vs);
+       	$('#pobox_type_country_customer').val(vp);
+	$("#closemodalcity1").click();
+        return true;
+    }
+</script>
+
+    <h1>Editar Casillero</h1>
+    
+    {{ form_start(edit_form, {attr: {novalidate: 'novalidate'}}) }}
+     <div class="widget-content">
+	      
+	     <table class="table table-striped table-bordered">
+                <thead>
+                  <tr>
+    			<th colspan="4"><h3>Datos del cliente</h3></th>
+		  </tr>
+                </thead>
+       		<tbody>
+			<tr>
+    			<td colspan="2">{{ form_row(edit_form.name_customer) }}</td>
+			<td colspan="2">{{ form_row(edit_form.lastname_customer) }}</td>
+			</tr>
+    			<tr> 
+			<td>{{ form_row(edit_form.docid_customer) }}</td>
+			<td colspan="3">{{ form_row(edit_form.address_customer) }}</td>
+			<tr>
+			<td>{{ form_row(edit_form.barrio_customer) }}</td>  
+			<td>{{ form_row(edit_form.zip_customer) }}</td>
+			<td>{{ form_row(edit_form.mobile_customer) }}</td>	
+			<td>{{ form_row(edit_form.phone_customer) }}</td>
+			</tr>
+			<tr> <td>{{ form_row(edit_form.cityname_customer) }}</td>
+			     <td>{{ form_row(edit_form.state_customer) }}</td>
+			     <td>{{ form_row(edit_form.country_customer) }}</td>
+			     <td><button type="button" class="btn btn-info btn-lg bcity" data-toggle="modal" data-target="#citysearch" data-thecity="1" >Ciudad</button></td>
+			</tr>
+			<tr>
+			<td>{{ form_row(edit_form.email_customer.first) }}</td>
+    	  		<td>{{ form_row(edit_form.email_customer.second) }}</td>
+			<td>{{ form_row(edit_form.password.first) }}</td>
+			<td>{{ form_row(edit_form.password.second) }}</td>
+			</tr> 
+    	</tbody>
+    </table>
+
+<!-- Modal -->
+  <div class="modal fade" id="citysearch" role="dialog">
+    <div class="modal-dialog modal-lg">
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button id="closemodalcity1" type="button" class="close" data-dismiss="modal">&times;</button>
+          <h2 class="modal-title">Buscar Ciudad</h2>
+        </div>
+        <div class="modal-body">
+	      <table class="table">
+	      <tbody>
+		<tr>
+	        <td>{{ form_row(edit_form.namecity) }}<td>
+		<td>{{ form_row(edit_form.searchcity) }}<td>
+		</tr>
+	      </tbody>
+	      </table>
+              <div class="table-responsive">
+	      <table id="cityTable" class="table table-striped table-sm" cellspacing="0" width="100%" >
+                <thead>
+                  
+                </thead>
+                <tbody >
+        
+                </tbody>
+              </table>
+	      </div>
+	      <ul class="pagination pagination-sm pager" id="myPager1"></ul>
+        </div>
+        
+        <div class="modal-footer">
+          <button id="closemodalcity" type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+<table class="table table-striped table-bordered">
+                <thead>
+                  <tr>
+    			<th>{{ form_row(edit_form.submit) }}</th>
+			{# <th>{{ form(delete_form) }}</th> #}
+			<th><a href="{{ path('pobox') }}" class="btn btn-default">Regresar a lista de casilleros</a></th>
+			
+		  </tr>
+                </thead>
+</table>
+
+    {% do edit_form.namecustomer.setRendered %}
+    {% do edit_form.lastnamecustomer.setRendered %}
+    {% do edit_form.searchcustomer.setRendered %}
+  
+    {{ form_row(edit_form.submit) }}
+    {{ form_end(edit_form) }}
+
+{% block javascript %}
+
+<script type="text/javascript" src="{{ asset('assets/js/jquery.dataTables.min.js') }}"></script>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+	var $thisCityTable=null;
+        $('#pobox_type_searchcity').click(function(){
+	    var name = $('#pobox_type_namecity').val();
+	    if (name) {
+		$.ajax({
+                type: "GET",
+                url: "{{ url('city_list') }}?city_name=" + name,
+                success: function(data) {
+		if ($thisCityTable) {
+			//console.log('La tabla ya existía');
+			$thisCityTable.clear();
+			$thisCityTable.destroy();
+		} 
+
+		var tableHead = document.getElementById('cityTable').getElementsByTagName('thead')[0];
+
+		
+		var nh = tableHead.rows.length;
+		for (i=0; i < nh; i++) {
+			tableHead.deleteRow(0);
+		}
+
+		var newhead = tableHead.insertRow(0); 
+
+		var newH0  = newhead.insertCell(0);
+		var newH1  = newhead.insertCell(1);
+		var newH2  = newhead.insertCell(2);	
+		var newH3  = newhead.insertCell(3);
+		
+		var h0 = document.createElement("h4");
+		var h1 = document.createElement("h4")
+		var h2 = document.createElement("h4")
+		var h3 = document.createElement("h4")
+		
+		var t0 = document.createTextNode("Id");
+		var t1 = document.createTextNode("Nombre");
+		var t2 = document.createTextNode("Estado");
+		var t3 = document.createTextNode("País");
+		
+		h0.appendChild(t0);
+		h1.appendChild(t1);
+		h2.appendChild(t2);
+		h3.appendChild(t3);
+
+		newH0.appendChild(h0);
+		newH1.appendChild(h1);
+		newH2.appendChild(h2);
+		newH3.appendChild(h3);
+		
+
+		var tableRef = document.getElementById('cityTable').getElementsByTagName('tbody')[0];
+		var nf = tableRef.rows.length;
+		for (i=0; i < nf; i++) {
+			tableRef.deleteRow(0);
+		}
+		var nc = data.length;
+		for (i = 0; i < nc; i++) {
+			var cityid = data[i]['cityid'];
+			var cityname = data[i]['cityname'];
+			var state = data[i]['state'];
+			var country = data[i]['country'];
+			// Insert a row in the table at the last row
+			var newRow   = tableRef.insertRow(tableRef.rows.length);
+						
+			// Insert a cell in the row at index 0
+			var newCell0  = newRow.insertCell(0);
+			var newCell1  = newRow.insertCell(1);
+			var newCell2  = newRow.insertCell(2);	
+			var newCell3  = newRow.insertCell(3);
+
+			// Append a text node to the cell
+			
+			
+			var btn = document.createElement("input");        // Create a <button> element
+
+			var tag = "Ciudad_" + cityid;
+			var t = document.createTextNode(tag);
+			
+    			btn.type = "button";
+    			btn.value = tag;
+    			
+			btn.onclick = (function(){ var ci = cityid; var cn= cityname; var sn=state; var pn = country; return function() 				 {returnSelectCity(ci,cn,sn,pn)}})();  
+		 	newCell0.appendChild(btn);
+
+			var newText1 = document.createTextNode(cityname);
+			newCell1.appendChild(newText1);
+
+			var newText2 = document.createTextNode(state);
+			newCell2.appendChild(newText2);
+
+			var newText3 = document.createTextNode(country);
+			newCell3.appendChild(newText3);		
+                }
+
+		$thisCityTable=$('#cityTable').DataTable({
+			searching: false,
+			"info":     false,
+			"lengthChange": false,
+			"scrollX": true,
+			pageLength: 4,
+    			language: {				
+      				emptyTable: "<div style=\"color:red;\">No hay resultados</div>",
+        			paginate: {
+					first:      'Primero',
+        				last:       'Último',
+            				previous: '‹',
+            				next:     '›'
+        			},
+        			aria: {
+            				paginate: {
+                				previous: 'Anterior',
+                				next:     'Siguiente'
+            				}
+        			}	
+    			}
+		});
+	     }
+	    });	
+	    } else {
+	    	alert('Suministre un nombre de ciudad');
+           }
+           return false;
+	});
+    });
+</script>
+{% endblock %}
+
+{% endblock %}
+

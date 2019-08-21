@@ -1,0 +1,113 @@
+{# src/NvCarga/Bundle/Resources/views/Security/login.html.twig #}
+{% extends '::layout_login.html.twig' %}
+{% form_theme form _self %}
+
+{% block email_row -%}
+    {% spaceless %}
+    {% set type = type|default('email') %}
+    <div class="input-group">
+            <span class="input-group-addon"><i class="fa fa-envelope"></i></span>
+            <input type="{{ type }}" class="form-control" {{ block('widget_attributes') }} {% if value is defined %} value = "{{ value }}" {% endif %}>
+    </div>
+    {{ form_errors(form) }}
+    {% endspaceless %}
+{%- endblock email_row %}
+
+{% block text_row -%}
+    {% spaceless %}
+    {% set type = type|default('text') %}
+    <div class="input-group">
+            <span class="input-group-addon"><i class="fa fa-user"></i></span>
+            <input type="{{ type }}" class="form-control" {{ block('widget_attributes') }} {% if value is defined %} value = "{{ value }}" {% endif %}>
+    </div>
+    {{ form_errors(form) }}
+    {% endspaceless %}
+{%- endblock text_row %}
+
+{% block password_row -%}
+    {% spaceless %}
+    {% set type = type|default('password') %}
+    <div class="input-group">
+            <span class="input-group-addon"><i class="fa fa-lock"></i></span>
+            <input type="{{ type }}" class="form-control" {{ block('widget_attributes') }} {% if value is defined %} value = "{{ value }}" {% endif %}>
+    </div>
+    {{ form_errors(form) }}
+    {% endspaceless %}
+{%- endblock password_row %}
+
+{% block body -%}
+<div id="cl-wrapper" class="sign-up-container">
+    <div class="middle-sign-up">
+        <div class="block-flat">
+            <div class="header">
+                <h3 class="text-center">
+                {% if logomain %}
+                    {% set logo = companies_logosmain ~ logomain %}
+                {% else %}
+                    {% set logo = companies_logosmain ~ 'logo.png' %}
+                {% endif %}
+                <img alt="Logomain" src="{{ absolute_url(asset(logo)) }}" style="vertical-align: middle !important;width:auto;height:auto;max-height:60px; max-width:120px; padding: 0 !important; margin-top:5px;"  class="logo-img">
+                {% for flashMessage in app.session.flashbag.get('notice') %}
+                    <div class="alert alert-danger">
+                        <strong>Advertencia: </strong>{{ flashMessage }}
+                    </div>
+                {% endfor %}
+            </div>
+            <div>
+                {{ form_start(form, {attr: {novalidate: 'novalidate', 'id': 'register_type' }}) }}
+                
+                <div class="content">
+                    <h4 class="title text-center"><strong style="font-weight: 400;">Crear cuenta sistema</strong></h4>
+                    
+                    <div class="form-group">
+                        <div class="col-md-12 col-sm-12 col-xs-12">
+                            <button type="button" class="btn btn-block btn-trans btn-facebook bg btn-rad" onclick="location.href='{{ path('hwi_oauth_service_redirect', {'service': 'facebook' }) }}';"><i class="fa fa-facebook"></i> Continuar con Facebook</button>
+                        </div>
+                    </div>
+                    
+                    {{ form_row(form.name) }}
+                    {{ form_row(form.lastname) }}
+                    {{ form_row(form.email) }}
+                    <div class="row">
+                        <div class="col-sm-6 col-xs-6">
+                            {{ form_row(form.password.first) }}
+                        </div>
+                        <div class="col-sm-6 col-xs-6">
+                            {{ form_row(form.password.second) }}
+                        </div>
+                    </div>
+                    <p style="margin-left: 15px;">Al hacer clic en "Crear cuenta", aceptas nuestros 
+                    <a href="https://trackingpremium.com/tos.html" target="_blank">Términos y Condiciones</a> 
+                    y Política de privacidad</p>
+                    
+                    <div align="center" class="g-recaptcha" data-sitekey="{{ google_public_key }}"></div>
+                    
+                    {{ form_row(form.submit, { 'attr': {'class': 'btn btn-block btn-success btn-rad btn-lg'} }) }}
+                    <p class="spacer">¿Ya tienes una cuenta? <a  href="{{ path('login') }}">Iniciar sesión</a> </p>
+                </div>
+                <!-- TERMCOND Modal-->
+                    <div id="termcond" class="md-modal colored-header custom-width md-effect-7">
+                        <div class="md-content">
+                            <div class="modal-header">
+                                <h3>Términos y Condiciones</h3>
+                                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close">×</button>
+                            </div>
+                            <div class="modal-body col-sm-12 col-md-12">
+                                {{ content }}
+                            </div>
+                            <div class="modal-footer">
+                                <center>
+                                <button type="button" data-dismiss="modal" class="btn btn-default btn-flat md-close">Cerrar</button>
+                                </center>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- TERMCOND Modal-->
+                {{ form_end(form) }}
+            </div>
+        </div>
+        <div class="text-center out-links"><a href="#">© 2018 Trackingpremium</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

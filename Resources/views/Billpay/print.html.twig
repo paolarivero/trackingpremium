@@ -1,0 +1,206 @@
+{% extends '::layout-pdf.html.twig' %}
+
+{% block body %}
+
+<style>
+table { page-break-inside:auto }
+    tr    { page-break-inside:avoid; page-break-after:auto }
+    thead { display:table-header-group }
+    tfoot { display:table-footer-group; page-break-inside:avoid; page-break-after:auto }
+
+.mytable td,  .mytable th, .mytable thead{
+   border: 1px solid black;
+} 
+
+.mytable td {
+   padding-left: 5px;
+}
+</style> 
+
+{# <div class="container"> #}
+<br>
+<div class="row">
+    <div class="col-print-6">
+    <p style="padding-left:25px">
+        {% if entity.maincompany.logo %}
+            {% set name = companies_logos ~ entity.maincompany.logo %}
+        {% else %}
+            {% set name = companies_logos ~ 'default.png' %}
+        {% endif %}
+        <img src="{{ absolute_url(asset(name)) }}" alt="Logo" style="width:auto;height:auto;max-height:100px; max-width:100px;"><br>
+        {{app.user.maincompany.name }}<br>
+        {{agency.address }}<br>
+        {{agency.city }}, {{agency.city.state }} {{agency.zip }}. {{agency.city.state.country }}<br>
+        Teléfono: {{agency.phone }} <br>
+        Email: {{ app.user.maincompany.email }}<br>	
+    </p>
+    </div>
+    <div class="col-print-6" >
+        <center>
+        <h3> Recibo de Pago</h3>
+        <div id="demo"></div>
+        {{ entity.paydate|date('M d, Y') }}
+        </center>
+    </div>
+</div>
+
+<br>
+<table class="mytable" style="width:50%">
+    <tr>
+    <td bgcolor="#dddddd">
+    Facturado
+    </td>
+    </tr>
+    <tr>
+    <td>
+        <b>{{ entity.bill.customer}}</b><br>
+        {{ entity.bill.customer.adrdefault.address }}<br>
+        {% if entity.bill.customer.adrdefault.phone %}
+            Teléfono: {{ entity.bill.customer.adrdefault.phone }}<br>
+        {% endif %}
+        {% if entity.bill.customer.adrdefault.mobile %}
+            Móvil: {{ entity.bill.customer.adrdefault.mobile }}<br>
+        {% endif %}
+        Email: {{ entity.bill.customer.email }}<br>
+    </td>
+    </tr>
+</table>
+
+<br>
+<br>
+<h2 style="text-align:center">Datos de la factura</h2>
+<table class="mytable" style="width:100%">
+    <tr>
+    <td bgcolor="#dddddd">
+    Número
+    </td>
+    <td bgcolor="#dddddd">
+    Monto ($)
+    </td>
+    <td bgcolor="#dddddd">
+    Fecha facturación
+    </td>
+    </tr>
+   <tr>
+    <td bgcolor="#ffffff">
+    {{ entity.bill }}
+    </td>
+    <td bgcolor="#ffffff">
+    {{ entity.bill.total }}
+    </td>
+    <td bgcolor="#ffffff">
+    {{ entity.bill.creationdate|date('M d, Y') }}
+    </td>
+    </tr>
+</table>
+
+<br>
+<br>
+{% if entity.refund %}
+    {% set status = 'Devuelto (refund)' %}
+{% else %}
+    {% if entity.verified %}
+        {% set status = 'Verificado' %}
+    {% else %}
+        {% set status = 'Por verificar' %}
+    {% endif %}
+{% endif %}
+<h2 style="text-align:center">Datos del pago</h2>
+{% set columns = 4 %}
+<table class="mytable" style="width:100%">
+    <tr>
+    <td bgcolor="#dddddd">
+    Método
+    </td>
+    <td bgcolor="#dddddd">
+    Monto ($)
+    </td>
+    <td bgcolor="#dddddd">
+    Currency
+    </td>
+    {% if entity.currency.code != 'USD' %}
+        <td bgcolor="#dddddd">
+            Monto ({{ entity.currency.code }})
+        </td>
+        <td bgcolor="#dddddd">
+            Conversión
+        </td>
+    {% endif %}
+    <td bgcolor="#dddddd">
+    Actualizada
+    </td>
+    </tr>
+   <tr>
+    <td bgcolor="#ffffff">
+    {{ entity.paidtype }}
+    </td>
+    <td bgcolor="#ffffff">
+    {{ entity.amount }}
+    </td>
+    <td bgcolor="#ffffff">
+    {{ entity.currency }}
+    </td>
+    {% if entity.currency.code != 'USD' %}
+        {% set columns = columns + 2 %}
+        <td bgcolor="#ffffff">
+            {{ (entity.amount/entity.conversion)| number_format(2, '.', ',') }}
+        </td>
+        <td bgcolor="#ffffff">
+            {{ entity.conversion }}
+        </td>
+    {% endif %}
+    <td bgcolor="#ffffff">
+        {{ entity.lastupdate|date('M d, Y') }}
+    </td>
+    </tr>
+    <tr>
+    <td colspan="{{ columns }}" bgcolor="#ffffff">
+    Nota: {{ entity.note }}
+    </td>
+    </tr>
+</table>
+<h2 style="text-align:center">Status del pago: {{ status }}</h2>
+
+<script type="text/javascript">
+    function isChrome() {
+        var isChromium = window.chrome,
+            winNav = window.navigator,
+            vendorName = winNav.vendor,
+            isOpera = winNav.userAgent.indexOf("OPR") > -1,
+            isIEedge = winNav.userAgent.indexOf("Edge") > -1,
+            isIOSChrome = winNav.userAgent.match("CriOS");
+
+        if(isIOSChrome){
+            return true;
+        } else if(isChromium !== null && isChromium !== undefined && vendorName === "Google Inc." && isOpera == false && isIEedge == false) {
+            return true;
+        } else { 
+            return false;
+        }
+    }
+    function goback() {
+        window.history.go(-1);
+    }
+    function doprint() {
+        if (isChrome()) {
+            // alert('El navegador is chrome...');
+            window.setTimeout(function(){goback();}, 1000); 
+            window.print();
+        } else {
+            window.print();
+            goback();
+        }
+    }
+    $(document).ready(function () {
+		var thecode= {{ entity.number|json_encode|raw }};
+		$("#demo").barcode(
+			thecode, // Value barcode (dependent on the type of barcode)
+			"code128", // type (string)
+			{ barWidth: 2, barHeight: 50, showHRI: true}
+		);
+		doprint();
+    });
+</script>
+{% endblock %} 
+
+

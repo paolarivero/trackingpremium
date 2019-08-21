@@ -1,0 +1,317 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>Editar Empresa</title>
+{% endblock %}
+
+{# Display the form #}
+
+{% form_theme form 'form/fields.html.twig' %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Editar Empresa</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('maincompany') }}">Empresas</a></li>
+            <li class="active">Editar</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger alert-white rounded">
+                    <button type="button" data-dismiss="alert" aria-hidden="true" class="close">×</button>
+                    <div class="icon">
+                        <i class="fa fa-warning"></i>
+                    </div>
+                    <strong>Alerta! </strong> {{ flashMessage|raw }} 
+                    </strong>
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+
+        {{ form_start(form, {attr: {novalidate: 'novalidate', 'id': 'agency_type' }}) }}
+        <div class="block-flat">
+            <div class="header">
+                <h3>Datos de la empresa</h3>
+            </div>
+            <div class="content">
+                {{ form_row(form.name) }} 
+                {{ form_row(form.acronym) }} 
+                {{ form_row(form.url) }} 
+                {{ form_row(form.billurl) }} 
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <label class="control-label required" for="">Logo de impresión</label>
+                        </div>
+                        <div class="col-sm-10">
+                            <div class="dropzone" id="dropzonelogo">
+                                <div class="dz-message">
+                                    <h3> Suelta el archivo aquí o haz clic para cargar (JPG/PNG) (<= 500 Kb)</h3>
+                                    <span class="note">Se recomienda que la imagen tenga las siguientes dimensiones: 200x200px</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% if entity.logo %}
+                    <center>
+                    {% set name = companies_logos ~ entity.logo %}
+                    <img src="{{ asset(name) }}" alt="Logo" style="height:100px;" >
+                    </center>
+                {% endif %}
+                
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <label class="control-label required" for="">Logo de sistema</label>
+                        </div>
+                        <div class="col-sm-10">
+                            <div class="dropzone" id="dropzonelogomain">
+                                <div class="dz-message">
+                                    <h3> Suelta el archivo aquí o haz clic para cargar (JPG/PNG) (<= 500 Kb)</h3>
+                                    <span class="note">Se recomienda que la imagen tenga las siguientes dimensiones: 120x34px</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% if entity.logomain %}
+                    <center>
+                    {% set logomain = companies_logosmain ~ entity.logomain %}
+                    <img src="{{ asset(logomain) }}" alt="Logo" style="height:100px;" >
+                    </center>
+                {% endif %}
+                
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-sm-2">
+                            <label class="control-label required" for="">Fondo pantallas acceso</label>
+                        </div>
+                        <div class="col-sm-10">
+                            <div class="dropzone" id="dropzonebackground">
+                                <div class="dz-message">
+                                    <h3> Suelta el archivo aquí o haz clic para cargar (JPG/PNG) (<= 500 Kb)</h3>
+                                    <span class="note">Se recomienda que la imagen tenga las siguientes dimensiones: 300x300px</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% if entity.background %}
+                    <center>
+                    {% set background = companies_backgrounds ~ entity.background %}
+                    <img src="{{ asset(background) }}" alt="Logo" style="width:200px;" >
+                    </center>
+                {% endif %}
+                {{ form_row(form.email) }} 
+                {{ form_row(form.dimfactor) }} 
+                {{ form_row(form.iniguide) }} 
+                {{ form_row(form.ininum) }} 
+                {{ form_row(form.convertvol) }} 
+                {{ form_row(form.firststatus) }} 
+                {{ form_row(form.showalltariffs) }}
+                <div class="row">
+                    <div class="col-sm-2 col-md-2">
+                        {{ form_row(form.roundtotal) }} 
+                    </div>
+                    <div class="col-sm-5 col-md-5">
+                        {{ form_row(form.roundvol) }}
+                    </div>
+                    <div class="col-sm-5 col-md-5">
+                        {{ form_row(form.roundweight) }} 
+                    </div>
+                </div>
+                {{ form_row(form.prefixguide) }} 
+                {{ form_row(form.prefixpobox) |nl2br }} 
+                {{ form_row(form.prefixconsol) }} 
+                <div class="row">
+                    <div class="col-sm-4 col-md-4">
+                        {{ form_row(form.companyname) }} 
+                    </div>
+                    <div class="col-sm-4 col-md-4">
+                        {{ form_row(form.numbername) }} 
+                    </div>
+                    <div class="col-sm-4 col-md-4">
+                        {{ form_row(form.customername) }} 
+                    </div>
+                </div>
+                {{ form_row(form.poboxmsg)}} 
+                {{ form_row(form.countries)}}
+                <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        <td>
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default" >Regresar</button>
+                        </td>
+                        <td style="text-align:right;">
+                            {{ form_row(form.submit, { 'attr': {'class': 'btn btn-primary'} }) }}
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+                {{ form_end(form) }}
+                <input type="hidden" id="acceptedLogo">
+                <input type="hidden" id="acceptedLogomain">
+                <input type="hidden" id="acceptedBackground">
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block javascripts %}
+<script type="text/javascript">
+    $(document).ready(function () {
+        
+        var countries = '';
+        {% for country in countries %}
+            countries= countries + ' {{ country }}';
+        {% endfor %}
+        
+        $('input:checkbox[id^="maincompany_type_countries_"]').each(function(){
+            var country = $(this).closest('label').text();
+            if (countries.indexOf(country) != -1) {
+                $(this).prop('disabled', true);
+            }
+        });
+        /*
+        {% if entity.poboxmsg|length > 0 %}
+            var men = '{{ entity.poboxmsg|raw }}';
+            var men = men.replace(/<br>/g, "\n");
+            $('#maincompany_type_poboxmsg').val(men);
+        {% endif %}
+        */
+
+        $('#maincompany_type_submit').click(function(evt) {
+            var men = $('#maincompany_type_poboxmsg').val();
+            var men = men.replace(/\n/g, "<br>");
+            $('#maincompany_type_poboxmsg').val(men);
+            $('input:checkbox[id^="maincompany_type_countries_"]').each(function(){
+                $(this).prop('disabled',false);
+            });
+            return true
+        });
+        $(":file").filestyle({buttonText: "Imagen(jpg/png)", buttonName: "btn-primary", placeholder: "no tiene imagen"});
+        $('#maincompany_type_fileLogo').val('');
+        $('#maincompany_type_fileLogomain').val('');
+        $('#maincompany_type_fileBackground').val('');
+        Dropzone.autoDiscover = false;
+        var dropzoneLogo = new Dropzone("#dropzonelogo", {
+            url: '{{ path('loadlogo') }}',
+            maxFiles: 1,
+            uploadMultiple: false,
+            dictMaxFilesExceeded: 'Solo puede seleccionar un (1) archivo',
+            acceptedFiles: 'image/*',
+            dictInvalidFileType: 'No se permiten archivos de este tipo',
+            maxFilesize: 0.5,  // in Mb
+            dictFileTooBig: "El tamaño del archivo ({{ '{{' ~ 'filesize' ~ '}}' }}Mb) excede el máximo permitido ({{ '{{' ~ 'maxFilesize' ~ '}}' }}Mb)",
+            addRemoveLinks: true,
+            dictRemoveFile: 'Eliminar archivo',
+            init: function () {
+                this.on("error", function(file, message, xhr) { 
+                    if (xhr == null) this.removeFile(file); // perhaps not remove on xhr errors
+                    funalert(message);
+                });
+                this.on("sending", function(file, xhr, formData) {
+                    // send additional data with the file as POST data if needed.
+                    // formData.append("key", "value");  
+                });
+                this.on("success", function(file, response) {
+                    if (response.uploaded) {
+                        $('#maincompany_type_fileLogo').val(response.fileName);
+                        $('#acceptedLogo').val(file.name);
+                        //alert('File Uploaded: ' + response.fileName);
+                    }
+                });
+                this.on("removedfile", function(file) {
+                    //var num = dropzone_default.getUploadingFiles().length;
+                    //x = confirm('¿Quiere eliminar el archivo? ' + num);
+                    //if(!x)  return false;
+                    //console.log(num + '->' + $('#maincompany_type_fileLogo').val() + '==' + file.name);
+                    if ($('#acceptedLogo').val() == file.name) {
+                        $('#maincompany_type_fileLogo').val('');
+                    }
+                });
+            }
+        });
+        var dropzoneLogomain = new Dropzone("#dropzonelogomain", {
+            url: '{{ path('loadlogomain') }}',
+            maxFiles: 1,
+            uploadMultiple: false,
+            dictMaxFilesExceeded: 'Solo puede seleccionar un (1) archivo',
+            acceptedFiles: 'image/*',
+            dictInvalidFileType: 'No se permiten archivos de este tipo',
+            maxFilesize: 0.5,  // in Mb
+            dictFileTooBig: "El tamaño del archivo ({{ '{{' ~ 'filesize' ~ '}}' }}Mb) excede el máximo permitido ({{ '{{' ~ 'maxFilesize' ~ '}}' }}Mb)",
+            addRemoveLinks: true,
+            dictRemoveFile: 'Eliminar archivo',
+            init: function () {
+                this.on("error", function(file, message, xhr) { 
+                    if (xhr == null) this.removeFile(file); // perhaps not remove on xhr errors
+                    funalert(message);
+                });
+                this.on("sending", function(file, xhr, formData) {
+                    // send additional data with the file as POST data if needed.
+                    // formData.append("key", "value");  
+                });
+                this.on("success", function(file, response) {
+                    if (response.uploaded) {
+                        $('#maincompany_type_fileLogomain').val(response.fileName);
+                        $('#acceptedLogomain').val(file.name);
+                        //alert('File Uploaded: ' + response.fileName);
+                    }
+                });
+                this.on("removedfile", function(file) {
+                    //var num = dropzone_default.getUploadingFiles().length;
+                    //x = confirm('¿Quiere eliminar el archivo? ' + num);
+                    //if(!x)  return false;
+                    //console.log(num + '->' + $('#maincompany_type_fileLogo').val() + '==' + file.name);
+                    if ($('#acceptedLogomain').val() == file.name) {
+                        $('#maincompany_type_fileLogomain').val('');
+                    }
+                });
+            }
+        });
+        var dropzoneBackground = new Dropzone("#dropzonebackground", {
+            url: '{{ path('loadbackground') }}',
+            maxFiles: 1,
+            uploadMultiple: false,
+            dictMaxFilesExceeded: 'Solo puede seleccionar un (1) archivo',
+            acceptedFiles: 'image/*',
+            dictInvalidFileType: 'No se permiten archivos de este tipo',
+            maxFilesize: 0.5,  // in Mb
+            dictFileTooBig: "El tamaño del archivo ({{ '{{' ~ 'filesize' ~ '}}' }}Mb) excede el máximo permitido ({{ '{{' ~ 'maxFilesize' ~ '}}' }}Mb)",
+            addRemoveLinks: true,
+            dictRemoveFile: 'Eliminar archivo',
+            init: function () {
+                this.on("error", function(file, message, xhr) { 
+                    if (xhr == null) this.removeFile(file); // perhaps not remove on xhr errors
+                    funalert(message);
+                });
+                this.on("sending", function(file, xhr, formData) {
+                    // send additional data with the file as POST data if needed.
+                    // formData.append("key", "value");  
+                });
+                this.on("success", function(file, response) {
+                    if (response.uploaded) {
+                        $('#maincompany_type_fileBackground').val(response.fileName);
+                        $('#acceptedBackground').val(file.name);
+                        //alert('File Uploaded: ' + response.fileName);
+                    }
+                });
+                this.on("removedfile", function(file) {
+                    //var num = dropzone_default.getUploadingFiles().length;
+                    //x = confirm('¿Quiere eliminar el archivo? ' + num);
+                    //if(!x)  return false;
+                    //console.log(num + '->' + $('#maincompany_type_fileLogo').val() + '==' + file.name);
+                    if ($('#acceptedBackground').val() == file.name) {
+                        $('#maincompany_type_fileBackground').val('');
+                    }
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

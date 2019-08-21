@@ -1,0 +1,15 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+    <h1>Nuevo seguro de agencia</h1>
+
+    {{ form(form) }}
+
+        <ul class="record_actions">
+    <li>
+        <a href="{{ path('insurance') }}">
+            Regresar a la lista de seguros de agencia
+        </a>
+    </li>
+</ul>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+    <h1>Nuevo tipo de casillero</h1>
+
+    {{ form(form) }}
+
+        <ul class="record_actions">
+    <li>
+        <a href="{{ path('poboxtype') }}">
+            Regresar a la lista de tipos de casillero
+        </a>
+    </li>
+</ul>
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+
+<div class="widget">
+    <div class="widget-header"> <i class="icon-list-alt"></i>
+              <h3> <b>Bolsa</b> </h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+    
+    <!-- Tabs -->
+    <!-- Tab Content -->
+    
+    {% set head = entity.guides|first %}
+    {{ form_start(form) }}
+    <table class="table table-striped table-bordered">
+                <thead>
+		<tr>
+                <th><h3>#Bolsa</h3></th>
+		<th><h3>País Origen</h3></th>
+		<th><h3>País Destino</h3></th>
+		<th><h3>Servicio</h3></th>
+		<th><h3>Fecha</h3></th>
+		<th><h3>Nro de {% trans %}Guías{% endtrans %}</h3></th>
+		</tr>	
+		</thead>
+       		<tbody>
+			<tr>
+			<td>{{ entity.number }}</td>
+			<td>{{ head.countryfrom }}</td>
+			<td>{{ head.countryto }}</td>
+			<td>{{ head.shippingtype }}</td>
+			<td>{{ entity.creationdate|date('Y-m-d H:i:s') }}</td>
+			<td>{{ entity.guides|length }}</td>
+			</tr>
+		</tbody>
+		<tfoot>
+		<tr>
+		<td colspan=3>{{ form_row(form.submit) }}</td>
+		<td colspan=3 style="text-align:right;"><button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-lg bback" >Regresar</button></td>
+		</tr>
+		</tfoot>
+    </table>
+    {{ form_end(form) }}
+    <table class="table table-striped table-bordered">
+                <thead>
+		<tr>
+		<th colspan="7"><h3>CONTIENE</h3></th>
+		</tr>
+		<tr>
+                <th>Número</th>
+		<th>Peso</th>
+		<th>Volumen</th>
+		<th>Piezas</th>
+		<th>Valor</th>
+		<th>Monto</th>
+		<th>Tipo de cobro</th>
+		</tr>	
+		</thead>
+       		<tbody>
+			{% for guide in entity.guides %}
+			<tr>
+				<td><a  class="btn btn-success" href="{{ path('guide_show', { 'id': guide.id }) }}">{{ guide.number }}</a></td>
+				<td>{{ guide.realweight }}</td>
+				<td>{{ guide.length }}X{{ guide.width }}X{{ guide.height }} </td>
+				<td>{{ guide.pieces }}</td>
+				<td>{{ guide.declared }}</td>
+				<td>{{ guide.totalpaid }}</td>
+				<td>{{ guide.cod }}</td>
+			</tr>
+			{% endfor %}
+			<tr>
+		</tbody>
+    </table>
+ 
+</div>
+</div>
+{% endblock %}

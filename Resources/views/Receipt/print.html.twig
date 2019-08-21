@@ -1,0 +1,126 @@
+{% extends '::layout-pdf.html.twig' %}
+
+{% block body %}
+{# <div class="container"> #}
+<div class="row">
+    <div class="span4">
+        {% if entity.maincompany.logo %}
+        {% set name = companies_logos ~ entity.maincompany.logo %}
+    {% else %}
+        {% set name = companies_logos ~ 'default.png' %}
+    {% endif %}
+      <img src="{{ absolute_url(asset(name)) }}" alt="Logo" style="width:auto;height:auto;max-height:150px; max-width:150px;"><br>
+	{{ entity.agency.name }}<br>
+	{{ entity.agency.address }}<br>
+	{{ entity.agency.city }}, {{ entity.agency.city.state }} {{ entity.agency.zip }}. {{ entity.agency.city.state.country }}<br>
+	Ph. {{ entity.agency.phone }} <br>
+	Info: {{ entity.agency.email }}<br>	
+    </div>
+
+    <div class="span4" >
+	<div id="demo"></div><br>
+	<h3> {{ entity.number }} </h3><br>
+	Número de Recibo: {{ entity.number }}<br>
+        Fecha: {{ entity.arrivedate|date('Y-m-d') }}<br>
+	Recibido Por: {{ entity.receiptdby }}   
+    </div>
+</div>
+{# </div> #}
+
+<table class="table table-bordered">
+<thead>
+	<tr>
+	<th><center>REMITENTE</center></th>
+	<th><center>DESTINATARIO</center></th>
+	</tr>
+</thead>
+<tbody>
+	<tr>
+	<td>{{entity.shipper.adrdefault.name }} {{entity.shipper.adrdefault.lastname }}<br> 
+	    {{entity.shipper.adrdefault.address }}<br> 
+	    {{entity.shipper.adrdefault.city }} {{entity.shipper.adrdefault.city.state }} {{entity.shipper.adrdefault.city.state.country }}<br><br>
+	    Tel:{{entity.shipper.adrdefault.phone }}<br>
+	</td>
+	<td>{{ entity.receiver.name }} {{ entity.receiver.lastname }}<br> {{ entity.receiver.address }}<br>
+	    {{ entity.receiver.city }} {{ entity.receiver.city.state }} {{ entity.receiver.city.state.country }}<br><br>
+	    Tel:{{ entity.receiver.phone }}<br>
+	</td>
+	</tr>
+	<tr>
+	<td colspan="2">
+	    Notas: {{ entity.note }}<br>
+	    Track#: {{ entity.tracking }}
+	</td>
+	</tr>
+</tbody>
+</table>
+<table class="table table-bordered">
+<thead>
+	<tr>
+	<th><center>PIEZAS</center></th>
+	<th><center>INFORMACIÓN</center></th>
+	<th><center>DESCRIPCIÓN</center></th>
+	<th><center>PESO</center></th>
+	<th><center>VOLUMEN</center></th>
+	</tr>
+</thead>
+<tbody>
+	<tr>
+	<td><center>{{ entity.quantity }}</center></td>
+	<td><center>{{ entity.reference }}</center></td>
+	<td><center>{{ entity.description }}</center></td>
+	<td><center>{{ entity.weight }}</center></td>
+	<td><center>{{ entity.length }} x {{ entity.width }} x {{ entity.height }}</center>
+	<br><br><br><br><br><br><br><br><br><br><br><br>
+	</td>
+	
+	</tr>
+</tbody>
+</table>
+{% set wmet = entity.weight  %}
+{% set wmet = wmet*0.454 %}
+{% set len = entity.length %}
+{% set wid = entity.width  %}
+{% set hei = entity.height %}
+{% set vol1 = len * wid * hei /166 %}
+
+<table class="table">
+	<thead>
+	<tr>
+	<th colspan= 2></th>
+	<th><center>Piezas</center></th>
+	<th><center>Peso</center></th>
+	<th><center>Volumen</center></th>
+	</tr>
+	</thead>
+	<tbody>
+	<tr>
+	<td colspan="2"> Received by Signature </td>
+	<td><center>{{ entity.quantity }}</center></td>
+	<td><center>{{ entity.weight }}LB</center></td>
+	<td><center>{{ vol1|number_format(2, '.', ',') }}</center></td>
+	</tr>
+	<tr>
+	<td colspan=3><div style="border: 2px solid black">
+           ***You are hereby giving consent to screen/ inspect all cargo tendered by you or your company for this and any future shipments*** Por Favor indicar detalladamente la descripcion de la mercancia para la elaboracion del HBL o HAWB y asi evitar problemas con la aduana en destino. Please be advised that we have received the following cargo in our Miami Terminal Under de Name of {{ entity.agency.maincompany.name }}.
+         </div></td>
+	<td><center>{{ wmet|number_format(2, '.', ',') }}Kg</center></td>
+	<td><center>{{ vol1|number_format(2, '.', ',') }}</center><br>
+	  {{ entity.agency.maincompany.url }}</td>
+	</tr>
+	</tbody>
+</table>	
+
+<script type="text/javascript">
+    $(document).ready(function () {
+		var thecode= {{ entity.number|json_encode|raw }};
+		$("#demo").barcode(
+			thecode, // Value barcode (dependent on the type of barcode)
+			"code128" // type (string)
+		);
+		doprint();
+    });
+</script>
+{% endblock %} 
+
+

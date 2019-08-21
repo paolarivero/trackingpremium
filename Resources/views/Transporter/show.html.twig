@@ -1,0 +1,64 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+    <h1>Transporter</h1>
+
+    <table class="record_properties">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ entity.id }}</td>
+            </tr>
+            <tr>
+                <th>Nombre</th>
+                <td>{{ entity.name }}</td>
+            </tr>
+            <tr>
+                <th>Teléfono</th>
+                <td>{{ entity.phone }}</td>
+            </tr>
+            <tr>
+                <th>Fax</th>
+                <td>{{ entity.fax }}</td>
+            </tr>
+            <tr>
+                <th>Contacto</th>
+                <td>{{ entity.contact }}</td>
+            </tr>
+            <tr>
+                <th>Zip</th>
+                <td>{{ entity.zip }}</td>
+            </tr>
+            <tr>
+                <th>Ciudad</th>
+                <td>{{ entity.city }}</td>
+            </tr>	    
+            <tr>
+                <th>Dirección</th>
+                <td>{{ entity.address }}</td>
+            </tr>
+            <tr>
+                <th>Zona Aduanera</th>
+                <td>{{ entity.customsarea }}</td>
+            </tr>
+	    <tr>
+                <th>Fecha de creación</th>
+                <td>{{ entity.creationdate|date('Y-m-d H:i:s') }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+        <ul class="record_actions">
+    <li>
+        <a href="{{ path('transporter') }}">
+            Regresar a la lista de transportistas de carga
+        </a>
+    </li>
+    <li>
+        <a href="{{ path('transporter_edit', { 'id': entity.id }) }}">
+            Editar
+        </a>
+    </li>
+    <li>{{ form(delete_form) }}</li>
+</ul>
+{% endblock %}

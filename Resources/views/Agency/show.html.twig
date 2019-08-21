@@ -1,0 +1,108 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>Mostrar Agencia</title>
+{% endblock %}
+
+{% block body -%}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Información  de Agencia</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            {% if app.user.agency.type == "MASTER" %}
+                <li><a href="{{ url('agency') }}">Agencias</a></li>
+            {% endif %}
+            <li class="active"> Mostrar Agencia</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        <div class="block-flat">
+            <div class="header">
+                <div class="row">
+                    <div class="col-sm-4 col-md-4">
+                        <h3>Agencia: <b>{{ entity.name }}</b> </h3>
+                    </div>
+                    <div class="col-sm-8 col-md-8">
+                        <div class="btn-group" style="margin-bottom: 5px;margin-top: 4px;">
+                            <button type="button" class="btn btn-default">Opciones</button>
+                            <button type="button" data-toggle="dropdown" class="btn btn-default dropdown-toggle">
+                            <span class="caret"></span><span class="sr-only">Opciones</span></button>
+                            <ul role="menu" class="dropdown-menu">
+                                    <li><a href="{{ path('agency_edit', {'id': entity.id }) }}">Editar</a></li>
+                                    <li><a href="{{ path('tariff', { 'idag': entity.id })  }}">Tarifas</a></li>
+                            </ul>
+                        </div>
+                            
+                    </div>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="row">
+                    <div class="col-md-6 col-sm-6">
+                        <b>
+                        <i class="fa fa-home"></i> Tipo: {{ entity.type}}</BR>
+                        <i class="fa fa-building"></i> Dirección: {{ entity.address }}<BR>
+                        <i class="fa fa-flag"></i> Ciudad: {{ entity.city }} ({{ entity.city.state }}, {{ entity.city.state.country }} )<BR>
+                        <i class="fa fa-envelope"></i> Email: {{ entity.email }}<BR>
+                        {% if entity.phone %}
+                            <i class="fa fa-phone"></i> Teléfono: {{ entity.phone }}<BR>
+                        {% endif %}
+                        {% if entity.fax %}
+                            <i class="fa fa-fax"></i> Fax: {{ entity.fax }}<BR>
+                        {% endif %}
+                        </b>
+                    </div>
+                    <div class="col-md-6 col-sm-6">
+                        <b>
+                        <i class="fa fa-address-card"></i> Gerente: {{ entity.manager }}<br>
+                        {% if entity.webmaster %}
+                            <i class="fa fa-user"></i> WebMaster: {{ entity.webmaster }}<br>
+                        {% endif %}
+                        <i class="fa fa-copy"></i> Copias de {% trans %}Guías{% endtrans %}: 
+                                {% if entity.guidecopies %}
+                                    <input type="checkbox" checked="checked" class="icheck" disabled readonly >
+                                {% else %}
+                                    <input type="checkbox" disabled class="icheck" readonly >
+                                {% endif %}<br>
+                        <i class="fa fa-inbox"></i> Maneja Casilleros: 
+                                {% if entity.poboxs %}
+                                    <input type="checkbox" checked="checked" class="icheck" disabled readonly >
+                                {% else %}
+                                    <input type="checkbox" disabled class="icheck" readonly >
+                                {% endif %}<br>
+                        <i class="fa fa-address-book"></i> Comparte clientes: 
+                                {% if entity.sharecustomer %}
+                                    <input type="checkbox" checked="checked" class="icheck" disabled readonly >
+                                {% else %}
+                                    <input type="checkbox" disabled class="icheck" readonly >
+                                {% endif %}<br>
+                       <i class="fa fa-calendar"></i> Creada: {{ entity.creationdate|date('m/d/Y') }}<BR>
+                        </b>
+                    </div>
+                </div>
+                <div style="margin-top:10px;">
+                    <center>
+                        <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-flat" >Regresar</button>
+                    </center>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+{% block javascripts %}
+<script type="text/javascript">
+    $(document).ready(function(){
+        
+    });
+</script>
+{% endblock %}

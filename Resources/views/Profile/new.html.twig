@@ -1,0 +1,102 @@
+{% extends '::newbase.html.twig' %}
+{% block title %}
+    <title>Nuevo Perfil</title>
+{% endblock %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Crear Perfil</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('profile') }}">Perfiles</a></li>
+            <li class="active">Crear</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        <div class="block-flat">
+            <div class="header">
+                <h3>Información</h3>
+            </div>
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+            <div class="content">
+                <div class="row">
+                    <div class="col-sm-6 col-md-6">
+                        {{ form_row(form.name) }}
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                        {{ form_row(form.description) }}
+                    </div>
+                </div>
+                {{ form_row(form.adminrole, { 'attr': {'class': 'icheck'} }) }}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-sm-6 col-md-6">
+                <div class="block-flat">
+                    <div class="header">
+                        <h3>Permisos de Administración</h3>
+                    </div>
+                    <div class="content">
+                            {{ form_row(form.admins) }}  
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-6 col-md-6">
+                <div class="block-flat">
+                    <div class="header">
+                        <h3>Permisos de Visualización</h3>
+                    </div>
+                    <div class="content">
+                        {{ form_row(form.views) }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="block-flat">
+        <table class="no-border">
+            <tbody class="no-border-y">
+                <tr>
+                <td>
+                    <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-flat" >Regresar</button>
+                </td>
+                <td style="text-align:right;">
+                    {{ form_row(form.submit) }}
+                </td>
+                </tr>
+            </tbody>
+        </table>
+        </div>
+    </div>
+     {{ form_end(form) }}
+</div>
+{% endblock %}
+{% block javascripts %}
+<script type="text/javascript">
+    $(document).ready(function () {
+        
+        $('#profile_type_adminrole').on('ifChecked', function(event){
+            $('input[type=checkbox][id*=_admins]').each(function(){
+                $(this).attr('disabled', true);
+            });
+            $('input[type=checkbox][id*=_views]').each(function(){
+                $(this).attr('disabled', true);
+            });
+        });
+        $('#profile_type_adminrole').on('ifUnchecked', function(event){
+            $('input[type=checkbox][id*=_admins]').each(function(){
+                $(this).attr('disabled', false);
+            });
+            $('input[type=checkbox][id*=_views]').each(function(){
+                $(this).attr('disabled', false);
+            });
+        });
+    });
+</script>
+{% endblock %}

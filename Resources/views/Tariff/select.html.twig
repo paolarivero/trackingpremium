@@ -1,0 +1,52 @@
+{% extends '::layout.html.twig' %}
+
+{% block body -%}
+<script type="text/javascript">
+    // return the value to the parent window
+    function returnYourChoice(vtid,vtname){
+        opener.setTariffResult(tid, tname, vtid, vtname)
+        window.close();
+    }
+</script>
+
+    <h3>Seleccionar Tarifa de Agencia {{ entities[0].agency }} para {{ entities[0].region }} </h3>
+   
+           <div class="widget-content">
+              <table class="table table-striped table-bordered" id="myTable">
+                <thead>
+                  <tr>
+                	<th>Servicio</th>
+			<th>Medida</th>
+			<th>Valor Medida</th>
+                	<th>Seguro</th>
+			<th>Impuesto</th>
+			<th>Empieza</th>
+			<th>Hasta</th>
+			<th>Inicial</th>
+			<th>$Ini</th>
+			<th>$Adi</th>
+                 </tr>
+                </thead>
+                        <tbody >
+			    {% for entity in entities %}
+			     <tr>
+				<td><a href="#" onclick="returnYourChoice({{ entity.id }}, '{{ entity.name }}')"><button type="button" class="btn btn-default">{{ entity.name }}</button></a></td>		
+				<td>{{ entity.measure }}</td>
+				<td>{{ entity.valuemeasure }}</td>
+				<td>{{ entity.insurance }}</td>
+                		<td>{{ entity.tax }}</td>
+               			<td>{{ entity.begin }}</td>
+                		<td>{{ entity.until }}</td>
+				<td>{{ entity.minimun }}</td>
+				<td>{{ entity.valuemin }}</td>
+				<td>{{ entity.additional }}</td>
+			    </tr>
+        		    {% endfor %}
+                        </tbody>
+              </table>
+            </div>
+            <!-- /widget-content --> 
+          </div>
+          <!-- /widget --> 
+    
+{% endblock %}

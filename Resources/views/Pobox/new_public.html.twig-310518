@@ -1,0 +1,213 @@
+{% extends '::layout_login.html.twig' %}
+
+{% block title %}
+    <title>Crear Casillero</title>
+{% endblock %}
+
+{# Display the form #}
+
+{% form_theme form 'form/fields.html.twig' %}
+
+{% block body %}
+
+<div class="forgotpassword-container classbackground">
+    <div class="middle" style="width:70% !important;">
+        <div class="block-flat">
+            <div class="header" >
+                {% if logomain %}
+                    {% set logo = companies_logosmain ~ logomain %}
+                {% else %}
+                    {% set logo = companies_logosmain ~ 'logo.png' %}
+                {% endif %}
+                <h3 class="text-center">
+                <img alt="Logomain" src="{{ absolute_url(asset(logo)) }}" style="vertical-align: middle !important;width:130px;height:30px;padding: 0 !important; margin-top:10px; margin-right:5px;"  class="logo-img">
+                {# <img src="{{ asset('assets/assets/img/logo.png') }}" alt="logo" class=""> #}
+                </h3>
+                {% for flashMessage in app.session.flashbag.get('notice') %}
+                    <div class="alert alert-danger">
+                        <strong>Advertencia: </strong>{{ flashMessage }}
+                    </div>
+                {% endfor %}
+            </div>
+            {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'class': 'form-horizontal', 'style' : 'margin-bottom: 0px !important' }}) }}
+            {# <form style="margin-bottom: 0px !important;" action="index.html" parsley-validate="" novalidate class="form-horizontal"> #}
+            <div class="content">
+                <div class="block-flat">
+                    <div class="header">
+                        <h3>Agencia</h3>
+                    </div>
+                    <div class="content">
+                        {{ form_widget(form.agencypobox) }}
+                    </div>
+                </div>
+                <div class="block-flat">
+                    <div class="header">
+                        <h3>Datos del cliente</h3>
+                    </div>
+                    <div class="content">
+                        <div class="row">
+                                <div class="col-sm-6 col-md-6">
+                                    {{ form_widget(form.type) }}
+                                </div>
+                                <div class="col-sm-6 col-md-6">
+                                    <button id="clearcus" type="button" style="margin-top: 13px;"  class="btn btn-default" onclick="ClearCus();">Limpiar</button>
+                                </div>
+                        </div>
+                        {{ form_row(form.name_customer) }}
+                        {{ form_row(form.lastname_customer) }}
+                        {{ form_row(form.docid_customer) }}
+                        {{ form_row(form.address_customer) }}
+                        <div class="form-group">
+                            <div class="row">
+                                    <div class="col-md-2">
+                                        <label>Ciudad (Búsqueda) </label>
+                                    </div>
+                                    <div class="col-md-10">
+                                        <input type="hidden" id="citycustomer" style="width:100%;" />
+                                    </div>
+                            </div>
+                        </div>
+                        {{ form_row(form.country_customer) }}
+                        {{ form_row(form.state_customer) }}
+                        {{ form_row(form.cityname_customer) }}
+                        {{ form_row(form.zip_customer) }}
+                        {{ form_row(form.mobile_customer) }}
+                        {{ form_row(form.phone_customer) }}
+                        {{ form_row(form.email_customer) }}
+                        {{ form_row(form.password) }}
+                        <table class="no-border">
+                            <tbody class="no-border-y">
+                                <tr>
+                                <td>
+
+                                </td>
+                                <td style="text-align:right;">
+                                    <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-flat" >Cancelar</button>
+                                    {{ form_widget(form.submit, { 'attr': {'class': 'btn btn-primary btn-flat'} }) }}
+                                </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>{# FIN CONTENT #}
+                </div> {# FIN BLOCK FLAT #}
+                {{ form_end(form) }}
+            </div>
+        </div>
+        <div class="text-center out-links"><a href="#">© 2016-2017 Trackingpremium</a></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block javascripts %}
+<script src="{{ asset('assets/mylibs/utilityLib.js') }}" type="text/javascript"></script>
+<script type="text/javascript">
+    function ClearCus() {
+        $('#pobox_type_id_customer').val(0);
+        $('#pobox_type_name_customer').val('');
+        $('#pobox_type_lastname_customer').val('');
+        $('#pobox_type_address_customer').val('');
+        $('#pobox_type_cityid_customer').val(0);
+        $('#pobox_type_cityname_customer').val('');
+        $('#citycustomer').select2('data', null);
+        $('#pobox_type_phone_customer').val('');
+        $('#pobox_type_mobile_customer').val('');
+        $('#pobox_type_barrio_customer').val('');
+        $('#pobox_type_email_customer_first').val('');
+        $('#pobox_type_email_customer_second').val('');
+        $('#pobox_type_zip_customer').val('');
+        $('#pobox_type_type_1').iCheck('check');
+        $('#pobox_type_type').change();
+        return true;
+    }
+    $(document).ready(function () {        
+        $('.bcustomer').click(function(e) {
+            e.preventDefault();
+            $('#findcustomer').val('');
+            $('#divTable').hide();
+            $('#mensajeCus').hide();
+            return true;
+        });
+        
+        $("#citycustomer").select2({
+            placeholder: "Buscar Ciudad",
+            ajax: {
+                url: "{{ path('city_find') }}",
+                dataType: 'json',
+                delay: 250,
+                data: function (term) {
+                    return {
+                        q: term, //search term
+                    };
+                },
+                results: function (data) {
+                    return {
+                        results: data,
+                    };
+                },
+                cache: true
+                },
+             minimumInputLength: 2,
+             formatInputTooShort: function (input, min) { var n = min - input.length; return "Por favor ingrese  " + n + " carcater" + (n == 1? "" : "es") + " mas"; },
+             formatNoMatches: function () { return "No se encuentran resultados"; },
+             
+        });
+        $('#citycustomer').on("change", function(e) { 
+            var cityid = $('#citycustomer').val();
+            $('#pobox_type_cityid_customer').val(cityid);
+            var complete = $('#citycustomer').select2('data').text;
+            var ini1 = complete.lastIndexOf('(');
+            var ini2 = complete.lastIndexOf(',');
+            var end = complete.lastIndexOf(')');
+            var state = complete.substring(ini1+1,ini2);
+            var country = complete.substring(ini2+2,end);
+            // $('#pobox_type_country_customer').val('');
+            $('#pobox_type_country_customer option').map(function () {
+                if ($(this).text() == country) return this;
+            }).prop('selected', 'selected');
+            utilityLib.statesbyname('#pobox_type_state_customer', '#pobox_type_country_customer', state, "{{ url('select_states') }}"); 
+            $('#pobox_type_cityname_customer').val(complete.substring(0,ini1-1));
+        });
+        $('#pobox_type_country_customer').change(function(){
+           var val = "#pobox_type_country_customer";
+           utilityLib.statesbyname('#pobox_type_state_customer', val, '', "{{ url('select_states') }}");
+           return false;
+        });
+        $('#pobox_type_state_customer').change(function(){
+            // console.log('CAMBIO el estado');
+            $('#pobox_type_cityid_customer').val(0);
+            utilityLib.showCity('{{ form.vars.id }}','customer');
+            return false;
+        });
+        $('#pobox_type_cityname_customer').change(function(){
+            $('#pobox_type_cityid_customer').val(0);
+            utilityLib.showCity('{{ form.vars.id }}','customer');
+            return false;
+        });
+        var citySID = $("#pobox_type_cityid_customer").val();
+        var citySname = $("#pobox_type_cityname_customer").val();
+        if (citySID && citySname) {
+            // console.log('Hola:  ' +  citySID + ' ' + citySname);
+            $('#citycustomer').select2('data', {id: citySID, text: citySname});
+        }
+        $('#pobox_type_type_1').iCheck('check');
+        $('#pobox_type_type_2').on('ifChecked', function(event){
+            $('#pobox_type_lastname_customer').val('');
+            $('#pobox_type_lastname_customer').prop('readonly', true);
+        });
+        $('#pobox_type_type_1').on('ifChecked', function(event){
+            $('#pobox_type_lastname_customer').prop('readonly', false);
+        });
+        $('#pobox_type_email_customer_first, #pobox_type_email_customer_second').change(function() {
+            $('#guide_type_id_customer').val(0);
+        });
+        $('#pobox_type_submit').click(function(evt) {
+            var cityid = $('#citycustomer').val();
+            if (!cityid) {
+                funalert('Debe seleccionar una ciudad..');
+                return false;
+            }
+        });
+        $('#pobox_type_cityname_customer').change();
+    });
+</script>
+{% endblock %}

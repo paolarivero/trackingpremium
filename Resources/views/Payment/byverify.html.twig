@@ -1,0 +1,350 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>Lista de Pagos</title>
+{% endblock %}
+
+{% block body -%}
+
+<div class="page-aside app filters">
+    <div class="content">
+        <button data-target=".app-nav" data-toggle="collapse" type="button" class="navbar-toggle"><span class="fa fa-chevron-down"></span></button>
+        <h2 class="page-title">Filtros</h2>
+        <p class="description">Buscador Avanzado</p>
+       
+    </div>
+    <div class="app-nav collapse">
+        <div class="content">
+            <div class="form-group">
+                <label class="control-label">Desde:</label>
+                <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetime">
+                    <input id="mindate" size="16" type="text" value="" class="form-control"><span class="input-group-addon btn btn-primary"><span class="glyphicon glyphicon-th"></span></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label">Hasta:</label>
+                <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetime">
+                    <input id="maxdate" size="16" type="text" value="" class="form-control"><span class="input-group-addon btn btn-primary"><span class="glyphicon glyphicon-th"></span></span>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<div id="pcont" class="container-fluid">
+    <div class="main-app">
+        <div class="head">
+            <h3>Búsqueda</h3>
+            <input type="text" id="globalfilter" placeholder="Cliente/Guía" class="form-control">
+        </div>
+        
+        <div class="filters">
+            <input id="check-all" type="checkbox" name="checkall" class="icheck"><span>Todos</span>
+            <p style="display:inline; margin: 5px;"> </p>
+            <input id="check-none" type="checkbox" name="checknone" class="icheck"><span>Ninguno</span>
+        </div>
+        <div class="block-flat" style=" padding-top: 0px;">
+            <div class="content" style=" padding-top: 0px;">
+               <div id="mydiv" style="width:70%">
+                <table id="payTable" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
+                    <thead id="headrec">
+                        <tr>
+                            <th></th>
+                            <th>Procesar</th>
+                            <th>Cliente</th>
+                            <th>Número de {% trans %}Guía{% endtrans %}</th>
+                            <th>Cuenta</th>
+                            <th>Monto</th>
+                            <th>Fecha de Pago</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entity in entities %}
+                            <tr>
+                                <td>{{ entity.id }}</td>
+                                <td style="vertical-align:top">
+                                    <input id="recheck{{ entity.id }}" type="checkbox" name="recheck{{ entity.id }}" class="icheck checkclass">
+                                </td>
+                                <td><button type="button" class="btn btn-success btn-xs" onclick="location.href='{{ path('customer_show', { 'id': entity.customer.id }) }}';">{{ entity.customer }}</button></td>
+                                <td><button type="button" class="btn btn-success btn-xs" onclick="location.href='{{ path('guide_show', { 'id': entity.guide.id }) }}';">{{ entity.guide }}</button></td>
+                                <td><button type="button" class="btn btn-success btn-xs" onclick="location.href='{{ path('account_show', { 'id': entity.account.id }) }}';">{{ entity.account }}</button></td>
+                                <td>{{ entity.amount }}</td>
+                                <td>{{ entity.paydate |date('m/d/Y') }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        <td>
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default" >Regresar</button>
+                        </td>
+                        <td style="text-align:right;">
+                            <button id="procesar" type="button" class="btn btn-default btn-flat bpagos" data-toggle="modal" data-target="#procpago">Procesar</button>
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>    
+
+    <!-- Modal -->
+    <div id="procpago" tabindex="-1" role="dialog" class="modal fade colored-header md-effect-9">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <center><h3>Reportar Pagos</h3></center>
+                    <button id="closeprocpago" type="button" data-dismiss="modal" aria-hidden="true" class="close">×</button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center">
+                        <div class="alert alert-danger">
+                            <strong>Advertencia: </strong>Confirme que los pagos reportados han sido verificados
+                        </div>
+                        <center>
+                        <button type="button" class="btn btn-info btn-flat gotoprocess">Confirmar</button>
+                        </center>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <div class="text-center">
+                            <button type="button" data-dismiss="modal" class="btn btn-default">Cerrar</button>
+                        </div>
+                    </div>
+                </div>
+            </div><!-- /.modal-content-->
+        </div><!-- /.modal-dialog-->
+    </div><!-- /.modal-->
+
+{% endblock %}
+{% block javascripts %}  
+
+<script type="text/javascript">
+    function formatDate(datein) {
+        var date = new Date(datein);
+        var monthNames = [
+            "Ene", "Feb", "Mar",
+            "Abr", "May", "Jun", "Jul",
+            "Ago", "Sep", "Oct",
+            "Nov", "Dic"
+        ];
+
+        var day = date.getDate();
+        var monthIndex = date.getMonth();
+        var year = date.getFullYear();
+
+        return day + monthNames[monthIndex] + ' ' + year;
+    }
+    function searchBis(str_search) {
+        var ret = $($.parseHTML(str_search)).text().toLowerCase();
+        return ret.indexOf($('#globalfilter').val().toLowerCase()) != -1;
+    }
+    $.fn.dataTable.ext.search.push(
+        function( settings, data, dataIndex ) {
+     
+        if ($('#globalfilter').val().trim() != '') {
+            // var ret0 = searchBis(data[1]);
+            var ret2 = searchBis(data[2]);
+            var ret3 = searchBis(data[3]);
+            return ( ret2 || ret3);
+        } else {
+            return true;
+        }
+        
+    });
+    $.fn.dataTableExt.afnFiltering.push(
+        function( oSettings, aData, iDataIndex ) {
+            var iFini = document.getElementById('mindate').value;
+            var iFfin = document.getElementById('maxdate').value;
+            var iStartDateCol = 6;
+            var iEndDateCol = iStartDateCol;
+    
+            iFini=iFini.substring(6,10) + iFini.substring(0,2)+ iFini.substring(3,5);
+            iFfin=iFfin.substring(6,10) + iFfin.substring(0,2)+ iFfin.substring(3,5);
+    
+            // console.log(iFini + ' ' + iFfin);
+            
+            var datofini=aData[iStartDateCol].substring(6,10) + aData[iStartDateCol].substring(0,2)+ aData[iStartDateCol].substring(3,5);
+            var datoffin= datofini;
+            /*
+            aData[iEndDateCol].substring(6,10) + aData[iEndDateCol].substring(3,5)+ aData[iEndDateCol].substring(0,2);
+            // console.log(datofini + ' ' + datoffin); */
+    
+            if ( iFini === "" && iFfin === "" )
+            {
+                return true;
+            }
+            else if ( iFini <= datofini && iFfin === "")
+            {
+                return true;
+            }
+            else if ( iFfin >= datoffin && iFini === "")
+            {
+                return true;
+            }
+            else if (iFini <= datofini && iFfin >= datoffin)
+            {
+                return true;
+            }
+            return false;
+        }
+    );
+    
+    $(document).ready(function () {
+        $thisPayTable=$('#payTable').DataTable({
+            "ordering": true,
+            "responsive": true,
+            "searching": true,
+            "info":     true,
+            "lengthChange": true,
+            "scrollX": true,
+            "paginate": true,
+            "pageLength": 5,
+            "lengthMenu": [[5, 10, 15, 20, 25, 30, -1], [5, 10, 15, 20, 25, 30, "Todos"]],
+            "columns": [ {sortable: false},  {sortable: false},  null, null, {sortable: false}, {sortable: false}, null ],
+            
+            "columnDefs": [
+             {   
+                "targets": [ 0 ],
+                "visible": false,
+                "searchable": true,
+            },
+            { "type": 'date', "targets": 3 },
+            ],
+            
+            "order": [[ 6, "desc" ]],
+            "language": {
+                "sSearch": "Buscar",
+                "lengthMenu": 'Mostrando  _MENU_  "Pagos" por página',
+                        "zeroRecords": "<div style=\"color:red;\">Lo siento no se encontraron Pagos</div>",
+                "sInfo": "Mostrando _START_ a _END_ de _TOTAL_ Pagos",
+                        "infoEmpty": "No hay registros disponibles",
+                        "infoFiltered": "(Filtradas de un total de _MAX_ )",
+                "searchPlaceholder": "Número/Remitente/Destinatario",
+                "paginate" : {
+                                first:    '«',
+                                previous: '‹',
+                                next:     '›',
+                                last:     '»'
+                    }
+                },
+            "pagingType": "full_numbers",
+            "sDom": '<"top"B>rt<"bottom"lp><"clear">',
+            "fnDrawCallback": function(oSettings) {
+                    if ((oSettings._iDisplayLength >= oSettings.fnRecordsDisplay()) ||  (oSettings._iDisplayLength == -1)) {
+                        $(oSettings.nTableWrapper).find('.dataTables_paginate').hide();
+                    } else {
+                        $(oSettings.nTableWrapper).find('.dataTables_paginate').show();
+                    }
+                    if (oSettings.fnRecordsDisplay() == 0) {
+                        $('#procesar').hide();
+                    } else {
+                        $('#procesar').show();
+                    }
+            },
+        });
+        
+        $('#check-all').on('ifChecked', function(event){
+            $('#check-none').iCheck('uncheck');
+            $('#check-none').iCheck('update');
+            var info = $thisPayTable.page.info();
+            var page = info['page'];
+            var length = info['length'];
+            $thisPayTable.page.len( -1 ).draw();
+            $('.checkclass').iCheck('check');
+            $('.checkclass').iCheck('update');
+            $thisPayTable.page.len(length);
+            $thisPayTable.page(page).draw(false);
+            
+        });
+        $('#check-none').on('ifChecked', function(event){
+            $('#check-all').iCheck('uncheck');
+            $('#check-all').iCheck('update');
+            var info = $thisPayTable.page.info();
+            var page = info['page'];
+            var length = info['length'];
+            $thisPayTable.page.len( -1 ).draw();
+            $('.checkclass').iCheck('uncheck');
+            $('.checkclass').iCheck('update');
+            $thisPayTable.page.len(length);
+            $thisPayTable.page(page).draw(false);
+        });
+        
+        $('.checkclass').on('ifChecked', function(event){
+            $('#check-none').iCheck('uncheck');
+            $('#check-none').iCheck('update');
+        });
+        $('.checkclass').on('ifUnchecked', function(event){
+            $('#check-all').iCheck('uncheck');
+            $('#check-all').iCheck('update');
+        });
+        $('#globalfilter').on( 'keyup', function () {
+            $thisPayTable.draw();
+        } );
+        
+        $('#mindate').change( function() { $thisPayTable.draw(); } );
+        $('#maxdate').change( function() { $thisPayTable.draw(); } );
+        $('.bpagos').click(function(e) {
+            e.preventDefault();
+            var count=0;
+            $thisPayTable.$('tr').each(function(index,rowhtml){
+                var checked = $('input[type="checkbox"]:checked',rowhtml).length;
+                var data = $thisPayTable.row(rowhtml).data();
+                // console.log(ii + ':' + checked);
+                if (checked==1) {
+                    count++;
+                } 
+            });
+            if (count == 0) {
+                $("#closeprocpago").click();
+                funalert('Debe seleccionar algún pago para procesar');
+                return false;
+            }
+            return true;
+        });
+        $('.gotoprocess').click(function(e) {
+            e.preventDefault();
+            $("#closeprocpago").click();
+            var toprocess = [];
+            var count=0;
+            $thisPayTable.$('tr').each(function(index,rowhtml){
+                var checked = $('input[type="checkbox"]:checked',rowhtml).length;
+                var data = $thisPayTable.row(rowhtml).data();
+                // console.log(ii + ':' + checked);
+                if (checked==1) {
+                    toprocess[count++]=data[0];
+                } 
+            });
+            var paymentlist = JSON.stringify(toprocess);
+           
+            var url = "{{ path('payment_process') }}?paymentlist=" + paymentlist;
+            // funalert(url);
+            // return false;
+            if (count == 0) {
+                funalert('Debe seleccionar algún pago para procesar');
+            } else { 
+                window.location.href = url;
+            }
+            return false;
+        });
+        
+        $('#mydiv').width("100%");
+        $thisPayTable.responsive.rebuild();
+        $thisPayTable.responsive.recalc();
+        $thisPayTable.draw(false);
+        $( window ).resize(function() {
+            $thisPayTable.responsive.rebuild();
+            $thisPayTable.responsive.recalc();
+            $thisPayTable.draw(false);
+        });
+        
+        
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,68 @@
+labels:
+        name_sender: Nombre
+        guide: Guía
+        guides: Guías
+        receipt: Paquete
+        receipts: Paquetes
+        warehouse: Recibo
+        warehouses: Recibos 
+        consolidated: Consolidado
+        prefixconsols: Prefijo de Consolidados
+        prefixguides: Prefijo de Guías
+        emailagency: Enviar copia de Guías
+        inheretedconsol: Guías heredan este status
+        statusguide: Status del Guía
+        guidenumber: Número del Guía
+        recnumber: Número del Recibo
+        iniguide: Numeración inicial de Guías
+        barrio: Sector
+        paso: Estado
+        bag: Bolsa
+
+Paso: Estado
+Pasos: Estados
+peso: Lb
+altpeso: Kg
+dimension: CF
+altdimension: Mt3
+tailcolor: red
+Recibo: Paquete
+Recibos: Paquetes
+Warehouse: Recibo
+Warehouses: Recibos
+mconsoldate: M
+Guía: Guía
+Guías: Guías
+Consolidados: Consolidados
+Consolidado: Consolidado
+Consolidar: Consolidar
+number: Número
+shippingtype: Envío
+agency: Agencia
+countryto: País destino
+addressee: Destinatario
+creationdate: Fecha
+realweight: Peso
+insurancepaid: Seguro
+freight: Flete
+volfreight: Flete Vol. 
+otherfees: Otros cargos
+discount: Descuento
+consol: Consolidado
+sender: Remitente
+totalpaid: Total
+moves: status
+#MESES
+January: Enero
+February: Febrero
+March: Marzo 
+April: Abril
+May: Mayo
+June: Junio 
+July: Julio
+August: Agosto
+September: Septiembre
+October: Octubre
+November: Noviembre
+December: Diciembre
+'Administrador de %name%': Administrador de %name%

@@ -1,0 +1,101 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+{% block javascript %}
+
+<script type="text/javascript">
+function gotoConsol(consolid) {
+	var toconsol = [];
+	var count=0;
+	{% for guide in entity.guides %} 
+		toconsol[count++] = {{ guide.id }};
+	{% endfor %}
+	var guidelist = JSON.stringify(toconsol);
+	
+	if (toconsol.length > 0 ) {
+		window.location.href = "{{ url('consolidated_guides') }}?guidelist=" + guidelist +"&idconsol=" + consolid;
+	} else {
+		alert('Debe escoger al menos 1 {% trans %}Guía{% endtrans %}');
+	}
+	return false;
+}
+</script>
+{% endblock %}
+
+<div class="widget">
+    <div class="widget-header"> <i class="icon-list-alt"></i>
+              <h3> {% trans %}Consolidar{% endtrans %} {% trans %}Guías{% endtrans %} de la bolsa {{ entity.number }} </h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+    
+    <!-- Tabs -->
+    <!-- Tab Content -->
+    
+    
+    <br>
+	<table id="guideTable1" class="table table-striped table-bordered">
+        <thead>
+	<tr>
+        <th><h4>Número</h4></th>
+	<th><h4>Remitente</h4></th>
+	<th><h4>Destinatario</h4></th>
+	<th><h4>Fecha</h4></th>
+	<th><h4>Peso</h4></th>
+	<th><h4>Volumen</h4></th>
+	</tr>	
+	</thead>
+	<tbody>
+	
+	{% for guide in entity.guides %} 
+	<tr>
+	{% set wkg = guide.realweight*0.454 %}
+	<td>{{ guide.number }}</td>
+	<td>{{ guide.sender }}</td>
+	<td>{{ guide.addressee }}</td>
+	<td>{{ guide.creationdate|date('m/d/Y') }}</td>
+	<td>{{ guide.realweight }} {% trans %}peso{% endtrans %}</td>
+    <td> HOLA </td>
+    {#{{ guide.length }} X {{ guide.width }} X {{ guide.height }} </td>#}
+	</tr>
+	{% endfor %}
+	
+	</tbody>
+       </table> 
+
+   <table id="consolTable" class="table table-striped table-bordered">
+        <thead>
+            <tr>
+                <th>{% trans %}Consolidado{% endtrans %}</th>
+		<th>Remitente</th>  
+		<th>Destinatario</th>
+		<th>Tipo de envío</th>
+		<th>País origen</th>
+		<th>País destino</th>
+		<th>Oficina</th>
+		<th>Agencia</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for consol in listconsol %}
+            <tr>
+                <td style="text-align:center;"><a href="{{ path('consolidated_show', { 'id': consol.id }) }}">{{ consol.id }}</a></td>
+                <td>{{ consol.sender }}</td>
+                <td>{{ consol.receiver }}</td>
+                <td>{{ consol.shippingtype }}</td>
+                <td>{{ consol.countryfrom }}</td>
+                <td>{{ consol.countryto }}</td>
+                <td>{{ consol.office }}</td>
+                <td>{{ consol.agency }}</td>
+		<td><button type="button" class="btn btn-success btn-lg" onclick="gotoConsol({{ consol.id }});" >{% trans %}Consolidar{% endtrans %}</button></td>
+            </tr>
+        {% endfor %}
+        </tbody>
+<tr>
+		<td colspan="9" style="text-align:center;"><button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-lg bback" >Regresar</button></td>
+		</tr>
+    </table>
+</div>
+</div>
+
+{% endblock %}

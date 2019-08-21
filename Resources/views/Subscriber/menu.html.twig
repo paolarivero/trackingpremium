@@ -1,0 +1,82 @@
+{% extends '::newbase-subscriber.html.twig' %}
+
+{% block title %}
+    <title>Bienvenid@ a Trackingpremium</title>
+{% endblock %}
+
+{# Display the form #}
+
+{% block body %}
+{% if app.user.stripeCustomer is null %}
+ <script>window.location.href = "{{ url('exit') }}";</script>
+{% endif %}
+
+{% if app.user.subscriber is null %}
+	<script>window.location.href = "{{ path('subscriber_selectplan') }}"</script>
+{% else %}
+    {% if app.user.subscriber.maincompany is null %}
+        <script>window.location.href = "{{ path('subscriber_config') }}"</script>
+    {% endif %}
+{% endif %}
+
+
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Bienvenid@ {{ app.user.name }} {{ app.user.lastname }}</h2>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger alert-white rounded">
+                    <button type="button" data-dismiss="alert" aria-hidden="true" class="close">×</button>
+                    <div class="icon">
+                        <i class="fa fa-warning"></i>
+                    </div>
+                    <strong>Alerta! </strong> {{ flashMessage|raw }} 
+                    </strong>
+                </div>
+            {% endfor %}
+            {% for flashMessage in app.session.flashbag.get('info') %}
+                <div class="alert alert-danger alert-white rounded">
+                    <button type="button" data-dismiss="alert" aria-hidden="true" class="close">×</button>
+                    <div class="icon">
+                        <i class="fa fa-warning"></i>
+                    </div>
+                    <strong>MENSAJE: </strong> {{ flashMessage|raw }} 
+                    </strong>
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        <div class="block-flat">
+            <div class="header">
+                <h3>
+                {# DEBEN DEFINIRSE Y PROGRAMARSE LAS OPCIONES DISPONIBLES <br> #}
+                {% if app.user.subscriber is not null%}
+                    {% if app.user.subscriber.maincompany is not null%}
+                        Para usar el sistema ingrese a:<br><br>
+                        <center>
+                            <a href='{{ path('subscriber_login') }}' style='font-size:1.2em'><span style="font-weight:bold">{{ app.user.subscriber.maincompany.homepage }}</span></a>
+                        {# <p style="color:blue; font-size:24px"> http://{{ app.user.subscriber.maincompany.homepage }}</p> #}
+                        </center>
+                        <br>
+                    {% endif %}
+                {% endif %}
+                {# Con el "username" y el "password" que seleccionó #}
+                </h3>
+                
+            </div>
+            <div class="content">
+                <button type="button" class="btn btn-success btn-mini" onclick="location.href='{{ path('subscriber_updateplan') }}';">Actualizar plan</button>
+
+            </div>{# FIN CONTENT #}
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block javascripts %}
+
+<script type="text/javascript">
+    
+</script>
+{% endblock %}
+
+

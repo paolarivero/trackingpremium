@@ -1,0 +1,80 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+
+<div class="widget">
+<div class="widget-header">
+    <h3><i class="icon-list-ol"></i>  Lista de tipos de {% trans %}Recibos{% endtrans %}</h3>
+</div>
+<div class="widget-content">
+    <div class="table-responsive">
+	      <table id="receipttypeTable" class="table table-striped table-sm" cellspacing="0" width="100%" >
+        <thead>
+            <tr>
+                <th>ID</th>
+		<th>Nombre</th>
+                <th>Descripción</th>
+                <th>Fecha</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for entity in entities %}
+            <tr>
+		<td>{{ entity.id }}</td>
+                <td>{{ entity.name }}</td>
+                <td>{{ entity.description }}</td>
+		 <td>{% if entity.creationdate %}{{ entity.arrivedate|date('Y-m-d') }}{% endif %}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+	<tfoot>
+	<tr>
+		<td colspan=4 style="text-align:center;"><button type="button" class="btn btn-default" onclick="location.href='{{ path('config') }}';">Regresar</button></td>
+	</tr>
+	</tfoot>
+    </table>
+ </div>
+<ul class="pagination pagination-sm pager" id="myPager1"></ul>
+</div>
+</div>
+{% block javascript %}
+
+<script type="text/javascript" src="{{ asset('assets/js/jquery.dataTables.min.js') }}"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+	$thisRecTable=$('#receipttypeTable').DataTable({
+		searching: false,
+		"info":     false,
+		"lengthChange": false,
+		"scrollX": true,
+		pageLength: 10,
+		"pagingType": "full_numbers",
+		"fnDrawCallback": function(oSettings) {
+        		if (oSettings._iDisplayLength >= oSettings.fnRecordsDisplay()) {
+            			$(oSettings.nTableWrapper).find('.dataTables_paginate').hide();
+		
+        		} else {
+				$(oSettings.nTableWrapper).find('.dataTables_paginate').show();
+			
+			}
+    		},
+    		language: {				
+      			emptyTable: "<div style=\"color:red;\">No hay {% trans %}Recibos{% endtrans %}</div>",
+        		paginate: {
+				first:      '<<',
+        			last:       '>>',
+        			previous: '‹',
+        			next:     '›'
+        		},
+        		aria: {
+        			paginate: {
+               				previous: 'Anterior',
+               				next:     'Siguiente'
+        			}
+       			}	
+    		}
+	});
+    });
+</script>
+{% endblock %}
+{% endblock %}

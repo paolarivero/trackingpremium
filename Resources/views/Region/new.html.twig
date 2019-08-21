@@ -1,0 +1,145 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>Crear Región</title>
+{% endblock %}
+
+{# Display the form #}
+
+{% form_theme form 'form/fields.html.twig' %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Crear Región</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('region') }}">Regiones</a></li>
+            <li class="active">Crear</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        {{ form_start(form, {attr: {novalidate: 'novalidate', 'id': 'agency_type' }}) }}
+        <div class="block-flat">
+            <div class="header">
+                <h3>Datos de la región</h3>
+            </div>
+            <div class="content">
+                <div class="row">
+                    <div class="col-sm-6 col-md-6">
+                        {{ form_row(form.name) }}
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                        {{ form_row(form.country) }}
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6 col-md-6">
+                        {{ form_row(form.state) }}
+                    </div>
+                    <div class="col-sm-6 col-md-6">
+                        {{ form_row(form.region_cities) }}
+                    </div>
+                </div>
+                
+                <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        <td>
+
+                        </td>
+                        <td style="text-align:right;">
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-flat" >Regresar</button>
+                            {{ form_widget(form.submit, { 'attr': {'class': 'btn btn-primary btn-flat'} }) }}
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+        
+{% endblock %}
+{% block javascripts %}
+<script type="text/javascript">
+    $(document).ready(function () {
+        var country = $('#region_type_country').val();
+        
+        
+        $('#region_type_country').change(function(){
+           $('#region_type_state').prop('disabled', false);
+           $('#region_type_region_cities').prop('disabled', false);
+           $('#region_type_region_cities').html('');
+           var val = $(this).val();
+           $.ajax({
+                type: "POST",
+                url: "{{ url('select_states') }}?country_id=" + val,
+                success: function(data) {
+                    // Remove current options
+                    $('#region_type_state').html('');
+                    $.each(data, function(k, v) {
+                        $('#region_type_state').append('<option value="' + v + '">' + k + '</option>');
+                    });
+                }
+            });
+            return false;
+        });
+       $('#region_type_state').change(function(){
+		var val = $(this).val();
+	   	var list = [];
+	    	var count=0;
+    		for (i=0; i < val.length; i++) {
+			var id = Number(val[i]);
+			// console.log(mark.checked + ' ' + id);
+			list[count++]=id;
+		}
+	   // console.log(list);
+	   var statelist = JSON.stringify(list);
+           $.ajax({
+                type: "POST",
+                url: "{{ url('select_cities') }}?statelist=" + statelist,
+                success: function(data) {
+                    // Remove current options
+                    $('#region_type_region_cities').html('');
+                    $.each(data, function(k, v) {
+                        $('#region_type_region_cities').append('<option value="' + v + '">' + k + '</option>');
+                    });
+                    
+                }
+            });
+            return false;
+        });
+        
+        $('#region_type_submit').click(function(evt) {
+            // var ciudades = $('#region_type_region_cities');
+            var ciudades = $('#region_type_region_cities option');
+            var count = $('#region_type_region_cities :selected').length;
+            var total =  ciudades.length;
+            // console.log(count +'/'+ total);
+            
+            if (count < 1) {
+                funalert('Debe seleccionar al menos una Ciudad..');
+                return false;
+            }
+            var name =  $('#region_type_name').val();
+            var country = $("#region_type_country :selected").text();
+            
+            if ((name.toLowerCase().indexOf('todas') >= 0) &&  (name.toLowerCase().indexOf(country.toLowerCase()) >= 0)) {
+                funalert('El nombre de la región NO ES VALIDO');
+                return false; 
+            }
+            return false;
+        });
+        
+    });
+</script>
+{% endblock %}
+

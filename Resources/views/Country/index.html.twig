@@ -1,0 +1,178 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>Países</title>
+{% endblock %}
+
+{% block body -%}
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Lista de Países</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('country') }}">Países</a></li>
+            <li class="active">Listar</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="main-app">
+        <div class="head" >
+            <h3>Búsqueda</h3>
+            <input type="text" id="globalfilter" placeholder="Nombre" class="form-control" style="width: 30%;">
+        {#    
+        <div class="form-group">
+                <label class="control-label">País:</label>
+                <select id="findCountry" class="select2">
+                    <option value="Todos">Todos</option>
+                    {% for country in countries %}
+                        <option value={{ country['id'] }}>{{ country['name'] }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        #}
+        <div class="filters">
+            <p style="display:inline;" id="currentdate"></p>
+        </div>
+        <div class="block-flat" style=" padding-top: 0px;">
+            <div class="content" style=" padding-top: 0px;">
+                <div id="mydiv" style="width: 100%" >
+                    <table id="countryTable" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%">
+                        <thead>
+                            <tr>
+                                <th>Nombre</th>
+                                <th>Código</th>
+                                <th>Estados/Provincias</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for entity in entities %}
+                        <tr>
+                            <td><a href="{{ path('country_show', { 'id': entity.id }) }}">{{ entity.name }}</a></td>
+                            <td>{{ entity.code }}</td>
+                            <td>{{ entity.states|length }}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    <div style="margin-top:10px;">
+                    <table class="no-border">
+                        <tbody class="no-border-y">
+                            <tr>
+                            <td>
+                                <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-sm" >Regresar</button>
+                            </td>
+                            <td style="text-align:right;">
+                                <buttom class="btn btn-primary btn-sm" title="Crear" onclick="location.href='{{ path('country_new') }}';">Crear país</buttom>
+                            </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+{% block javascripts %}
+
+<script type="text/javascript">
+    function formatDate(date) {
+        var monthNames = [
+            "Enero", "Febrero", "Marzo",
+            "Abril", "Mayo", "Junio", "Julio",
+            "Agosto", "Septiembre", "Octubre",
+            "Noviembre", "Diciembre"
+        ];
+
+        var day = date.getDate();
+        var monthIndex = date.getMonth();
+        var year = date.getFullYear();
+
+        return day + ' de ' + monthNames[monthIndex] + ' ' + year;
+    }
+    function searchBis(str_search) {
+        var ret = $($.parseHTML(str_search)).text().toLowerCase();
+        return ret.indexOf($('#globalfilter').val().toLowerCase()) == 0;
+    }
+    $.fn.dataTable.ext.search.push(
+        function( settings, data, dataIndex ) {
+        if ($('#globalfilter').val().trim() != '') {
+            var ret0 = searchBis(data[0]);
+            return ( ret0 );
+        } else {
+            return true;
+        }
+
+    });
+    $(document).ready(function () {
+        $(".dataTables_filter input").val('');
+        document.getElementById("currentdate").innerHTML = formatDate(new Date());
+        var $thisRegionTable = $('#countryTable').DataTable({
+            "stateSave": false,
+            "columnDefs": [
+                    { "searchable": true, "targets": 0 },
+                    { "searchable": true, "targets": 1 },
+                    { "searchable": false, "targets": 2 },
+            ],
+            "order": [[ 0, "asc" ]],
+            "pageLength": 10,
+            "ordering": true,
+            "searching": true,
+            "info":     false,
+            "lengthChange": true,
+            "scrollX": true,
+            "lengthMenu": [[10, 20, 30, -1], [10, 20, 30, "Todas"]],
+            "language": {
+                "sSearch": "Buscar",
+                "lengthMenu": 'Mostrando  _MENU_  "Países" por página',
+                "zeroRecords": "<div style=\"color:red;\">Lo siento no se encontraron Países</div>",
+                "sinfo": "Mostrando _START_ a _END_ de _TOTAL_ Países",
+                "infoEmpty": "No hay registros disponibles",
+                "infoFiltered": "(Filtradas de un total de _MAX_ )",
+                "searchPlaceholder": "Nombre",
+                "paginate" : {
+                    first:    '«',
+                    previous: '‹',
+                    next:     '›',
+                    last:     '»'
+                },
+            },
+            "sDom": '<"top"i>rt<"bottom"lp><"clear">',
+            "pagingType": "full_numbers",
+            "fnDrawCallback": function(oSettings) {
+                if ((oSettings._iDisplayLength >= oSettings.fnRecordsDisplay()) ||  (oSettings._iDisplayLength == -1)) {
+                    $(oSettings.nTableWrapper).find('.dataTables_paginate').hide();
+                } else {
+                    $(oSettings.nTableWrapper).find('.dataTables_paginate').show();
+                }
+            },
+        });
+        $('#globalfilter').on( 'keyup', function () {
+            $thisRegionTable.draw();
+        } );
+        /*
+        $('#findCountry').change( function () {
+            // console.log(this.value);
+            $('#myInputId').trigger(jQuery.Event('keypress', { keycode: 13 }));
+            var column = $thisRegionTable.column(1);
+            if (this.value == "Todos" ) {
+                column.visible(true);
+                $thisRegionTable.columns( 1 ).search('').draw();
+            } else {
+                column.visible(false);
+                $thisRegionTable.columns( 1 ).search( this.value ).draw();
+            }
+        });
+        */
+    });
+    
+</script>
+{% endblock %}

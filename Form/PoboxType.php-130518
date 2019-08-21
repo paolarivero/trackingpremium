@@ -1,0 +1,93 @@
+<?php
+
+namespace NvCarga\Bundle\Form;
+
+use Doctrine\ORM\EntityManager;
+use NvCarga\Bundle\Entity\Warehouse;
+use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\OptionsResolver\OptionsResolverInterface;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\Length;
+use Symfony\Component\Validator\Constraints\Email;
+
+class PoboxType extends AbstractType
+{
+    /**
+     * @param FormBuilderInterface $builder
+     * @param array $options
+     */
+    public function buildForm(FormBuilderInterface $builder, array $options)
+    {
+        $builder
+            ->add('id_customer', 'hidden', array('mapped'=>false, 'data'=> 0)) // SOLO SE REQUIERE ESTE ID....
+            ->add('name_customer', 'text', array('label'=> 'Nombre ', 'mapped'=>false, 'constraints' => array(
+                new NotBlank(["message" => "El nombre no puede estar vacío"]), 
+                new Length(["min" => 2, "max" => 30,
+                            "minMessage" => "El nombre debe tener al menos {{ limit }} caracteres",
+                            "maxMessage" => "El nombre no puede tener mas de {{ limit }} caracteres"]))))
+            ->add('lastname_customer', 'text', array('label'=> 'Apellido ', 'mapped'=>false,'constraints' => array(
+                new Length(["max" => 40,
+                            "maxMessage" => "El apellido no puede tener mas de {{ limit }} caracteres"]))))	
+            ->add('docid_customer', 'text', array('label'=> 'Documento de identidad ', 'mapped'=>false, 'required' => false,
+                'constraints' => array(
+                // new NotBlank(["message" => "Debe suministrar un documento de identidad"]), 
+                new Length(["min" => 5, "max" => 30,
+                            "minMessage" => "El documento de identidad debe tener al menos {{ limit }} caracteres",
+                            "maxMessage" => "El documento de identidad no puede tener mas de {{ limit }} caracteres"]))))				
+            ->add('address_customer', 'textarea', array('label'=> 'Dirección ', 'mapped'=>false, 'constraints' => array(
+                new NotBlank(["message" => "La dirección no puede estar vacía"]), 
+                new Length(["min" => 2, "max" => 120,
+                            "minMessage" => "La dirección debe tener al menos {{ limit }} caracteres",
+                            "maxMessage" => "La dirección no puede tener mas de {{ limit }} caracteres"]))))
+            ->add('phone_customer', 'text', array('label'=> 'Teléfono', 'mapped'=>false, 'required' => false))
+            ->add('mobile_customer', 'text', array('label'=> 'Móvil ', 'mapped'=>false, 'required' => false))
+            // ->add('barrio_customer', 'text', array('label'=> 'Sector ', 'mapped'=>false, 'required' => false))
+            ->add('email_customer', 'repeated', array('type' => 'email', 'mapped'=>false, 
+                'first_options'=>array('label'=> 'Email '),
+                'second_options' => array('label' => 'Repita el Email '),
+                'invalid_message' => 'Los emails deben ser iguales',
+                'constraints' => array(new NotBlank(["message" => "Debe asignar un email"]),
+                    new Email(["message" => "El email '{{ value }}' no es válido.", 
+                                "checkMX" => true, 
+                                "checkHost" => true]) 
+                )))
+            ->add('cityid_customer', 'hidden', array('mapped'=>false))
+            ->add('cityname_customer', 'hidden', array('label'=> 'Ciudad ', 
+                'mapped'=>false, 'constraints' => array(new NotBlank(["message" => "Escoja una ciudad para el cliente"])))) 
+            //->add('cityname_customer', 'text', array('label'=> 'Ciudad ', 'mapped'=>false, 'read_only' => true, 
+            //        'constraints' => array(new NotBlank(["message" => "Escoja una ciudad"]))))  
+            // ->add('state_customer', 'text', array('label'=> 'Estado ', 'mapped'=>false, 'read_only' => true))
+            // ->add('country_customer', 'text', array('label'=> 'País ', 'mapped'=>false, 'read_only' => true)) 
+            ->add('zip_customer','text', array('label'=> 'Zip', 'mapped'=>false, 'required' => false))	
+            ->add('password', 'repeated', array('type' => 'password', 
+                    'constraints' => array(new NotBlank(["message" => "Debe colocar un password"])),
+                    'first_options'  => array('label' => 'Password'),
+                    'second_options' => array('label' => 'Repita el Password'), 
+                    'invalid_message' => 'Los password deben ser iguales'))
+            ->add('type', 'entity', array('label' => 'Tipo de Cliente ', 'mapped' => false,
+                    'empty_value' => false, 'multiple' => false,
+                    'data_class'=> 'NvCarga\Bundle\Entity\Customertype', 'class'=> 'NvCargaBundle:Customertype', 'expanded' => true))
+        ;
+    }
+    /**
+     * @param OptionsResolverInterface $resolver
+     */
+    public function setDefaultOptions(OptionsResolverInterface $resolver)
+    {
+        $resolver->setDefaults(array(
+            'data_class' => 'NvCarga\Bundle\Entity\Pobox'
+        ));
+    }
+
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return 'pobox_type';
+    }
+}

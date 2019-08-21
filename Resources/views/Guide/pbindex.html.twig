@@ -1,0 +1,227 @@
+{% extends '::newbase-public.html.twig' %}
+
+{% block title %}
+    <title>{% trans %}Guías{% endtrans %}</title>
+{% endblock %}
+
+{% block body -%}
+
+<div class="page-aside app filters">
+    <div class="content">
+        <button data-target=".app-nav" data-toggle="collapse" type="button" class="navbar-toggle"><span class="fa fa-chevron-down"></span></button>
+        <h2 class="page-title">Filtros</h2>
+        <p class="description">Buscador Avanzado</p>
+    </div>
+    <div class="app-nav collapse">
+        <div class="content">
+            <div class="form-group">
+                <label class="control-label">Desde:</label>
+                <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetime">
+                    <input id="mindate" size="16" type="text" value="" class="form-control"><span class="input-group-addon btn btn-primary"><span class="glyphicon glyphicon-th"></span></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label">Hasta:</label>
+                <div data-min-view="2" data-date-format="mm/dd/yyyy" class="input-group date datetime">
+                    <input id="maxdate" size="16" type="text" value="" class="form-control"><span class="input-group-addon btn btn-primary"><span class="glyphicon glyphicon-th"></span></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Lista de {% trans %}Guías{% endtrans %}</h2>
+    </div>
+    <div class="main-app">
+        <div class="head">
+            <h3>Búsqueda</h3>
+            <input type="text" id="globalfilter" placeholder="Número/Servicio/Status" class="form-control">
+        </div>
+        <div class="filters">
+            <p style="display:inline;" id="currentdate"></p>
+        </div>
+        <div class="block-flat" style=" padding-top: 0px;">
+            <div class="content" style=" padding-top: 0px;">
+                <table id="guideTable" class="table table-striped table-bordered dt-responsive nowrap" cellspacing="0" width="100%"> 
+                    <thead>
+                        <tr>
+                            <th style="text-align:center;">{% trans %}Guía{% endtrans %} </th>
+                            <th style="text-align:center;">Fecha</th>
+                            <th style="text-align:center;">Servicio</th>
+                            <th style="text-align:center;">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for guide in entities %}
+                            <tr>
+                                <td>{{ guide.number }}
+                                <buttom class="btn btn-default btn-xs" title="PDF" onclick="location.href='{{path('guide_printpdf', {'id': guide.id }) }}';" data-placement="up"><i class="fa fa-file"></i></buttom>
+                                        
+                                <buttom class="btn btn-primary btn-xs" title="Rastrear" onclick="location.href='{{ url('guide_poboxfind') }}?guidenumber={{ guide.number }}';"><i class="fa fa-pencil"></i></buttom>
+                                </td>
+                                <td>{{ guide.creationdate|date('m/d/Y') }}</td>
+                                <td>{{ guide.shippingtype }}</td>
+                                {% set last = guide.moves|last %}
+                                <td>{{ last.status }}</td>
+                                {#
+                                <td style="text-align:center;">
+                                <div style="margin:0 auto;">
+                                <a  class="btn btn-success" href="{{ path('guide_printpdf', { 'id': guide.id }) }}">PDF</a>
+                                <a  class="btn btn-success" href="{{ url('guide_poboxfind') }}?guidenumber={{ guide.number }}">Rastreo</a>
+                                #}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <div style="margin-top:10px;">
+                    <center>
+                        <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-flat" >Regresar</button>
+                    </center>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>    
+
+
+{% endblock %}
+{% block javascripts %}  
+
+<script type="text/javascript">
+    function formatDate(date) {
+        var monthNames = [
+            "Enero", "Febrero", "Marzo",
+            "Abril", "Mayo", "Junio", "Julio",
+            "Agosto", "Septiembre", "Octubre",
+            "Noviembre", "Diciembre"
+        ];
+
+        var day = date.getDate();
+        var monthIndex = date.getMonth();
+        var year = date.getFullYear();
+
+        return day + ' de ' + monthNames[monthIndex] + ' ' + year;
+    }
+    function searchBis(str_search) {
+        var ret = $($.parseHTML(str_search)).text().toLowerCase();
+        return ret.indexOf($('#globalfilter').val().toLowerCase()) != -1;
+    }
+    $.fn.dataTable.ext.search.push(
+        function( settings, data, dataIndex ) {
+     
+        if ($('#globalfilter').val().trim() != '') {
+            var ret0 = searchBis(data[0]);
+            var ret2 = searchBis(data[2]);
+            var ret3 = searchBis(data[3]);
+            return ( ret0 || ret2 || ret3);
+        } else {
+            return true;
+        }
+        
+    });
+    $.fn.dataTableExt.afnFiltering.push(
+        function( oSettings, aData, iDataIndex ) {
+            var iFini = document.getElementById('mindate').value;
+            var iFfin = document.getElementById('maxdate').value;
+            var iStartDateCol = 1;
+            var iEndDateCol = 1;
+    
+            iFini=iFini.substring(6,10) + iFini.substring(0,2)+ iFini.substring(3,5);
+            iFfin=iFfin.substring(6,10) + iFfin.substring(0,2)+ iFfin.substring(3,5);
+    
+            // console.log(iFini + ' ' + iFfin);
+            
+            var datofini=aData[iStartDateCol].substring(6,10) + aData[iStartDateCol].substring(0,2)+ aData[iStartDateCol].substring(3,5);
+            var datoffin= datofini;
+            /*
+            aData[iEndDateCol].substring(6,10) + aData[iEndDateCol].substring(3,5)+ aData[iEndDateCol].substring(0,2);
+            // console.log(datofini + ' ' + datoffin); */
+    
+            if ( iFini === "" && iFfin === "" )
+            {
+                return true;
+            }
+            else if ( iFini <= datofini && iFfin === "")
+            {
+                return true;
+            }
+            else if ( iFfin >= datoffin && iFini === "")
+            {
+                return true;
+            }
+            else if (iFini <= datofini && iFfin >= datoffin)
+            {
+                return true;
+            }
+            return false;
+        }
+    );
+    $(document).ready(function () {
+        $(".clickable-row").click(function() {
+            window.location = $(this).data("href");
+        });
+        document.getElementById("currentdate").innerHTML = formatDate(new Date());
+        
+        $thisGuideTable=$('#guideTable').DataTable({
+            "ordering": true,
+            "responsive": true,
+            "searching": true,
+            "info":     false,
+            "lengthChange": true,
+            "scrollX": true,
+            "pageLength": 10,
+            "lengthMenu": [[10, 15, 20, 25, 30, -1], [10, 15, 20, 25, 30, "Todos"]],
+            // "columns": [ null, null, null , null, null ],
+            "columnDefs": [
+                { "type": 'date', "targets": 1 },
+                { className: "searchclass", "targets": [ 0 ] }, 
+                { className: "searchclass", "targets": [ 2 ] }, 
+                { className: "searchclass", "targets": [ 3 ] }, 
+                ],
+            "order": [[ 1, "desc" ]],
+            "language": {
+                "sSearch": "Buscar",
+                "lengthMenu": 'Mostrando  _MENU_  "{% trans %}Guías{% endtrans %}" por página',
+                "zeroRecords": "<div style=\"color:red;\">Lo siento no se encontraron {% trans %}Guías{% endtrans %}</div>",
+                "sInfo": "Mostrando _START_ a _END_ de _TOTAL_ {% trans %}Guías{% endtrans %}",
+                "infoEmpty": "No hay registros disponibles",
+                "infoFiltered": "(Filtradas de un total de _MAX_ )",
+                "searchPlaceholder": "Número/Remitente/Destinatario",
+                "paginate" : {
+                                first:    '«',
+                                previous: '‹',
+                                next:     '›',
+                                last:     '»'
+                    }
+                },
+            
+            "pagingType": "full_numbers",
+            "sDom": '<"top"i>rt<"bottom"lp><"clear">',
+            "fnDrawCallback": function(oSettings) {
+                    if ((oSettings._iDisplayLength >= oSettings.fnRecordsDisplay()) ||  (oSettings._iDisplayLength == -1)) {
+                        $(oSettings.nTableWrapper).find('.dataTables_paginate').hide();
+                    } else {
+                        $(oSettings.nTableWrapper).find('.dataTables_paginate').show();
+                    }
+            },
+        });
+        
+        $('#globalfilter').on( 'keyup', function () {
+            $thisGuideTable.draw();
+        } );
+        $('#mindate').change( function() { $thisGuideTable.draw(); } );
+        $('#maxdate').change( function() { $thisGuideTable.draw(); } );
+        $thisGuideTable.responsive.rebuild();
+        $thisGuideTable.responsive.recalc();
+        // $thisGuideTable.draw();
+        $( window ).resize(function() {
+            $thisGuideTable.responsive.rebuild();
+            $thisGuideTable.responsive.recalc();
+            // $thisGuideTable.draw();
+        });
+    });
+</script>
+{% endblock %}

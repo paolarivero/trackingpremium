@@ -1,0 +1,326 @@
+{% extends app.user.pobox is null
+    ? '::newbase.html.twig' 
+    : '::newbase-public.html.twig' %}
+
+{% block title %}
+    <title>Editar Cliente</title>
+{% endblock %}
+
+{# Display the form #}
+
+{% form_theme edit_form 'form/fields.html.twig' %}
+
+{% block body %}
+<style>
+    td {
+        white-space: nowrap;
+    }
+ 
+    td.wrapok {
+        white-space:normal;
+    }
+</style>
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Editar Cliente</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('customer') }}">Clientes</a></li>
+            <li class="active">Editar</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+
+        {{ form_start(edit_form, {attr: {novalidate: 'novalidate', 'id': 'customer_type' }}) }}
+        <div class="block-flat">
+            <div class="header">
+                <h3>Datos del cliente</h3>
+            </div>
+            <div class="content">
+                {{ form_widget(edit_form.type) }}
+                {{ form_row(edit_form.name) }}
+                {{ form_row(edit_form.lastname) }}
+                {{ form_row(edit_form.email) }}
+                {{ form_row(edit_form.docid) }}
+                {{ form_row(edit_form.address) }}
+                <div class="form-group myselect">
+                    <div class="row">
+                            <div class="col-md-2">
+                                <label>Ciudad</label>
+                            </div>
+                            <div class="col-md-10">
+                                <input type="hidden" id="citycustomer" style="width:100%;" />
+                            </div>
+                    </div>
+                </div>
+                {{ form_row(edit_form.cityname) }}
+                {{ form_row(edit_form.zip) }}
+                {{ form_row(edit_form.mobile) }}
+                {{ form_row(edit_form.phone) }}
+
+                
+                <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        <td>
+
+                        </td>
+                        <td style="text-align:right;">
+                            {{ form_widget(edit_form.submit, { 'attr': {'class': 'btn btn-primary btn-flat'} }) }}
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>{# FIN CONTENT #}
+        </div> {# FIN BLOCK FLAT #}
+        {{ form_end(edit_form) }}
+        <div class="block-flat">
+            <div class="header">
+                <h3>Direcciones</h3>
+                <hr>
+                <h4>Búsqueda</h4>
+                <input type="text" id="globalfilter" placeholder="Nombre/Apellido/Ciudad" class="form-control">
+                
+            </div>
+            <div class="content">
+                <div id="mydiv" width="40%">
+                <table id="dirTable" class="table table-striped table-bordered dt-responsive" cellspacing="0" width="100%">
+                    <thead id="headrec">
+                        <tr>
+                            <th>Acción</th>
+                            <th>Nombre</th>
+                            <th>Apellido</th>
+                            <th>Doc. Identidad</th>
+                            <th>Dirección</th>
+                            <th>Ciudad</th>
+                            <th>ZIP</th>
+                            <th>Teléfono</th>
+                            <th>Móvil</th>
+                            
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for dir in entity.baddress %}
+                            <tr>
+                                <td>
+                                    {% if entity.baddress|length > 1 %}
+                                        <button type="button" title="Borrar" class="btn btn-danger btn-xs bconfirm" data-toggle="modal" data-target="#confirmdelete" data-thedir="{{ dir.id }}" ><i class="fa fa-times"></i></button>
+                                    {% endif %}
+                                    <buttom class="btn btn-info btn-xs" title="Editar" onclick="location.href='{{path('baddress_edit', {'id': dir.id }) }}';" data-placement="up"><i class="fa fa-pencil"></i></buttom>
+                                    {% if dir.id != entity.adrdefault.id %}
+                                        <buttom class="btn btn-primary btn-xs" title="Cambiar a Predeterminada" onclick="location.href='{{ path('baddress_change', { 'id': dir.id }) }}';"><i class="fa fa-building"></i></buttom>
+                                    {% else %}
+                                        <buttom class="btn btn-success btn-xs" title="Dirección Predeterminada" disable readonly><i class="fa fa-building-o"></i></buttom>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {{ dir.name }}
+                                </td>
+                                <td>
+                                    {{ dir.lastname }}
+                                </td>
+                                <td>
+                                    {{ dir.docid }}
+                                </td>
+                                
+                                <td>
+                                    {{ dir.address }}
+                                </td>
+                                <td>
+                                    {{ dir.city }} ({{ dir.city.state }}, {{ dir.city.state.country }})
+                                </td>
+                                <td>
+                                    {{ dir.zip }}
+                                </td>
+                                <td>
+                                    {{ dir.phone }}
+                                </td>
+                                <td>
+                                    {{ dir.mobile }}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                <buttom class="btn btn-success btn-xs" title="Dirección Predeterminada" disable readonly><i class="fa fa-building-o"></i></buttom> Dirección Predeterminada
+                <div style="margin-top:10px;">
+                    <center>
+                    <div class="row">
+                        <div class="col-sm-6 col-md-6">
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-flat" >Regresar</button>
+                        </div>
+                        <div class="col-sm-6 col-md-6">
+                            <button type="button" class="btn btn-primary btn-flat" onclick="location.href='{{ path('baddress_new', { 'id': entity.id, 'type': 1 })  }}';">Agregar dirección</button>
+                        </div>
+                    </div>
+                    </center>
+                </div>
+            </div>
+        </div>
+        <!-- Modal -->
+        <div class="modal fade" id="confirmdelete" role="dialog">
+            <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                <button id="closemodalconfirm" type="button" class="close" data-dismiss="modal">&times;</button>
+                <h2 class="modal-title"><center>Borrar dirección del cliente</center></h2>
+                </div>
+                <div class="modal-body">
+                <input type="hidden" id="iddir">
+                <center>
+                    <a id="linkdel" href="{{ path('baddress_delete', { 'id': 1 }) }}" class="btn btn-danger btn-sm"><h2>CONFIRMAR</h2></a>
+                </center>
+                </div>
+                
+                <div class="modal-footer">
+                <button id="closemodalconfirm" type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                </div>
+            </div>      
+            </div>
+        </div> 
+    </div>
+</div>
+{% endblock %}
+{% block javascripts %}
+<script type="text/javascript">
+    function searchBis(str_search) {
+        var ret = $($.parseHTML(str_search)).text().toLowerCase();
+        return ret.indexOf($('#globalfilter').val().toLowerCase()) != -1;
+    }
+    $.fn.dataTable.ext.search.push(
+        function( settings, data, dataIndex ) {
+     
+        if ($('#globalfilter').val().trim() != '') {
+            var ret0 = searchBis(data[1]);
+            var ret2 = searchBis(data[2]);
+            var ret3 = searchBis(data[5]);
+            return ( ret0 || ret2 || ret3);
+        } else {
+            return true;
+        }
+        
+    });
+    $(document).ready(function () {
+        $("#citycustomer").select2({
+            placeholder: "Buscar Ciudad",
+            ajax: {
+                url: "{{ path('city_find') }}",
+                dataType: 'json',
+                delay: 250,
+                data: function (term) {
+                    return {
+                        q: term, //search term
+                    };
+                },
+                results: function (data) {
+                    return {
+                        results: data,
+                    };
+                },
+                cache: true
+                },
+             minimumInputLength: 2,
+             formatInputTooShort: function (input, min) { var n = min - input.length; return "Por favor ingrese  " + n + " carcater" + (n == 1? "" : "es") + " mas"; },
+             formatNoMatches: function () { return "No se encuentran resultados"; },
+        });
+        
+        $('#citycustomer').on("change", function(e) {
+            var cityid = $('#citycustomer').val();
+            $('#customer_type_cityid').val(cityid);
+            var cityname = $('#citycustomer').select2('data').text;
+            $('#customer_type_cityname').val(cityname);
+        });
+        var citySID = $("#customer_type_cityid").val();
+        var citySname = $("#customer_type_cityname").val();
+        if (citySID && citySname) {
+            // console.log('Hola:  ' +  citySID + ' ' + citySname);
+            $('#citycustomer').select2('data', {id: citySID, text: citySname});
+        }
+        $('#customer_type_type_1').iCheck('check');
+        $('#customer_type_type_2').on('ifChecked', function(event){
+            $('#customer_type_lastname').val('');
+            $('#customer_type_lastname').prop('readonly', true);
+        });
+        $('#customer_type_type_1').on('ifChecked', function(event){
+            $('#customer_type_lastname').prop('readonly', false);
+        });
+        $thisDirTable=$('#dirTable').DataTable({
+            "ordering": true,
+            "responsive": true,
+            "searching": true,
+            "info":     true,
+            "lengthChange": true,
+            "scrollX": true,
+            "paginate": true,
+            "pageLength": 5,
+            "lengthMenu": [[5, 10, 15, 20, 25, 30, -1], [5, 10, 15, 20, 25, 30, "Todos"]],
+            "columns": [ {"searchable": false},  null, {"searchable": false}, null, {"searchable": false}, null, {"searchable": false}, {"searchable": false}, {"searchable": false} ],
+            "columnDefs": [
+                    {
+                        "targets": [ 4 ],
+                        class:"wrapok",
+                    },
+            ],
+            "order": [[ 1, "asc" ]],
+            "language": {
+                "sSearch": "Buscar",
+                "lengthMenu": 'Mostrando  _MENU_  "Direcciones" por página',
+                        "zeroRecords": "<div style=\"color:red;\">Lo siento no se encontraron Direcciones</div>",
+                "sInfo": "Mostrando _START_ a _END_ de _TOTAL_ Direcciones",
+                        "infoEmpty": "No hay registros disponibles",
+                        "infoFiltered": "(Filtradas de un total de _MAX_ )",
+                "searchPlaceholder": "Número/Remitente/Destinatario",
+                "paginate" : {
+                                first:    '«',
+                                previous: '‹',
+                                next:     '›',
+                                last:     '»'
+                    }
+                },
+            "pagingType": "full_numbers",
+            "sDom": '<"top"B>rt<"bottom"lp><"clear">',
+            "fnDrawCallback": function(oSettings) {
+                    if ((oSettings._iDisplayLength >= oSettings.fnRecordsDisplay()) ||  (oSettings._iDisplayLength == -1)) {
+                        $(oSettings.nTableWrapper).find('.dataTables_paginate').hide();
+                    } else {
+                        $(oSettings.nTableWrapper).find('.dataTables_paginate').show();
+                    }
+            },
+        });
+        
+        $('#globalfilter').on( 'keyup', function () {
+            $thisDirTable.draw();
+        } );
+        
+        $('#mindate').change( function() { $thisDirTable.draw(); } );
+        $('#maxdate').change( function() { $thisDirTable.draw(); } );
+    
+        $('#mydiv').width("100%");
+        $thisDirTable.responsive.rebuild();
+        $thisDirTable.responsive.recalc();
+        $thisDirTable.draw();
+        $( window ).resize(function() {
+            $thisDirTable.responsive.rebuild();
+            $thisDirTable.responsive.recalc();
+            $thisDirTable.draw();
+        });
+        $('#confirmdelete').on('shown.bs.modal', function (e) {
+            var dirid = $(e.relatedTarget).data('thedir'); 
+            var path = "{{ path('baddress_delete', { 'id': 1 }) }}"
+            var lp = path.length;
+            var newpath = path.substring(0, lp-1) + dirid;
+            // console.log(path + ' ' + newpath);
+            var link = document.getElementById("linkdel");
+            link.setAttribute("href", newpath);
+            // $("a[href="+path+"]").attr('href', newpath);
+        });
+    });
+</script>
+{% endblock %}
+

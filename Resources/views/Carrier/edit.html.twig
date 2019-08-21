@@ -1,0 +1,62 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>Editar Carrier</title>
+{% endblock %}
+
+{# Display the form #}
+
+{% form_theme edit_form 'form/fields.html.twig' %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Editar Carrier</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('carrier') }}">Carriers</a></li>
+            <li class="active">Editar</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        {{ form_start(edit_form, {attr: {novalidate: 'novalidate', 'id': 'agency_type' }}) }}
+        <div class="block-flat">
+            <div class="header">
+                <h3>Información</h3> 
+            </div>
+            <div class="content">
+                    {{ form_row(edit_form.name) }}
+                    {{ form_row(edit_form.description) }}
+                    <div class="row">
+                        <div class="col-sm-2 col-md-2">
+                            Activo
+                        </div>
+                        <div class="col-sm-10 col-md-10">
+                            {{ form_row(edit_form.active) }}
+                        </div>
+                    </div>
+                <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        <td>
+
+                        </td>
+                        <td style="text-align:right;">
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-flat" >Regresar</button>
+                            {{ form_widget(edit_form.submit, { 'attr': {'class': 'btn btn-primary btn-flat'} }) }}
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {{ form_end(edit_form) }}
+    </div>
+</div>
+{% endblock %}

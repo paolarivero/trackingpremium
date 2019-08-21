@@ -1,0 +1,128 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>Crear Cuenta Bancaria</title>
+{% endblock %}
+
+{# Display the form #}
+
+{% form_theme edit_form 'form/fields.html.twig' %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Crear Cuenta Bancaria</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('account') }}">Cuenta Bancarias</a></li>
+            <li class="active">Crear</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+
+        {{ form_start(edit_form, {attr: {novalidate: 'novalidate', 'id': 'account_type' }}) }}
+        <div class="block-flat">
+            <div class="header">
+                <div class="row">
+                    <div class="col-sm-6 col-md-6">
+                        <h3>Datos de la cuenta</h3> 
+                    </div>
+                     <div class="col-sm-6 col-md-6">
+                        {{ form_row(edit_form.isactive) }}
+                    </div>
+                </div>
+               
+            </div>
+            <div class="content">
+                
+                {{ form_row(edit_form.bankname) }}
+                {{ form_row(edit_form.address) }}
+                <div class="form-group">
+                    <div class="row">
+                            <div class="col-md-2">
+                                <label>Ciudad</label>
+                            </div>
+                            <div class="col-md-10">
+                                <input type="hidden" id="citybank" style="width:100%;" />
+                            </div>
+                    </div>
+                </div>
+                {{ form_row(edit_form.number) }}
+                {{ form_row(edit_form.swift) }}
+                {{ form_row(edit_form.rtn) }}
+                {{ form_row(edit_form.holdername) }}
+                {{ form_row(edit_form.docid) }}
+                {{ form_row(edit_form.email) }}
+                
+                <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        <td>
+
+                        </td>
+                        <td style="text-align:right;">
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-flat" >Cancelar</button>
+                            {{ form_widget(edit_form.submit, { 'attr': {'class': 'btn btn-primary btn-flat'} }) }}
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>{# FIN CONTENT #}
+        </div> {# FIN BLOCK FLAT #}
+        {{ form_end(edit_form) }}
+    </div>
+</div>
+{% endblock %}
+{% block javascripts %}
+<script type="text/javascript">
+    
+   
+    
+    $(document).ready(function () {
+       
+        $("#citybank").select2({
+            placeholder: "Buscar Ciudad",
+            ajax: {
+                url: "{{ path('city_find') }}",
+                dataType: 'json',
+                delay: 250,
+                data: function (term) {
+                    return {
+                        q: term, //search term
+                    };
+                },
+                results: function (data) {
+                    return {
+                        results: data,
+                    };
+                },
+                cache: true
+                },
+             minimumInputLength: 2,
+             formatInputTooShort: function (input, min) { var n = min - input.length; return "Por favor ingrese  " + n + " carcater" + (n == 1? "" : "es") + " mas"; },
+             formatNoMatches: function () { return "No se encuentran resultados"; },
+
+        });
+
+        $('#citybank').on("change", function(e) {
+            var cityid = $('#citybank').val();
+            $('#account_type_cityid').val(cityid);
+            var cityname = $('#citybank').select2('data').text;
+            $('#account_type_cityname').val(cityname);
+        });
+        
+            var citySID = $("#account_type_cityid").val();
+            var citySname = $("#account_type_cityname").val();
+            if (citySID && citySname) {
+                // console.log('Hola:  ' +  citySID + ' ' + citySname);
+                $('#citybank').select2('data', {id: citySID, text: citySname});
+            }
+    });
+</script>
+{% endblock %}

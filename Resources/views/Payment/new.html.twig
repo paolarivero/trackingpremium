@@ -1,0 +1,116 @@
+{% extends app.user.pobox is null
+    ? '::layout_min.html.twig' 
+    : '::newbase-public.html.twig' %}
+
+{% block title %}
+    <title>{{ nameform }}</title>
+{% endblock %}
+
+{% form_theme form 'form/fields.html.twig' %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>{{ nameform }}</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('payment') }}">Pagos</a></li>
+            <li class="active">{{ nameform }}</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+            {% for flashMessage in app.session.flashbag.get('warning') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        {{ form_start(form, {attr: {novalidate: 'novalidate', 'id': 'receipt_type' }}) }}
+        <div class="block-flat">
+            <div class="header">
+                <h3>Datos del pago</h3>
+            </div>
+            <div class="content">
+                {{ form_row(form.name_customer) }}
+                {{ form_row(form.lastname_customer) }}
+                {{ form_row(form.email_customer) }}
+                {{ form_row(form.guide) }}
+                {{ form_row(form.account) }}
+                {{ form_row(form.paydate) }}
+                {{ form_row(form.amount) }}	
+                <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        <td>
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default" >Regresar</button>
+                        </td>
+                        <td style="text-align:right;">
+                            {{ form_row(form.submit, { 'attr': {'class': 'btn btn-primary'} }) }}
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+            </div>
+        </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block javascripts %}
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#payment_type_guide').change(function(){
+            var val = $(this).val();
+            $.ajax({
+                type: "POST",
+                url: "{{ url('totalpaid_guide') }}?guide_id=" + val,
+                success: function(data) {
+                    if (data){       
+                        $('#payment_type_amount').val(data);
+                    } else {
+                        funalert('No se encontró la {% trans %}Guía{% endtrans %}');
+                    }
+                }
+            });
+        });
+        $('#payment_type_paydate').datepicker();
+        $("#payment_type_paydate").val($.datepicker.formatDate('mm/dd/yy', new Date()));
+        // $("label.required").append('<span class="red-star" title="Campo Obligatorio"> *</span>');
+        var val = $('#payment_type_email_customer').val();
+        if (val == '') {
+            funalert('Debe asignar el email del cliente');
+        } else {
+           $.ajax({
+                type: "POST",
+                url: "{{ url('select_guides') }}?customer_email=" + val,
+                success: function(data) {
+                    if (data){       
+                        var num = (data + '').length;
+                        if (num == 0) {
+                            alert('El cliente no tiene {% trans %}Guías{% endtrans %} registradas que pueda pagar');
+                            $('#payment_type_submit').hide();
+                        } else {
+                            $('#payment_type_guide').html('');
+                            $.each(data, function(k, v) {
+                                $('#payment_type_guide').append('<option value="' + v + '">' + k + '</option>');
+                            })
+                            $('#payment_type_guide').change();
+                        }
+                    } else {
+                        funalert('No se encontraron {% trans %}Guías{% endtrans %}');
+                    }
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

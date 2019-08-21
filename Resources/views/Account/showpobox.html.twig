@@ -1,0 +1,72 @@
+{% extends app.user.pobox is null
+    ? '::layout_min.html.twig' 
+    : '::newbase-public.html.twig' %}
+
+{% block title %}
+    <title>Mostrar Cuenta Bancaria</title>
+{% endblock %}
+
+{% block body -%}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Información  de Cuenta Bancaria</h2>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        <div class="block-flat">
+            <div class="header">
+                <div class="row">
+                    <div class="col-sm-4 col-md-4">
+                        <h3>Cuenta Bancaria </h3>
+                    </div>
+                    <div class="col-sm-4 col-md-4">
+                        ACTIVA: {% if entity.isactive %}
+                            <input type="checkbox" checked="checked" class="icheck" disabled readonly >
+                        {% else %}
+                            <input type="checkbox" disabled class="icheck" readonly >
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="content">
+                <div class="row">
+                    <div class="col-md-4 col-sm-4">
+                        <b>
+                        <i class="fa fa-bank"></i> Banco: {{ entity.bankname}}</BR>
+                        <i class="fa fa-map-pin"></i> Dirección: {{ entity.address }}<BR>
+                        <i class="fa fa-flag"></i> Ciudad: {{ entity.city }} ({{ entity.city.state }}, {{ entity.city.state.country }} )<BR>
+                        </b>
+                    </div>
+                    <div class="col-md-4 col-sm-4">
+                        <b>
+                        <i class="fa fa-book"></i> Número: {{ entity.number}}</BR>
+                        <i class="fa fa-cog"></i> RTN: {{ entity.rtn }}<BR>
+                        <i class="fa fa-dot-circle-o"></i> SWIFT: {{ entity.swift }}<BR>
+                        </b>
+                    </div>
+                    <div class="col-md-4 col-sm-4">
+                        <b>
+                        <i class="fa fa-male"></i> Titular: {{ entity.holdername}} </BR>
+                        <i class="fa fa-id-card"></i> Documento: {{ entity.docid }}<BR>
+                        <i class="fa fa-envelope"></i> Email: {{ entity.email }} <BR>
+                        </b>
+                    </div>
+                </div>
+                <div style="margin-top:10px;">
+                    <center>
+                        <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-flat" >Regresar</button>
+                    </center>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+

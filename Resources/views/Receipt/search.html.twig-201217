@@ -1,0 +1,377 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>Lista de {% trans %}Recibos{% endtrans %}</title>
+{% endblock %}
+
+{% block body -%}
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Lista de {% trans %}Recibos{% endtrans %}</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('receipt') }}">{% trans %}Recibos{% endtrans %}</a></li>
+            <li><a href="{{ url('receipt_search') }}">Todos los {% trans %}Recibos{% endtrans %}</a></li>
+            <li class="active">{% trans %}Recibos{% endtrans %} pendientes de {% trans %}Guía{% endtrans %} </li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        <div class="block-flat">
+            {# 
+            <div class="header">
+                <h3>Lista de {% trans %}Recibos{% endtrans %}</h3>
+            </div>
+            #}
+            <div class="content">
+                <table class="no-border">
+                <thead class="no-border">
+                    <tr>
+                        <th colspan=3><h2>Buscar por:  </h2></th>
+                    </tr>
+                </thead>
+                <tbody class="no-border-y">
+                    <tr>
+                        <td><input type="text" class="filter_rem" id="filter_rem" placeholder="Remitente"></td>
+                        <td><input type="text" class="filter_des" id="filter_des" placeholder="Destinatario"></td>
+                        <td><input type="text" class="filter_cas" id="filter_cas" placeholder="Nro de casillero"></td>    
+                    </tr>
+                </tbody>
+                </table>
+                {% if 'peso'|trans == 'Lb' %}
+                    {% set conwei = 0.454 %}
+                {% else %}
+                    {% set conwei = 1/0.454 %}
+                {% endif %}
+                    <div class="table-responsive">
+                    <table id="receiptTable" class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th><h4>Id</h4></th>
+                                <th><h4>Número</h4></th>
+                                <th><h4>Fecha</h4></th>
+                                <th><h4>Remitente</h4></th>
+                                <th><h4>Destinatario</h4></th>
+                                <th><h4>Cas #</h4></th>
+                                <th><h4>Carrier</h4></th>
+                                <th><h4>Peso ({% trans %}peso{% endtrans %}/{% trans %}altpeso{% endtrans %})</h4></th>
+                                <th><h4>Marcar</h4></th>
+                            </tr>	        
+                        </thead>
+                        <tbody>
+                            {% for entity in entities %}
+                            <tr>
+                                <td>{{ entity.id }}</td>
+                                <td><button type="button" class="btn btn-success btn-sm" onclick="location.href='{{ path('receipt_show', { 'id': entity.id }) }}';">{{ entity.number }}</button></td>
+                                <td>{{ entity.arrivedate|date('m-d-y') }}</td>
+                                <td>{{ entity.shipper }}</td>
+                                <td>{{ entity.receiver.name }} {{ entity.receiver.lastname }}</td>
+                                {% if entity.receiver.customer.pobox is null %}
+                                    <td></td>
+                                {% else %}
+                                    <td>{{ entity.receiver.customer.pobox.number }}</td>
+                                {% endif %}
+                                <td>{{ entity.carrier }}</td>
+                                <td>{{ entity.weight }}/{{ (entity.weight*conwei)|number_format(2, '.', ',') }}</td>
+                                <td style="text-align:center;"><input type="checkbox" name="marcar" value="marked" checked="unchecked"></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    </div>
+                    
+                    <table class="table-box">
+                        <tbody class="no-border-y">
+                            <tr>
+                                <td><button type="button" class="btn btn-info btn-md bcancel" data-toggle="modal" data-target="#cancelrec">Anular</button></td>
+                                <td style="text-align:center;"><button type="button" class="btn btn-info btn-md bguia" >Crear {% trans %}Guía{% endtrans %}</button></td>
+                                <td style="text-align:center;"><button type="button" class="btn btn-info btn-md breempack" >Reempacar</button></td>
+                                <td style="text-align:center;"><button type="button" class="btn btn-info btn-md bupdate" >Actualizar</button></td>
+                                <td style="text-align:right;"><button type="button" onClick="history.go(-1);return true;" class="btn btn-info btn-md bback" >Regresar</button></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <!-- Modal -->
+                    <div class="modal fade" id="cancelrec" role="dialog">
+                        <div class="modal-dialog modal-lg">
+                            <!-- Modal content-->
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button id="closecancelrec" type="button" class="close" data-dismiss="modal">&times;</button>
+                                    <h2 class="modal-title">Confirme la anulación de los {% trans %}Recibos{% endtrans %}</h2>
+                                </div>
+                                <div class="modal-body">
+                                    <table class="table">
+                                        <tbody>
+                                        <tr>
+                                        <td style="text-align:center;"><button type="button" class="btn btn-info btn-lg gotocancel">Confirmar</button><td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                
+                                <div class="modal-footer">
+                                    <button id="closecancelrec" type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                                </div>
+                            </div>     
+                        </div>
+                    </div> {# FIN DE MODAL #}
+            </div>
+        </div>
+    </div>
+</div>
+    
+
+  
+{% endblock %}
+
+{% block javascripts %}
+<script type="text/javascript">
+    // var $thisRecTable=null;
+    $('input.filter_name').val('');
+    $('input.filter_lastname').val('');
+    $('input.filter_cas').val('');
+    
+    function uncheckReceipt() {
+        $thisRecTable.$('tr').each(function(index,rowhtml){
+            $('input[type="checkbox"]',rowhtml).attr('checked', false);
+        });
+    }
+    
+    $(document).ready(function () {
+	
+	$thisRecTable=$('#receiptTable').DataTable({
+		"ordering": true,
+		"searching": true,
+		"info":     false,
+		"lengthChange": true,
+		"scrollX": true,
+		"pageLength": 10,
+		"lengthMenu": [[5, 10, 20, 30, 50, -1], [5, 10, 20, 30, 50, "Todos"]],
+		"columns": [ null, { "searchable": false }, { "searchable": false }, null, null, null,  { "searchable": false }, { "searchable": false }, { "searchable": false},], 
+        "columnDefs": [ {"targets": 8, "orderable": false} ],
+		"language": {
+			"sSearch": "",
+        		"lengthMenu": 'Mostrando  _MENU_  "{% trans %}Recibos{% endtrans %}" por página',
+        		"zeroRecords": '<div style=\"color:red;\">Lo siento no se encontraron "{% trans %}Recibos{% endtrans %}"</div>',
+                "sInfo": 'Mostrando _START_ a _END_ de _TOTAL_ "{% trans %}Recibos{% endtrans %}"',
+        		"infoEmpty": "No hay registros disponibles",
+        		"infoFiltered": "(Filtradas de un total de _MAX_ )",
+			// "searchPlaceholder": "Cliente",
+			"paginate" : {
+        				first:    '<<',
+        				previous: '<',
+        				next:     '>',
+        				last:     '>>'
+       			}
+        	},
+		"pagingType": "full_numbers",
+		"fnDrawCallback": function(oSettings) {
+			if (oSettings.fnRecordsDisplay() == 0) {
+				$('.bupdate').hide();
+				$('.bguia').hide();
+				$('.bcancel').hide(); 
+			} else {
+				$('.bupdate').show();
+				$('.bguia').show();
+				$('.bcancel').show();
+			}
+			if (oSettings.fnRecordsDisplay() <= 1) {
+				$('.breempack').hide();
+			} else {
+				$('.breempack').show();
+			}
+			$(oSettings.nTableWrapper).find('.dataTables_search').hide();
+        		if (oSettings._iDisplayLength >= oSettings.fnRecordsDisplay()) {
+        			$(oSettings.nTableWrapper).find('.dataTables_paginate').hide();
+        		} else {
+				$(oSettings.nTableWrapper).find('.dataTables_paginate').show();	
+			}
+    		},
+	});
+	uncheckReceipt();
+	$('.dataTables_filter').hide();
+	$('input.filter_rem').on( 'keyup click', function () {
+        var value = jQuery.fn.DataTable.ext.type.search.string($('#filter_rem').val());
+        /*
+		if (value.length == 1) {
+			// $('input.filter_des').val('');
+			$('input.filter_cas').val('');
+			$thisRecTable.column(4).search('').draw();
+		}
+		*/
+        if (value.length > 0) {
+			$thisRecTable.column(3).search(value).draw();
+            //$thisRecTable.column(3).search('^' + value,true,true).draw();
+        }  else {
+			$thisRecTable.column(3).search('').draw();	
+		}
+	});
+	$('input.filter_des').on( 'keyup click', function () {
+        var value = jQuery.fn.DataTable.ext.type.search.string($('#filter_des').val());
+		/*
+		if (value.length == 1) {
+			// $('input.filter_rem').val('');
+			$('input.filter_cas').val('');
+			$thisRecTable.column(5).search('').draw();
+		}
+		*/
+        if (value.length > 0) {
+			$thisRecTable.column(4).search(value).draw();
+            // $thisRecTable.column(4).search('^' + value,true,true).draw();
+        }  else {
+            $thisRecTable.column(4).search('').draw();	
+		}
+	});
+	$('input.filter_cas').on( 'keyup click', function () {
+        var value = jQuery.fn.DataTable.ext.type.search.string($('#filter_cas').val());
+        /*
+		if (value.length == 1) {
+			// $('input.filter_rem').val('');
+			$('input.filter_des').val('');
+			$thisRecTable.column(4).search('').draw();
+		}
+    */
+        if (value.length > 0) {
+			$thisRecTable.column(5).search(value).draw();
+            // $thisRecTable.column(5).search('^' + value,true,true).draw();
+        }  else {
+            $thisRecTable.column(5).search('').draw();	
+		}
+	});
+	$('.bcancel').click(function(e) {
+	        e.preventDefault();
+		var count=0;
+		$thisRecTable.$('tr').each(function(index,rowhtml){
+      			var checked= $('input[type="checkbox"]:checked',rowhtml).length;
+			// console.log(ii + ':' + checked);
+      			if (checked==1){
+				count++;
+			} 
+		});
+		if (count == 0) {
+			alert('Debe seleccionar algún "{% trans %}Recibo{% endtrans %}" para anular');
+			$("#cancelrec").modal().hide();
+		}	
+		return true;
+	});
+
+	$('.gotocancel').click(function(e) {
+        e.preventDefault();
+		$("#closecancelrec").click();
+		var tocancel = [];
+		var count=0;
+		$thisRecTable.$('tr').each(function(index,rowhtml){
+            var checked = $('input[type="checkbox"]:checked',rowhtml).length;
+			var data = $thisRecTable.row(rowhtml).data();
+			// console.log(ii + ':' + checked);
+      			
+            if (checked==1){
+				tocancel[count++]=data[0];
+			} 
+		});
+		var reclist = JSON.stringify(tocancel);
+		// alert('VOY A ANULAR LOS RECIBOS' + reclist);
+		window.location.href = "{{ url('receipts_cancel') }}?reclist=" + reclist;
+		return false;
+    		
+	});
+
+	$('.bguia').click(function(e) {
+	        e.preventDefault();
+		var tocreate = [];
+		var count=0;
+		$thisRecTable.$('tr').each(function(index,rowhtml){
+      			var checked = $('input[type="checkbox"]:checked',rowhtml).length;
+			var data = $thisRecTable.row(rowhtml).data();
+			// console.log(ii + ':' + checked);
+      			if (checked==1){
+				tocreate[count++]=data[0];
+			} 
+		});
+		// alert('A crear la guía');
+		var reclist = JSON.stringify(tocreate);
+		
+		var nrec = tocreate.length;
+		/* for (i=0; i < nrec; i++) {
+			console.log(tocreate[i]);
+		}*/
+		//console.log($("#reclist").val());
+		//console.log(tocreate);
+		var thecustomer = 3; //$('#receipt_type_selcustomer').val();
+		if (nrec == 0) {
+			alert('No hay "{% trans %}Recibos{% endtrans %}" seleccionados... ');
+		} else { 
+			window.location.href = "{{ url('guide_receipts') }}?typecus=" + thecustomer + "&reclist=" + reclist;
+		}
+		return false;
+    		
+	});
+	$('.breempack').click(function(e) {
+	        e.preventDefault();
+		var tocreate = [];
+		var count=0;
+		$thisRecTable.$('tr').each(function(index,rowhtml){
+      			var checked = $('input[type="checkbox"]:checked',rowhtml).length;
+			var data = $thisRecTable.row(rowhtml).data();
+			// console.log(ii + ':' + checked);
+      			if (checked==1){
+				tocreate[count++]=data[0];
+			} 
+		});
+		// alert('A crear la guía');
+		var reclist = JSON.stringify(tocreate);
+		
+		var nrec = tocreate.length;
+		
+		var thecustomer = 3; //$('#receipt_type_selcustomer').val();
+		if (nrec == 0) {
+			alert('No hay "{% trans %}Recibos{% endtrans %}" seleccionados... ');
+		} else { 
+			window.location.href = "{{ url('guide_reempack') }}?typecus=" + thecustomer + "&reclist=" + reclist;
+		}
+		return false;
+    		
+	});
+	$('.bupdate').click(function(e) {
+	        e.preventDefault();
+		var todel = [];
+		var i=0;
+		var data = $thisRecTable.rows().data();
+		var nf = data.length;
+		$thisRecTable.$('tr').each(function(index,rowhtml){
+      			var checked= $('input[type="checkbox"]:checked',rowhtml).length;
+			// console.log(ii + ':' + checked);
+      			if (checked==1){
+				todel[i]=false;
+			} else {
+				todel[i]=true;
+			}
+			i++;
+		});
+		// console.log(todel);
+    		
+		for (i=nf-1; i >=0; i--) {
+			if (todel[i]) {
+				$thisRecTable.row(i).remove().draw( false );
+			}
+		}
+		
+		var data = $thisRecTable.rows().data();
+		var nf = data.length;
+		if (nf == 0) {
+			$thisRecTable.clear();
+			$thisRecTable.draw();
+		} 
+
+		return false;
+	});
+	$('td:nth-child(1),th:nth-child(1)').hide();
+});
+</script>
+{% endblock %}

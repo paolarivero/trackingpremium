@@ -1,0 +1,107 @@
+{% extends app.user.pobox is null
+    ? '::base.html.twig' 
+    : '::base-public.html.twig' %}
+
+{% block body -%}
+<div class="widget">
+<div class="widget-content">
+   <div class="span5">
+        <div class="alert alert-success alert-dismissible fade in" role="alert">
+        {# <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+    	<span aria-hidden="true">&times;</span>
+ 	</button> #}
+  	<h3 class="alert-heading">Tu dirección en Estados Unidos, para enviar todas tus compras online, carga comercial o encomiendas:<br></h3>
+  	<p><b>A nombre de:</b> 
+	{% if app.user.agency.maincompany.companyname %}
+		{{ app.user.agency.maincompany.name }}
+	{% endif %}
+	{% if app.user.agency.maincompany.customername %}
+		{{ entity.customer }}
+	{% endif %}
+	{% if app.user.agency.maincompany.numbername %}
+		{{ entity.number }}
+	{% endif %}
+	{% if (not app.user.agency.maincompany.companyname) and (not app.user.agency.maincompany.customername) and (not app.user.agency.maincompany.numbername) %}
+		{{ entity.customer }}
+	{% endif %}
+	<br>
+	<b>Direccion:</b> {{ entity.warehouse.address }}<br>
+	<b>Ciudad:</b> {{ entity.warehouse.city }}, {{ entity.warehouse.city.state }}. {{ entity.warehouse.city.state.country }}<br>
+	<b>Zip:</b> {{ entity.warehouse.zip }}<br>
+	<b>Tel:</b> {{ entity.warehouse.agency.phone }}<br>
+	<b>Email:</b> {{ entity.warehouse.agency.email }}<br></p>
+        </div>  
+   </div>
+   <div class="span4">
+	<div class="alert alert-warning alert-dismissible fade in" role="alert">
+        {# <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+    	<span aria-hidden="true">&times;</span>
+ 	</button> #}
+  	<h3 class="alert-heading">Esta es tu dirección principal para entregas:<br></h3>
+	<p><b>Nombre:</b> {{ entity.customer.adrdefault.name }} {{ entity.customer.adrdefault.lastname }}<br>
+  	<b>Direccion:</b> {{ entity.customer.adrdefault.address }}<br>
+	<b>Ciudad:</b> {{ entity.customer.adrdefault.city }}, {{ entity.customer.adrdefault.city.state }}. {{ entity.customer.adrdefault.city.state.country }}<br>
+	<b>Zip:</b> {{ entity.customer.adrdefault.zip }}<br>
+	<b>Tel:</b> {{ entity.customer.adrdefault.phone }}/<b>Móvil:</b> {{ entity.customer.adrdefault.mobile }}<br>
+	<b>Email:</b>{{ entity.customer.email }}<br></p>
+        </div>
+   </div>
+
+	      
+	 <table class="table table-striped table-bordered">
+                <thead>
+                  <tr>
+    			<th colspan="3"><h3>Datos del Casillero {{ entity.number }}</h3></th>
+		  </tr>
+                </thead>
+        <tbody>
+            <tr>
+                <th>Número</th>
+                <td>{{ entity.number }}</td>
+	    </tr>
+	    <tr>
+		<th>Cliente</th>
+                <td>{{ entity.customer }}</td>
+            </tr>
+	    <tr>
+		<th>Email</th>
+                <td>{{ entity.user }}</td>
+            </tr>
+	    <tr>
+		<th>Tipo de casillero</th>
+                <td>{{ entity.type }}</td>
+	    </tr>
+	    <tr>
+		<th>Status</th>
+                <td>{{ entity.status }}</td>
+	    </tr>
+	    <tr>
+		<th>Dirección</th>
+		<td>{{ entity.customer.adrdefault.address }}. <br>
+		{{ entity.customer.adrdefault.city }}, {{ entity.customer.adrdefault.city.state }}. {{ entity.customer.adrdefault.city.state.country }}</td>
+                {# <td>{{ entity.warehouse.address }}. <br>
+		{{ entity.warehouse.city }}, {{ entity.warehouse.city.state }}. {{ entity.warehouse.city.state.country }}</td> #}
+            </tr>
+            <tr>
+                <th>Fecha de creación</th>
+                <td>{{ entity.creationdate|date('m/d/Y') }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+   
+<table class="table table-striped table-bordered">
+                <tbody>
+                  <tr>
+			{% if app.user.pobox is null %}
+				<td ><a href="{{ path('pobox') }}" class="btn btn-default">Lista de casilleros</a></td>
+				<td><button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-lg bback" >Regresar</button></td>
+			{% else %}
+				<td colspan=2><a href="{{ path('system') }}" class="btn btn-default">Regresar</a></td>
+			{% endif %}
+		  </tr>
+                </tbody>
+</table>
+</div>
+</div>
+{% endblock %}

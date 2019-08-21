@@ -1,0 +1,64 @@
+{% extends app.user.pobox is null
+    ? '::newbase.html.twig' 
+    : '::newbase-public.html.twig' %}
+
+{% block title %}
+    <title>Mostrar mensaje</title>
+{% endblock %}
+
+{# Display the form #}
+
+{% form_theme delete_form 'form/fields.html.twig' %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Mostrar mensaje</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('message') }}">mensajes</a></li>
+            <li class="active">Mostrar</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    {{ form_start(delete_form) }}
+    <div class="cl-mcont">
+        <div class="block-flat">
+            <div class="header">
+                <h3>Datos del mensaje</h3>
+            </div>
+            <div class="content">
+                <b>Remitente:</b> {{ entity.sender }}<br>
+                <b>Fecha:</b> {% if entity.creationdate %}{{ entity.creationdate|date('Y-m-d H:i:s') }}{% endif %}<br>
+                <b>Asunto:</b> {{ entity.subject }}<br>
+                {% if 'Ref:' in entity.body %}
+                    <b>Cuerpo del mensaje:</b><br> {{ entity.body | raw}}<br>
+                {% else %}
+                    <b>Cuerpo del mensaje:</b><br> {{ entity.body | raw}}<br>
+                {% endif %}
+                <hr>
+            </div>
+            <div class="footer">
+                <div class="row">
+                    <div class="col-sm-4 col-md-4">
+                        {{ form_row(delete_form.submit) }}
+                    </div>
+                    <div class="col-sm-4 col-md-4">
+                        <button type="button" class="btn btn-default" 
+                            onclick="location.href='{{ path('message_reply', {'id': entity.id }) }}';">Responder</button>
+                    </div>
+                    <div class="col-sm-4 col-md-4">
+                        <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-flat" >Regresar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {{ form_end(delete_form) }}
+</div>
+{% endblock %}

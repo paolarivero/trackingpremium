@@ -1,0 +1,55 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+    <h1>Listado de Bodegas</h1>
+
+    <table class="records_list">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Nombre</th>
+                <th>Dirección</th>
+                <th>Zip</th>
+                <th>Description</th>
+                <th>Agencia</th>
+                <th>Ciudad</th>
+                <th>Fecha de creación</th>
+                <th>Última modificación</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for entity in entities %}
+            <tr>
+                <td><a href="{{ path('warehouse_show', { 'id': entity.id }) }}">{{ entity.id }}</a></td>
+                <td>{{ entity.name }}</td>
+                <td>{{ entity.address }}</td>
+                <td>{{ entity.zip }}</td>
+		<td>{{ entity.description }}</td>
+		<td>{{ entity.agency }}</td>
+		<td>{{ entity.city }}</td>
+                <td>{% if entity.creationdate %}{{ entity.creationdate|date('Y-m-d H:i:s') }}{% endif %}</td>              
+                <td>{% if entity.lastupdate %}{{ entity.lastupdate|date('Y-m-d H:i:s') }}{% endif %}</td>
+                <td>
+                <ul>
+                    <li>
+                        <a href="{{ path('warehouse_show', { 'id': entity.id }) }}">Mostrar</a>
+                    </li>
+                    <li>
+                        <a href="{{ path('warehouse_edit', { 'id': entity.id }) }}">Editar</a>
+                    </li>
+                </ul>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+        <ul>
+        <li>
+            <a href="{{ path('warehouse_new') }}">
+                Crear nueva bodega
+            </a>
+        </li>
+    </ul>
+    {% endblock %}

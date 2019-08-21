@@ -1,0 +1,57 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+{% set tableclass = {'Pobox':'Casillero', 'Guide':'{% trans %}Guía{% endtrans %}', 'Bill': 'Factura', 'Receipt': '{% trans %}Recibo{% endtrans %}',  'Adservice':'Servicio Adicional',  
+							'Alert': 'Alerta', 'Consolidated': '{% trans %}Consolidado{% endtrans %}'} %}
+<div class="widget">
+    <div class="widget-header"> <i class="icon-flag"></i>
+              <h3> <b>Documento de Términos y Condiciones</b> 
+		
+	      </h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content">
+    <div class="bodycontainer scrollable">
+
+<table class="table table-striped table-bordered">
+        <tbody>
+            {# <tr>
+                <th>Id</th>
+                <td>{{ entity.id }}</td>
+            </tr> #}
+            <tr>
+                <th>Contenido</th>
+                <td>{{ entity.message }}</td>
+            </tr>
+            <tr>
+                <th>Activo</th>
+                 <td>   {% if entity.active %}
+			<input type="checkbox" checked="checked" disabled readonly >
+		    {% else %}
+			<input type="checkbox" disabled readonly >
+		    {% endif %}
+		</td>
+            </tr>
+            <tr>
+                <th>Asociado a </th>
+                <td>{{ tableclass[entity.tableclass] }}</td>
+            </tr>
+            <tr>
+                <th>Última modificación</th>
+                <td>{{ entity.lastupdate|date('Y-m-d H:i:s') }}</td>
+            </tr>
+        </tbody>
+        <tfoot>
+		 <tr>
+			<td><a href="{{ path('termcond_edit', { 'id': entity.id }) }}" class="btn btn-default">Editar</a></td>
+			<td><a href="{{ path('termcond') }}" class="btn btn-default">Regresar a lista</a></td>
+		  </tr>
+	</tfoot>
+    </table>
+
+      
+
+</div>
+</div>
+</div>
+{% endblock %}

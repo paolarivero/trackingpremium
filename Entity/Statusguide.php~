@@ -1,0 +1,46 @@
+<?php
+// src/NvCarga/Bundle/Entity/Statusguide.php
+
+namespace NvCarga\Bundle\Entity;
+
+
+use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
+
+/**
+ * @ORM\Entity
+ * @ORM\Table(name="statusguide")
+ * @ORM\HasLifecycleCallbacks()
+ */
+class Statusguide
+{
+    /**
+     * @ORM\Id
+     * @ORM\Column(type="integer")
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    protected $id;
+    /**
+     * @ORM\ManyToOne(targetEntity="Guide", inversedBy="liststatus")
+     * @ORM\JoinColumn(name="guide_id", referencedColumnName="id")
+     */
+    protected $guide;
+    /**
+     * @ORM\ManyToOne(targetEntity="Stepstatus")
+     * @ORM\JoinColumn(name="step_id", referencedColumnName="id")
+     */
+    protected $step;
+     /**
+     * @ORM\ManyToOne(targetEntity="City")
+     * @ORM\JoinColumn(name="place_id", referencedColumnName="id")
+     */
+    protected $place;
+    /**
+     * @ORM\Column(type="datetime")
+     */
+    protected $date;
+    /**
+     * @ORM\Column(type="string", length=255, nullable=true)
+     */
+    protected $comment;
+}

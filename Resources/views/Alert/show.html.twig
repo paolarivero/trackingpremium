@@ -1,0 +1,115 @@
+{% extends app.user.pobox is null
+    ? '::newbase.html.twig' 
+    : '::newbase-public.html.twig' %}
+
+
+{% block title %}
+    <title>Mostrar Alerta de Paquete</title>
+{% endblock %}
+{% block body -%}
+{% if app.user.pobox is null %}
+    {% set pobox = pobox %}
+{% else %}
+    {% set pobox = app.user.pobox %}
+{% endif %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Mostrar Alerta de Paquete</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('alert') }}">Alertas</a></li>
+            <li class="active">Mostrar</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        <div class="block-flat">
+            <div class="header">
+                <h3>
+                {% if entity.receipt is null %}
+                    NO RECIBIDO
+                {% else %}
+                    {% trans %}Recibo{% endtrans %}: {{ entity.receipt }}
+                {% endif %}
+            </div>
+            <div class="content">
+                <div class="row">
+                    <div class="col-sm-6 com-md-6">
+                        <h4>Envíar a: </h4>
+                    </div>
+                    <div class="col-sm-6 com-md-6">
+                        <h4>{% set dir = entity.baddress %}
+                            {{ dir.name }} {{dir.lastname}} {% if dir.docid %} ({{ dir.docid }}) {% endif %}<br>
+                            {{ dir.address }} <br>
+                            {% if dir.zip %} {{ dir.zip }}. {% endif %}
+                            {{ dir.city }}, {{ dir.city.state }}. {{ dir.city.state.country }} <br>
+                            {% if dir.phone %} {{ dir.phone }} {% endif %} {% if dir.mobile %} /{{ dir.mobile }} {% endif %}</h4>
+                    </div>
+                </div>
+            </div>{# FIN CONTENT #}
+        </div> {# FIN BLOCK FLAT #}
+        <div class="block-flat">
+            <div class="header">
+                <h3>Datos del paquete</h3>
+            </div>
+            <div class="content">
+                <div class="row">
+                    <div class="col-sm-4 com-md-4">
+                        <h4>Carrier: {{ entity.carrier }}</h4>
+                    </div>
+                    <div class="col-sm-4 com-md-4">
+                        <h4>Carrier: {{ entity.tracking }}</h4>
+                    </div>
+                    <div class="col-sm-4 com-md-4">
+                        <h4>LLegada: {{ entity.arrivedate|date('m/d/Y') }} </h4>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4 com-md-4">
+                        <h4>Piezas: {{ entity.pieces }}</h4>
+                    </div>
+                    <div class="col-sm-4 com-md-4">
+                        <h4>Peso: {{ entity.weight }}</h4>
+                    </div>
+                    <div class="col-sm-4 com-md-4">
+                        <h4>Valor: {{ entity.value }}</h4>
+                    </div>
+                </div>
+                <h4>Descripción: {{ entity.description }}</h4>
+                <div class="row">
+                    <div class="col-sm-6 com-md-6">
+                        <h4>Tipo de envío: {{ entity.shippingtype }}</h4>
+                    </div>
+                    <div class="col-sm-6 com-md-6">
+                        <h4>Instrucciones de envío: {{ entity.instructions }}</h4>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6 com-md-6">
+                        {% if entity.imageSize > 0 %}
+                            <img style="width:200px;" alt="Imagen del paquete" src="data:{{ entity.imageType }};base64,{{ image }}" />
+                        {% endif %}
+                    </div>
+                    <div class="col-sm-6 com-md-6">
+                        <h4>Seguro: 
+                        {% if entity.insurance %}
+                            <input type="checkbox" class="icheck" checked="checked" disabled readonly >
+                        {% else %}
+                            <input type="checkbox" class="icheck" disabled readonly >
+                        {% endif %}</h4>
+                    </div>
+                </div>
+                <center>
+                    <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-flat" >Regresar</button>
+                </center>
+            </div>{# FIN CONTENT #}
+        </div> {# FIN BLOCK FLAT #}
+    </div>
+</div>
+{% endblock %}
+

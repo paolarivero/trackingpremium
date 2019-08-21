@@ -1,0 +1,55 @@
+{# src/NvCarga/Bundle/Resources/views/Security/login_remember.html.twig #}
+{% extends '::layout_min.html.twig' %}
+
+
+{% form_theme form _self %}
+
+{%- block email_widget -%}
+    <div class="input-group">
+    <span class="input-group-addon"><i class="fa fa-envelope"></i></span><input type="email" id="form_email" name="form[email]" required="required" class="form-control" placeholder="Your Email" />
+    </div>
+{%- endblock email_widget -%}
+
+
+{% block body -%}
+
+<div id="cl-wrapper" class="forgotpassword-container">
+		<div class="middle">
+			<div class="block-flat">
+				<div class="header">
+					<h3 class="text-center"><img src="{{ asset('assets/newTemplate/img/logo.png') }}" alt="logo" class="logo-img"></h3>
+				</div>
+				<div>
+					{{ form_start(form, {'attr': {'novalidate': 'novalidate', 'class': 'form-horizontal', 'style' : 'margin-bottom: 0px !important' }}) }}
+					{# <form style="margin-bottom: 0px !important;" action="index.html" parsley-validate="" novalidate class="form-horizontal"> #}
+						<div class="content">
+							<h5 class="title text-center">Restablecer mi contraseña</h5>
+                                    <center>
+                                    {{ form_row(form.email) }}
+                                    {% for flashMessage in app.session.flashbag.get('notice') %}
+                                        <div class="alert alert-danger">
+                                            <strong>{{ flashMessage | nl2br }}
+                                            </strong>
+                                            <br><br>
+                                            <center>
+                                            <a style="color: #555; font-weight: 300;" href="{{ path('pobox_new_public') }}">¿No tienes una cuenta? </a> <a style="color: #555; font-weight: 500;" href="{{ path('pobox_new_public') }}">Crear una cuenta</a>
+                                            </center>
+                                        </div>
+                                    {% endfor %}
+									<div id="email-error">
+                                    
+                                    </div>
+							
+                                    {{ form_row(form.submit) }} 
+                            </center>
+							
+						</div>
+					{{ form_end(form) }}
+				</div>
+			</div>
+			<div class="text-center out-links"><a href="#">© 2016-2017 Trackingpremium</a></div>
+		</div>
+	</div>
+
+
+{% endblock %}

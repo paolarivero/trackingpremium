@@ -1,0 +1,399 @@
+<?php
+// src/NvCarga/Bundle/Entity/Bill.php
+
+namespace NvCarga\Bundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+
+
+/**
+ * @ORM\Entity
+ * @ORM\Table(name="bill")
+ * @ORM\HasLifecycleCallbacks()
+ */
+class Bill
+{
+    /**
+     * @ORM\Id
+     * @ORM\Column(type="integer")
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    protected $id;
+
+     /**
+     * @ORM\Column(type="string", length=30, unique=false, nullable=false)
+     */
+    protected $number;
+    /**
+     * @ORM\ManyToOne(targetEntity="Customer")
+     * @ORM\JoinColumn(name="customer_id", referencedColumnName="id")
+     */
+    protected $customer;
+     /**
+     * @ORM\Column(type="datetime")
+     */
+    protected $creationdate;
+    /**
+     * @ORM\ManyToOne(targetEntity="COD")
+     * @ORM\JoinColumn(name="cod_id", referencedColumnName="id")
+     */
+    protected $cod;
+    /**
+     * @ORM\ManyToOne(targetEntity="Paidtype")
+     * @ORM\JoinColumn(name="paidtype_id", referencedColumnName="id")
+     */
+    protected $paidtype;
+    /**
+     * @ORM\OneToMany(targetEntity="Guide", mappedBy="bill")
+     */
+    protected $guides;
+     /**
+     * @ORM\OneToMany(targetEntity="Billpay", mappedBy="bill")
+     */
+    protected $payments;
+     /**
+      @ORM\Column(type="string", columnDefinition="ENUM('PENDIENTE', 'COBRADA', 'ANULADA')", nullable=false)
+     */
+    protected $status;
+    /**
+     * @ORM\ManyToOne(targetEntity="Maincompany")
+     * @ORM\JoinColumn(name="maincompany_id", referencedColumnName="id")
+     */
+    protected $maincompany;
+    /**
+     * @ORM\Column(type="decimal", precision=10, scale=2, nullable=false)
+     */
+    protected $total;
+    /**
+     * @ORM\Column(type="decimal", precision=10, scale=2, nullable=false)
+     */
+    protected $balance;
+     /**
+     * @ORM\Column(type="datetime")
+     */
+    protected $expdate;
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    protected $canceled=false;
+    
+    public function __toString() {
+        return (string) ($this->getNumber());
+    }
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->guides = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->payments = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->balance = 0.0;
+    }
+
+    /**
+     * Get id
+     *
+     * @return integer
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set number
+     *
+     * @param string $number
+     *
+     * @return Bill
+     */
+    public function setNumber($number)
+    {
+        $this->number = $number;
+
+        return $this;
+    }
+
+    /**
+     * Get number
+     *
+     * @return string
+     */
+    public function getNumber()
+    {
+        return $this->number;
+    }
+
+    /**
+     * Set creationdate
+     *
+     * @param \DateTime $creationdate
+     *
+     * @return Bill
+     */
+    public function setCreationdate($creationdate)
+    {
+        $this->creationdate = $creationdate;
+
+        return $this;
+    }
+
+    /**
+     * Get creationdate
+     *
+     * @return \DateTime
+     */
+    public function getCreationdate()
+    {
+        return $this->creationdate;
+    }
+
+    /**
+     * Set customer
+     *
+     * @param \NvCarga\Bundle\Entity\Customer $customer
+     *
+     * @return Bill
+     */
+    public function setCustomer(\NvCarga\Bundle\Entity\Customer $customer = null)
+    {
+        $this->customer = $customer;
+
+        return $this;
+    }
+
+    /**
+     * Get customer
+     *
+     * @return \NvCarga\Bundle\Entity\Customer
+     */
+    public function getCustomer()
+    {
+        return $this->customer;
+    }
+    /**
+     * Add guide
+     *
+     * @param \NvCarga\Bundle\Entity\Guide $guide
+     *
+     * @return Bill
+     */
+    public function addGuide(\NvCarga\Bundle\Entity\Guide $guide)
+    {
+        $this->guides[] = $guide;
+
+        return $this;
+    }
+
+    /**
+     * Remove guide
+     *
+     * @param \NvCarga\Bundle\Entity\Guide $guide
+     */
+    public function removeGuide(\NvCarga\Bundle\Entity\Guide $guide)
+    {
+        $this->guides->removeElement($guide);
+    }
+
+    /**
+     * Get guides
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getGuides()
+    {
+        return $this->guides;
+    }
+
+    /**
+     * Set cod
+     *
+     * @param \NvCarga\Bundle\Entity\COD $cod
+     *
+     * @return Bill
+     */
+    public function setCod(\NvCarga\Bundle\Entity\COD $cod = null)
+    {
+        $this->cod = $cod;
+
+        return $this;
+    }
+
+    /**
+     * Get cod
+     *
+     * @return \NvCarga\Bundle\Entity\COD
+     */
+    public function getCod()
+    {
+        return $this->cod;
+    }
+
+    /**
+     * Set paidtype
+     *
+     * @param \NvCarga\Bundle\Entity\Paidtype $paidtype
+     *
+     * @return Bill
+     */
+    public function setPaidtype(\NvCarga\Bundle\Entity\Paidtype $paidtype = null)
+    {
+        $this->paidtype = $paidtype;
+
+        return $this;
+    }
+
+    /**
+     * Get paidtype
+     *
+     * @return \NvCarga\Bundle\Entity\Paidtype
+     */
+    public function getPaidtype()
+    {
+        return $this->paidtype;
+    }
+  
+    /**
+     * Set maincompany
+     *
+     * @param \NvCarga\Bundle\Entity\Maincompany $maincompany
+     *
+     * @return Bill
+     */
+    public function setMaincompany(\NvCarga\Bundle\Entity\Maincompany $maincompany = null)
+    {
+        $this->maincompany = $maincompany;
+
+        return $this;
+    }
+
+    /**
+     * Get maincompany
+     *
+     * @return \NvCarga\Bundle\Entity\Maincompany
+     */
+    public function getMaincompany()
+    {
+        return $this->maincompany;
+    }
+
+    /**
+     * Set status
+     *
+     * @param string $status
+     *
+     * @return Bill
+     */
+    public function setStatus($status)
+    {
+        $this->status = $status;
+
+        return $this;
+    }
+
+    /**
+     * Get status
+     *
+     * @return string
+     */
+    public function getStatus()
+    {
+        return $this->status;
+    }
+
+    /**
+     * Set total
+     *
+     * @param string $total
+     *
+     * @return Bill
+     */
+    public function setTotal($total)
+    {
+        $this->total = $total;
+
+        return $this;
+    }
+
+    /**
+     * Get total
+     *
+     * @return string
+     */
+    public function getTotal()
+    {
+        return $this->total;
+    }
+
+    /**
+     * Set balance
+     *
+     * @param string $balance
+     *
+     * @return Bill
+     */
+    public function setBalance($balance)
+    {
+        $this->balance = $balance;
+
+        return $this;
+    }
+
+    /**
+     * Get balance
+     *
+     * @return string
+     */
+    public function getBalance()
+    {
+        return $this->balance;
+    }
+
+    /**
+     * Set expdate
+     *
+     * @param \DateTime $expdate
+     *
+     * @return Bill
+     */
+    public function setExpdate($expdate)
+    {
+        $this->expdate = $expdate;
+
+        return $this;
+    }
+
+    /**
+     * Get expdate
+     *
+     * @return \DateTime
+     */
+    public function getExpdate()
+    {
+        return $this->expdate;
+    }
+    /**
+     * Set canceled
+     *
+     * @param boolean $canceled
+     *
+     * @return Bill
+     */
+    public function setCanceled($canceled)
+    {
+        $this->canceled = $canceled;
+
+        return $this;
+    }
+
+    /**
+     * Get canceled
+     *
+     * @return boolean
+     */
+    public function getCanceled()
+    {
+        return $this->canceled;
+    }
+}

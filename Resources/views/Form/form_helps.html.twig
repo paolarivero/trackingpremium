@@ -1,0 +1,8 @@
+{% block form_help -%}
+    {% for attrname, attrvalue in attr %}
+        {% if attrname == 'data-help' %}
+	   <span class="help-block">{{ attrvalue|trans }}</span>
+        {% endif %}
+    {% endfor %}
+{%- endblock form_help %}
+

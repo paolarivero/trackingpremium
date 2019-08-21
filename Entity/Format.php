@@ -1,0 +1,315 @@
+<?php
+// src/NvCarga/Bundle/Entity/Format.php
+
+namespace NvCarga\Bundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Validator\Constraints as Assert;
+use Egulias\EmailValidator\Validation\RFCValidation;
+
+/**
+ * @ORM\Entity
+ * @ORM\Table(name="format")
+ * @ORM\HasLifecycleCallbacks()
+ */
+class Format
+{
+    /**
+     * @ORM\Id
+     * @ORM\Column(type="integer")
+     * @ORM\GeneratedValue(strategy="AUTO")
+     */
+    protected $id;
+    /**
+     * @ORM\OneToOne(targetEntity="Maincompany", inversedBy = "format")
+     * @ORM\JoinColumn(name="maincompany_id", referencedColumnName="id")
+     */
+    protected $maincompany;
+    /** 
+     * @ORM\Column(type="string", length=30, nullable=true) 
+    */
+    protected $rprint; //Formato para imprimir PAQUETES
+    /** 
+     * @ORM\Column(type="string", length=30, nullable=true) 
+    */
+    protected $WHprint; //Formato para imprimir Warehouses
+    /** 
+     * @ORM\Column(type="string", length=30, nullable=true) 
+    */
+    protected $gprint; //Formato para imprimir Guías
+    /** 
+     * @ORM\Column(type="string", length=30, nullable=true) 
+    */
+    protected $cprint; //Formato para imprimir Consolidados
+    /** 
+     * @ORM\Column(type="string", length=30, nullable=true) 
+    */
+    protected $bprint; //Formato para imprimir Facturas
+    /** 
+     * @ORM\Column(type="string", length=30, nullable=true) 
+    */
+    protected $rlprint; //Formato para etiquetas de  PAQUETES
+    /** 
+     * @ORM\Column(type="string", length=30, nullable=true) 
+    */
+    protected $WHlprint; //Formato para etiquetas de  Warehouses
+    /** 
+     * @ORM\Column(type="string", length=30, nullable=true) 
+    */
+    protected $glprint; //Formato para etiquetas de Guías
+    /** 
+     * @ORM\Column(type="string", length=30, nullable=true) 
+    */
+    protected $billpayprint; //Formato para imprimir PAGOS 
+
+    /**
+     * Get id
+     *
+     * @return integer
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Set rprint
+     *
+     * @param integer $rprint
+     *
+     * @return Format
+     */
+    public function setRprint($rprint)
+    {
+        $this->rprint = $rprint;
+
+        return $this;
+    }
+
+    /**
+     * Get rprint
+     *
+     * @return integer
+     */
+    public function getRprint()
+    {
+        return $this->rprint;
+    }
+
+    /**
+     * Set gprint
+     *
+     * @param integer $gprint
+     *
+     * @return Format
+     */
+    public function setGprint($gprint)
+    {
+        $this->gprint = $gprint;
+
+        return $this;
+    }
+
+    /**
+     * Get gprint
+     *
+     * @return integer
+     */
+    public function getGprint()
+    {
+        return $this->gprint;
+    }
+
+    /**
+     * Set cprint
+     *
+     * @param integer $cprint
+     *
+     * @return Format
+     */
+    public function setCprint($cprint)
+    {
+        $this->cprint = $cprint;
+
+        return $this;
+    }
+
+    /**
+     * Get cprint
+     *
+     * @return integer
+     */
+    public function getCprint()
+    {
+        return $this->cprint;
+    }
+
+    /**
+     * Set bprint
+     *
+     * @param integer $bprint
+     *
+     * @return Format
+     */
+    public function setBprint($bprint)
+    {
+        $this->bprint = $bprint;
+
+        return $this;
+    }
+
+    /**
+     * Get bprint
+     *
+     * @return integer
+     */
+    public function getBprint()
+    {
+        return $this->bprint;
+    }
+
+    /**
+     * Set rlprint
+     *
+     * @param integer $rlprint
+     *
+     * @return Format
+     */
+    public function setRlprint($rlprint)
+    {
+        $this->rlprint = $rlprint;
+
+        return $this;
+    }
+
+    /**
+     * Get rlprint
+     *
+     * @return integer
+     */
+    public function getRlprint()
+    {
+        return $this->rlprint;
+    }
+
+    /**
+     * Set glprint
+     *
+     * @param integer $glprint
+     *
+     * @return Format
+     */
+    public function setGlprint($glprint)
+    {
+        $this->glprint = $glprint;
+
+        return $this;
+    }
+
+    /**
+     * Get glprint
+     *
+     * @return integer
+     */
+    public function getGlprint()
+    {
+        return $this->glprint;
+    }
+
+    /**
+     * Set maincompany
+     *
+     * @param \NvCarga\Bundle\Entity\Maincompany $maincompany
+     *
+     * @return Format
+     */
+    public function setMaincompany(\NvCarga\Bundle\Entity\Maincompany $maincompany = null)
+    {
+        $this->maincompany = $maincompany;
+
+        return $this;
+    }
+
+    /**
+     * Get maincompany
+     *
+     * @return \NvCarga\Bundle\Entity\Maincompany
+     */
+    public function getMaincompany()
+    {
+        return $this->maincompany;
+    }
+
+    /**
+     * Set wHprint
+     *
+     * @param string $wHprint
+     *
+     * @return Format
+     */
+    public function setWHprint($wHprint)
+    {
+        $this->WHprint = $wHprint;
+
+        return $this;
+    }
+
+    /**
+     * Get wHprint
+     *
+     * @return string
+     */
+    public function getWHprint()
+    {
+        return $this->WHprint;
+    }
+
+    /**
+     * Set wHlprint
+     *
+     * @param string $wHlprint
+     *
+     * @return Format
+     */
+    public function setWHlprint($wHlprint)
+    {
+        $this->WHlprint = $wHlprint;
+
+        return $this;
+    }
+
+    /**
+     * Get wHlprint
+     *
+     * @return string
+     */
+    public function getWHlprint()
+    {
+        return $this->WHlprint;
+    }
+
+    /**
+     * Set billpayprint
+     *
+     * @param string $billpayprint
+     *
+     * @return Format
+     */
+    public function setBillpayprint($billpayprint)
+    {
+        $this->billpayprint = $billpayprint;
+
+        return $this;
+    }
+
+    /**
+     * Get billpayprint
+     *
+     * @return string
+     */
+    public function getBillpayprint()
+    {
+        return $this->billpayprint;
+    }
+}

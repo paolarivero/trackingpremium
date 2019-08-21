@@ -1,0 +1,163 @@
+{% extends '::layout-pdf.html.twig' %}
+
+{% block body %}
+<style>
+
+html *
+{
+   font-size: 0.98em !important;
+   color: #000 !important;
+   font-family: Arial !important;
+   line-height: 1.2;
+   -webkit-print-color-adjust: exact; 
+}
+
+.table {
+    border-collapse: collapse;
+}
+
+.table, th, td {
+   
+   border: 1px solid black;
+}
+
+.table th{
+   text-align: center;
+   background-color: #eeeeee;
+}
+
+.table td {
+    text-align: center;
+    background-color: #ffffff; 
+}
+
+</style>
+
+<div class="container">
+<div class="row"> 
+<div class="span3">
+      <center>
+        {% if entity.maincompany.logo %}
+        {% set name = companies_logos ~ entity.maincompany.logo %}
+    {% else %}
+        {% set name = companies_logos ~ 'default.png' %}
+    {% endif %}
+        <img src="{{ absolute_url(asset(name)) }}" alt="Logo" style="width:auto;height:auto;max-height:100px; max-width:100px;"><br>
+     </center>
+</div>
+<div class="span3">
+	<center>
+	{{ entity.agency.name }}<br>
+	{{ entity.agency.address }}<br>
+	{{ entity.agency.city }}, {{ entity.agency.city.state }} {{ entity.agency.zip }}. {{ entity.agency.city.state.country }}<br>
+	Ph. {{ entity.agency.phone }} <br>
+	{{ entity.agency.email }}<br>
+	</center>	
+</div>
+<div class="span5">
+<center>
+<br>
+<h1><div id="demo"></div></h1>
+<h1>{{ entity.number }}</h1><br>
+</center>
+</div>
+</div>
+<br>
+
+{% set head = entity.guides|first %}
+<table class="table">
+                <thead>
+		<tr>
+                <th><h3>#Bolsa</h3></th>
+		<th><h3>País Origen</h3></th>
+		<th><h3>País Destino</h3></th>
+		<th><h3>Servicio</h3></th>
+		<th><h3>Fecha</h3></th>
+		<th><h3>Nro de {% trans %}Guías{% endtrans %}</h3></th>
+		</tr>	
+		</thead>
+       		<tbody>
+			<tr>
+			<td>{{ entity.number }}</td>
+			<td>{{ head.countryfrom }}</td>
+			<td>{{ head.countryto }}</td>
+			<td>{{ head.shippingtype }}</td>
+			<td>{{ entity.creationdate|date('Y-m-d') }}</td>
+			<td>{{ entity.guides|length }}</td>
+			</tr>
+		</tbody>
+</table>
+    <table class="table">
+                <thead>
+		<tr>
+		<th colspan="7"><h3>Lista de {% trans %}Guías{% endtrans %}</h3></th>
+		</tr>
+		<tr>
+        <th>Número</th>
+		<th>Peso</th>
+		<th>Volumen</th>
+		<th>Piezas</th>
+		<th>Valor($)</th>
+		<th>Cobrado($)</th>
+		<th>Código</th>
+		</tr>	
+		</thead>
+       		<tbody>
+			{% for guide in entity.guides %}
+			<tr>
+				<td>{{ guide.number }}</td>
+				<td>{{ guide.realweight }}</td>
+				{% set pri = true %}
+				<td>
+				{% set volcad = '' %}
+                {% if guide.masterec %}
+                    {% set listrec = [guide.masterec] %}
+                {% else %}
+                    {% set listrec = guide.receipts %}
+                {% endif %}
+                {% for receipt in listrec %}
+                    {% set vol = (receipt.length*receipt.width*receipt.height/guide.agency.maincompany.convertvol)|number_format(2, '.', ',') %}
+                    {% if pri %}
+                        {% set volcad = volcad ~ vol ~ 'dimension'|trans %}
+                        {% set pri = false %}
+                    {% else %}
+                        {% set volcad =  volcad ~ ',  ' ~ vol ~ 'dimension'|trans %}
+                    {% endif %} 
+                {% endfor %}
+                {{ volcad }}
+                </td>
+				<td>{{ guide.pieces }}</td>
+				<td>{{ guide.declared }}</td>
+				<td>{{ guide.totalpaid }}</td>
+				<td><center><div id="tag<%={{ guide.id }}%>"></div></center></td>
+			</tr>
+			{% endfor %}
+		</tbody>
+    </table>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+		var thecode= {{ entity.number|json_encode|raw }};
+		$("#demo").barcode(
+			thecode, // Value barcode (dependent on the type of barcode)
+			"code128", // type (string)
+			{ barWidth: 3, barHeight: 70, showHRI: false}
+		);
+		var nguide={{ entity.guides|length }};
+		{% for guide in entity.guides %}
+			var thecode= {{ guide.number|json_encode|raw }};
+			// console.log(thecode);
+			$('div[id^="tag"]').barcode(
+				thecode, // Value barcode (dependent on the type of barcode)
+				"code128", // type (string)
+				{ barWidth: 2, barHeight: 40, showHRI: false}
+			);
+		{% endfor %} 
+		window.print();
+		history.go(-1);
+    });
+</script>
+{% endblock %} 
+
+

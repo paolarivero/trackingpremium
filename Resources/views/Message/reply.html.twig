@@ -1,0 +1,89 @@
+{% extends app.user.pobox is null
+    ? '::newbase.html.twig' 
+    : '::newbase-public.html.twig' %}
+
+{% block title %}
+    <title>Responder mensaje</title>
+{% endblock %}
+
+{# Display the form #}
+
+{% form_theme form 'form/fields.html.twig' %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Crear mensaje</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('message') }}">mensajes</a></li>
+            <li class="active">Responder Mensaje</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        {{ form_start(form, {attr: {novalidate: 'novalidate', 'id': 'message_type' }}) }}
+        <div class="block-flat">
+            <div class="header">
+                <h3>Redactar mensaje  {% if app.user.pobox %}
+                    al administrador 
+                    {% endif %}
+                </h3>
+            </div>
+            <div class="content">
+                {% if app.user.pobox is null %}
+                    <div class="row">
+                        <div class="col-sm-12 col-md-12">
+                            {{ form_row(form.receivername) }}
+                        </div>
+                    </div>
+                {% else %}
+                    {% do form.receivername.setRendered %}
+                {% endif %}
+                
+                {{ form_row(form.subject) }}
+                
+                {{ form_row(form.body) }}
+                <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        <td>
+                        </td>
+                        <td style="text-align:right;">
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-flat" >Regresar</button>
+                            {{ form_widget(form.submit, { 'attr': {'class': 'btn btn-primary btn-flat'} }) }}
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+<script type="text/javascript">
+    
+    
+$(document).ready(function () {
+    $('#message_type_submit').click(function(evt) {
+        var receiverid = $('#message_type_receiverid').val();
+        {% if app.user.pobox is null %}
+            if (receiverid == 0) {
+                funalert('Debe seleccionar un destinatario');
+                return false;
+            }
+        {% endif %}
+        return true;
+    });
+});
+</script>
+{% endblock %}
+

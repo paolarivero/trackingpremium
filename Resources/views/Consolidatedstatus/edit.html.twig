@@ -1,0 +1,36 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+<div class="widget">
+    <div class="widget-header"> <i class="icon-asterisk"></i>
+              <h3>Editar status de {% trans %}Consolidado{% endtrans %} </h3> 
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content"> 
+ {{ form_start(edit_form) }}
+<table class="table table-striped table-bordered">
+	<tbody>
+	<tr>
+	<td>{{ form_row(edit_form.name) }}</td>
+	<td>{{ form_row(edit_form.address) }}</td>
+	</tr>	
+	<tr>
+	<td>{{ form_row(edit_form.latitude) }}</td>
+	<td>{{ form_row(edit_form.longitude) }}</td>
+	</tr>
+	<tr>
+	<td>{{ form_row(edit_form.country) }}</td>
+	<td>{{ form_row(edit_form.inherited) }}</td>
+	</tr>
+	</tbody>
+	<tfoot>
+	<tr>
+	<td>{{ form_row(edit_form.submit) }}</td>
+	<td><button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-lg bback" >Regresar</button></td>
+	</tr>
+	</tfoot>
+</table>
+{{ form_end(edit_form) }}
+</div>
+</div>
+{% endblock %}

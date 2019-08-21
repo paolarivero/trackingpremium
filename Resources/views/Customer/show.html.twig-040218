@@ -1,0 +1,113 @@
+{% extends app.user.pobox is null
+    ? '::base.html.twig' 
+    : '::base-public.html.twig' %}
+
+{% block body -%}
+<div class="widget">
+    {# <div class="widget-header"> <i class="icon-user-md"></i>
+              <h3>Datos del Cliente</h3>
+    </div> #}
+    <!-- /widget-header -->
+    <div class="widget-content">
+	      
+	     <table class="table table-striped table-bordered">
+		<thead>
+			<tr>
+			<th colspan=3 style="text-align:center">
+			<h3><i class="icon-user-md"></i> Datos del Cliente</h3>
+			</th>
+			</tr>
+			<tr>
+			{# <th><b>ID: </b>{{ entity.id }}</th> #}
+    			<th><b>Nombre: </b>{{ entity.name }}</th>
+			<th><b>Apellido: </b> {{ entity.lastname }}</th>
+			<th><b>Email: </b>{{ entity.email }}</th>
+			</tr>
+			<tr>
+			<td style="text-align:center;" colspan=3><h3>Direcciones asociadas</h3></td>
+			<tr>
+		</thead>
+		
+       		<tbody>
+			{% for dir in entity.baddress %}
+			{% set zip=dir.zip|replace({' ':''}) %}
+			<tr>
+			<td colspan=3>
+			{% if dir.id == entity.adrdefault.id %}
+			<center><h4>Dirección Principal</h4></center><br>
+			{% endif %}
+			{{ dir.name }} {{dir.lastname}} {% if dir.docid %} ({{ dir.docid }}) {% endif %}<br>
+			{{ dir.address }} <br>
+			{% if zip %} {{ dir.zip }}. {% endif %}
+			{{ dir.city }}, {{ dir.city.state }}. {{ dir.city.state.country }} <br>
+			{% if dir.phone %} {{ dir.phone }} {% endif %} {% if dir.mobile %} /{{ dir.mobile }} {% endif %}<br>
+			{% if entity.baddress|length > 1 %}
+			<button type="button" class="btn btn-info btn-lg bconfirm" data-toggle="modal" data-target="#confirmdelete" data-thedir="{{ dir.id }}" >Borrar</button>
+			{% endif %}
+			<a href="{{ path('baddress_edit', { 'id': dir.id }) }}" class="btn btn-info btn-lg">Modificar</a>
+			{% if dir.id != entity.adrdefault.id %}
+			<a href="{{ path('baddress_change', { 'id': dir.id }) }}" class="btn btn-info btn-lg">Cambiar a Principal</a>
+			{% endif %}
+			</td>
+			</tr>
+			{% endfor %}		
+    	</tbody>
+	<tfoot>
+		 <tr>	{% if is_granted('ROLE_ADMIN') or is_granted('ROLE_ADMIN_CUSTOMER') %}
+			<td><a href="{{ path('customer_edit', { 'id': entity.id }) }}" class="btn btn-default">Editar Datos</a></td>
+			<td><a href="{{ path('baddress_new', { 'id': entity.id, 'type': 1 }) }}" class="btn btn-default">Agregar Dirección</a></td>
+			{% else %}
+			<td colspan=2></td>
+			{% endif %}
+			{% if app.user.pobox is null %}
+				<td><a href="{{ path('customer') }}" class="btn btn-default">Regresar a lista</a></td>
+			{% else %}
+				<td><a href="{{ path('system') }}" class="btn btn-default">Regresar</a></td>
+			{% endif %}
+		  </tr>
+	</tfoot>
+	
+    </table>
+</div>
+</div>
+
+<!-- Modal -->
+  <div class="modal fade" id="confirmdelete" role="dialog">
+    <div class="modal-dialog modal-lg">
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button id="closemodalconfirm" type="button" class="close" data-dismiss="modal">&times;</button>
+          <h2 class="modal-title"><center>Borrar dirección del cliente</center></h2>
+        </div>
+        <div class="modal-body">
+	      <center>
+	      		<a id="linkdel" href="{{ path('baddress_delete', { 'id': 1 }) }}" class="btn btn-default"><h2>CONFIRMAR</h2></a>
+	      </center>
+        </div>
+        
+        <div class="modal-footer">
+          <button id="closemodalconfirm" type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+        </div>
+      </div>      
+    </div>
+  </div> 
+{% block javascript%}
+<script type="text/javascript">
+    $(document).ready(function () {
+	var $thisCityTable=null;
+	$('#confirmdelete').on('shown.bs.modal', function (e) {
+		var dirid = $(e.relatedTarget).data('thedir'); 
+		var path = "{{ path('baddress_delete', { 'id': 1 }) }}"
+		var lp = path.length;
+		var newpath = path.substring(0, lp-1) + dirid;
+		// alert(path + ' ' + newpath);
+		var link = document.getElementById("linkdel");
+		link.setAttribute("href", newpath);
+		// $("a[href="+path+"]").attr('href', newpath);
+	});
+   });
+</script>
+{% endblock %}
+{% endblock %}
+

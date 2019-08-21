@@ -1,0 +1,29 @@
+labels:
+        name_sender: Nombre
+        guide: Guía
+        guides: Guías
+        receipt: Recibo
+        receipts: Recibos
+        consolidated: Consolidado
+        prefixconsols: Prefijo de Consolidados
+        prefixguides: Prefijo de Guías
+        emailagency: Enviar copia de Guías
+        inheretedconsol: Guías heredan este status
+        statusguide: Status del Guía
+        guidenumber: Número del Guía
+        recnumber: Número del Recibo
+        iniguide: Numeración inicial de Guías
+
+peso: Kg
+altpeso: Lb
+dimension: Mt3
+altdimension: CF
+mconsoldate: MW
+tailcolor: red
+Recibo: Recibo
+Recibos: Recibos
+Guía: Guía
+Guías: Guías
+Consolidados: Consolidados
+Consolidado: Consolidado
+Consolidar: Consolidar

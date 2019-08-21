@@ -1,0 +1,161 @@
+{% extends '::layout-pdf.html.twig' %}
+
+
+
+{% block body %}
+
+<style>
+
+.mytable td,  .mytable th, .mytable thead{
+   border: 1px solid black;
+} 
+
+</style> 
+
+{# <div class="container"> #}
+<div class="row">
+    <div class="span4">
+      {% if entity.maincompany.logo %}
+        {% set name = companies_logos ~ entity.maincompany.logo %}
+    {% else %}
+        {% set name = companies_logos ~ 'default.png' %}
+    {% endif %}
+      <img src="{{ absolute_url(asset(name)) }}" alt="Logo" style="width:auto;height:auto;max-height:100px; max-width:100px;"><br>
+	{{ entity.agency.name }}<br>
+	{{ entity.agency.address }}<br>
+	{{ entity.agency.city }}, {{ entity.agency.city.state }} {{ entity.agency.zip }}. {{ entity.agency.city.state.country }}<br>
+	Ph. {{ entity.agency.phone }} <br>
+	Info: {{ entity.agency.email }}<br>	
+    </div>
+
+    <div class="span4" >
+	<div id="demo"></div><br>
+	<h3> Guía Número {{ entity.number }} </h3><br>
+        Fecha: {{ entity.creationdate|date('m/d/Y') }}<br>
+	Servicio: {{ entity.shippingtype }}<br>
+	Procesada Por: {{ entity.processedby }}  <br> 
+    </div>
+</div>
+{# </div> #}
+
+<table class="table mytable">
+<thead>
+	{# <tr>
+	<th colspan=2 style="text-align:center;"><h3> Guía Número {{ entity.number }} </h3></th>
+	</tr> #}
+	<tr>
+	<th><center>REMITENTE</center></th>
+	<th><center>DESTINATARIO</center></th>
+	</tr>
+</thead>
+<tbody>
+	<tr>
+	<td>{{entity.sender.adrdefault.name }} {{entity.sender.adrdefault.lastname }}<br> 
+	    {{entity.sender.adrdefault.address }}<br> 
+	    {{entity.sender.adrdefault.city }} {{entity.sender.adrdefault.city.state }} {{entity.sender.adrdefault.city.state.country }}<br>
+	    {% if entity.sender.adrdefault.phone %}	    
+		Tel:{{ entity.sender.adrdefault.phone }}<br>
+	    {% endif %}
+	</td>
+	<td>{{ entity.addressee.name }} {{ entity.addressee.lastname }}<br> {{ entity.addressee.address }}<br>
+	    {{ entity.addressee.city }} {{ entity.addressee.city.state }} {{ entity.addressee.city.state.country }}<br>
+	    {% if entity.addressee.phone %}
+		Tel:{{ entity.addressee.phone }}<br>
+	    {% endif %}
+	</td>
+	</tr>
+</tbody>
+</table>
+
+  <table class="table mytable">
+	<thead>
+	<tr>
+	<th colspan=5 style="text-align:center;">PAQUETE(S)</th>
+	</tr>
+	<tr>
+	<th style="text-align:center;">ALTURA</th>
+	<th style="text-align:center;">LARGO</th>
+	<th style="text-align:center;">ANCHO</th>
+	<th style="text-align:center;">PESO</th>
+	<th style="text-align:center;">VOLUMEN</th>
+	</tr>
+	</thead>	
+	<tbody>
+        {% if entity.masterec %}
+            {% set listrec = [entity.masterec] %}
+        {% else %}
+            {% set listrec = entity.receipts %}
+        {% endif %}
+		{% for receipt in listrec %}
+		<tr>
+			{% set volumen = receipt.length*receipt.width*receipt.height/1728 %}
+            {% set wkg = receipt.weight*0.454 %}
+			<td style="text-align:right;">
+                {{ receipt.height }}
+            </td>
+			<td style="text-align:right;">
+                {{ receipt.length }}
+            </td>
+			<td style="text-align:right;">
+                {{ receipt.width }}
+            </td>
+			<td style="text-align:right;">
+                {{ receipt.weight }}Lb/{{ wkg|number_format(2, '.', ',') }} Kg 
+            </td>
+			<td style="text-align:right;">
+                {{ volumen|number_format(2, '.', ',') }}CF
+            </td>
+        </tr>
+		{% endfor %}
+	<tr>
+    	<td colspan=5>CONTINE: {{ entity.contain }}</td>
+    	</tr>
+	</tbody>
+    </table>
+
+{% set wmet = entity.realweight*0.454 %}
+<table class="table">
+	<thead>
+	<tr>
+	<th colspan=2></th>
+	<th><center>Piezas</center></th>
+	<th><center>Peso</center></th>
+	<th><center>Declarado</center></th>
+	</tr>
+	</thead>
+	<tbody>
+	<tr>
+	<td colspan="2"> Processed by (Signature) </td>
+	<td><center>{{ entity.pieces }}</center></td>
+	<td><center>{{ entity.realweight }}LB/{{ wmet|number_format(2, '.', ',') }}Kg</center></td>
+	<td><center>${{ entity.declared }}</center></td>
+	</tr>
+	<tr>
+	<td colspan=3><div style="border: 2px solid black">
+           **NO SOMOS RESPONSABLES POR PERDIDA TOTAL Y/O PARCIAL SI LA 
+	MERCANCIA NO ESTA ASEGURADA MEDIANTE PREVIA REQUISICION. -LA EMPRESA NO SE 
+	HACE RESPONSABLE DE CUALQUIER PROBLEMA SI EL PROVEEDOR NO ENTREGA 
+	LA FACTURA. -EL TIEMPO DE ENTREGA ES UN ESTIMADO Y NO REPRESENTA 
+	PROMESA ALGUNA.-ES PROHIBIDO ENVIAR LIQUIDOS, CORROSIVOS, DINERO EN 
+	EFECTIVO, ARMAS DE FUEGO Y MATERIAL PORNOGRAFICO. -RASTREOS DE GUIAS
+	MEDIENTE NUESTRA PAGINA WEB {{ entity.agency.maincompany.url }}.
+         </div></td>
+	<td colspan=2>{{ entity.agency.maincompany.url }}</td>
+	</tr>
+	</tbody>
+</table>	
+
+<script type="text/javascript">
+    $(document).ready(function () {
+		var thecode= {{ entity.number|json_encode|raw }};
+		$("#demo").barcode(
+			thecode, // Value barcode (dependent on the type of barcode)
+			"code128", // type (string)
+			{ barWidth: 2, barHeight: 50, showHRI: false}
+		);
+		doprint();
+    });
+</script>
+{% endblock %} 
+
+

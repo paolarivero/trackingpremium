@@ -1,0 +1,109 @@
+{% extends '::newbase.html.twig' %}
+
+{% block title %}
+    <title>Mostrar Servicio</title>
+{% endblock %}
+
+{# Display the form #}
+
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Mostrar Servicio Adicional</h2>
+            <ol class="breadcrumb">
+            <li><a href="{{ url('homepage') }}">Home</a></li>
+            <li><a href="{{ url('adservice') }}">Servicios Adicionales</a></li>
+            <li class="active">Mostrar</li>
+            </ol>
+            {% for flashMessage in app.session.flashbag.get('notice') %}
+                <div class="alert alert-danger">
+                    <strong>Advertencia: </strong>{{ flashMessage }}
+                </div>
+            {% endfor %}
+    </div>
+    <div class="cl-mcont">
+        <div class="block-flat">
+            <div class="header">
+                <div class="row">
+                    <div class="col-md-6 col-sm-6">
+                        <h3>Datos del Servicio</h3>
+                    </div>
+                     <div class="col-md-6 col-sm-6">
+                        {% if entity.isactive %}
+                            <input type="checkbox" checked="checked" class="icheck" disabled readonly >
+                        {% else %}
+                            <input type="checkbox" class="icheck" disabled readonly >
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <div class="content">
+                <table class="table table-striped table-bordered">
+                    <tbody>
+                        <tr>
+                            <th>Nombre</th>
+                            <td>{{ entity.name }}</td>
+                        </tr>
+                        <tr>
+                            <th>Fecha de creación</th>
+                            <td>{{ entity.creationdate|date('Y-m-d') }}</td>
+                        </tr>
+                        <tr>
+                            <th>Medida</th>
+                            <td>{{ entity.measure }}</td>
+                        </tr>
+                        <tr>
+                            <th>Brand</th>
+                            <td>{{ entity.brand }}</td>
+                        </tr>
+                        <tr>
+                            <th>Descripción</th>
+                            <td>{{ entity.description }}</td>
+                        </tr>
+                        <tr>
+                            <th>Precio/Porcentaje</th>
+                            <td>{{ entity.price }}</td>
+                        </tr>
+                        <tr>
+                            <th>Depende de:</th>
+                            <td>
+                                {% for service in entity.meDependof %}
+                                
+                                        <a href="{{ path('adservice_show', { 'id': service.id }) }}">{{ service.name }}</a> &nbsp; 
+                                        
+                                {% endfor %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Dependen de este:</th>
+                            <td>
+                                {% for service in entity.dependofMe %}
+                                
+                                        <a href="{{ path('adservice_show', { 'id': service.id }) }}">{{ service.name }}</a> &nbsp; 
+                                        
+                                {% endfor %}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        <td>
+
+                        </td>
+                        <td style="text-align:right;">
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default btn-flat" >Cancelar</button>
+                            <button type="button" class="btn btn-primary btn-flat" onclick="location.href='{{ path('adservice_edit', { 'id': entity.id }) }}';">Editar</button>
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>{# FIN CONTENT #}
+        </div> {# FIN BLOCK FLAT #}
+    </div>
+</div>
+{% endblock %}
+

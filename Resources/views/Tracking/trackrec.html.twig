@@ -1,0 +1,56 @@
+{% extends app.user is null
+    ? '::layout_min.html.twig' 
+    : '::base-system.html.twig' %}
+    
+{% block title %}
+    <title>Rastreo de {% trans %}Recibos{% endtrans %}</title>
+{% endblock %}
+
+{% form_theme form 'form/fields.html.twig' %}
+
+{% block body %}
+
+<div id="pcont" class="container-fluid">
+    <div class="page-head">
+        <h2>Rastrear paquete</h2>
+    </div>
+    <div class="cl-mcont">
+        <div class="block-flat">
+            <div class="content">
+                {{ form_start(form, {attr: {novalidate: 'novalidate'}}) }}
+                {{ form_row(form.number) }}
+                <table class="no-border">
+                    <tbody class="no-border-y">
+                        <tr>
+                        {% if app.user is not null %}
+                        <td>
+                            <button type="button" onClick="history.go(-1);return true;" class="btn btn-default" >Regresar</button>
+                        </td>
+                        {% endif %}
+                        <td style="text-align:right;">
+                            {{ form_row(form.search, { 'attr': {'class': 'btn btn-primary'} }) }}
+                        </td>
+                        </tr>
+                    </tbody>
+                </table>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block javascripts %}
+<script type="text/javascript">
+$(document).ready(function () {
+	$('#search_rec_search').click(function(){
+		var number = $('#search_rec_number').val();
+		var track = $('#search_rec_track').val();
+		if (number) {
+			window.location.href = "{{ url('receipt_find') }}?recnumber=" + number;
+		} else {
+			alert('Debe suministar un número o tracking de recibo');
+		}
+	});
+});
+</script>
+{% endblock %}

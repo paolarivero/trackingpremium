@@ -1,0 +1,59 @@
+{# Display the form #}
+
+{% block body -%} 
+
+<div class="widget">
+    <div class="widget-header"> 
+              <h3> <b>Nueva Ciudad</b> 
+</h3>
+    </div>
+    <!-- /widget-header -->
+    <div class="widget-content"> 
+{{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+<table class="table table-striped table-bordered">
+<tbody>
+<tr>
+<td colspan=2>{{ form_row(form.name) }}</td>
+</tr>
+<tr>
+<td>{{ form_row(form.state) }}</td>
+<td>{{ form_row(form.country) }}</td>
+</tr>
+</tbody>
+<tfoot>
+<tr>
+<td colspan=3>{{ form_row(form.save) }}</td>
+</tr>
+</tfoot>
+</table>
+{{ form_end(form) }}
+</div>
+</div>
+{#
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#city_type_country').change(function(){
+           var val = $(this).val();
+	   if (val) {
+           $.ajax({
+                type: "POST",
+                url: "{{ url('select_states') }}?country_id=" + val,
+                success: function(data) {
+                    // Remove current options
+                    $('#city_type_state').html('');
+                    $.each(data, function(k, v) {
+                        $('#city_type_state').append('<option value="' + v + '">' + k + '</option>');
+                    });
+                }
+            });
+	    } else {
+		alert('Debe seleccionar un país');
+	    }
+            return false;
+        });
+    });
+</script>
+#}
+{% endblock %}
+

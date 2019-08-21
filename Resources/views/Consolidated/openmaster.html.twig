@@ -1,0 +1,15 @@
+{% extends '::base.html.twig' %}
+
+{% block body -%}
+    <h1>Seleccione el {% trans %}Consolidado{% endtrans %} maestro para agregarle {% trans %}Consolidados{% endtrans %}</h1>
+
+    {{ form(form) }}
+
+        <ul class="record_actions">
+    <li>
+        <a href="{{ path('consolidated') }}">
+            Regresar a la lista de {% trans %}Consolidados{% endtrans %}
+        </a>
+    </li>
+</ul>
+{% endblock %}

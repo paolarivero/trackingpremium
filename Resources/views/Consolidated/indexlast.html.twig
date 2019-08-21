@@ -1,0 +1,6 @@
+    {% for entity in entities %}   
+                {% set fields = entity.number|split('-') %}
+                {% set theid = fields|last %}
+                [<a style="color:red;"  href="{{ path('consolidated_show', { 'id': entity.id }) }}">{{ theid }}</a>]
+	{% endfor %}
+

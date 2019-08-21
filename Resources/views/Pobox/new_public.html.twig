@@ -1,0 +1,359 @@
+{% extends '::layout_login.html.twig' %}
+
+{% block title %}
+    <title>Crear Casillero</title>
+{% endblock %}
+
+{# Display the form #}
+
+{#
+{% form_theme form 'form/fields.html.twig' %}
+#}
+
+{% form_theme form _self %}
+
+{% block radio_widget %}
+    {% spaceless %}
+        <label  for="{{ id }}">&emsp; 
+        <input type="radio"  class="icheck" {{ block('widget_attributes') }}{% if value is defined %} value="{{ value }}"{% endif %}{% if checked %} checked="checked"{% endif %} /> {{ label|trans }}</label>
+    {% endspaceless %}
+{% endblock radio_widget %}
+
+{% block text_row -%}
+    {% spaceless %}
+    {% set type = type|default('text') %}
+    <div style="width:99%">
+        {% if label %}
+                <label for={{ id }} {{ block('label_attibutes') }}>{{ label|trans }}</label>
+                <input type="{{ type }}" class="form-control" {{ block('widget_attributes') }} {% if value is defined %} value = "{{ value }}" {% endif %}>
+        {% else %}
+            <input type="{{ type }}" class="form-control" {{ block('widget_attributes') }} {% if value is defined %} value = "{{ value }}" {% endif %}>
+        {% endif %}
+        {{ form_errors(form) }}
+    </div>
+    {% endspaceless %}
+{%- endblock text_row %}
+
+{% block password_row -%}
+    {% spaceless %}
+    {% set type = 'password' %}
+    <div style="width:99%">
+        {% if label %}
+                <label for={{ id }} {{ block('label_attibutes') }}>{{ label|trans }}</label>
+                <input type="{{ type }}" class="form-control" {{ block('widget_attributes') }} {% if value is defined %} value = "{{ value }}" {% endif %}>
+        {% else %}
+            <input type="{{ type }}" class="form-control" {{ block('widget_attributes') }} {% if value is defined %} value = "{{ value }}" {% endif %}>
+        {% endif %}
+        {{ form_errors(form) }}
+    </div>
+    {% endspaceless %}
+{%- endblock password_row %}
+
+{% block textarea_row -%}
+    {% spaceless %}
+    {% set type = type|default('textarea') %}
+    <div style="width:99%">
+        {% if label %}
+                <label for={{ id }} {{ block('label_attibutes') }}>{{ label|trans }}</label>
+                <textarea class="form-control" {{ block('widget_attributes') }} >{% if value is defined %}{{ value }}{% endif %}</textarea>
+        {% else %}
+            <textarea class="form-control" {{ block('widget_attributes') }} >{% if value is defined %}{{ value }}{% endif %}</textarea>
+        {% endif %}
+        {{ form_errors(form) }}
+    </div>
+    {% endspaceless %}
+{%- endblock textarea_row %}
+
+{% block choice_row -%}
+    {% spaceless %}
+        <div style="width:99%">
+            <label for={{ id }} {{ block('label_attibutes') }}>{{ label|trans }}</label>
+            {{- form_widget(form) -}}
+            {{- form_errors(form) -}}
+        </div>
+    {% endspaceless %}
+{%- endblock choice_row %}
+
+{% block body %}
+<style>
+
+    label {
+        font-weight: 300;
+        margin-bottom: 2px;
+        margin-top: 5px;
+    }
+    .sign-up-container .middle-sign-up {
+        width: 600px;
+    }
+
+    .form-group {
+        margin-top: 10px;
+        margin-bottom: 10px;
+    }
+</style>
+<div class="container-fluid">
+    <div id="cl-wrapper" class="sign-up-container" >
+        <div class="middle-sign-up col-sm-9 col-md-9" style="left: 41.5%;">
+            <div class="block-flat">
+                <div class="header" >
+                    {% if logomain %}
+                        {% set logo = companies_logosmain ~ logomain %}
+                    {% else %}
+                        {% set logo = companies_logosmain ~ 'logo.png' %}
+                    {% endif %}
+                    <h3 class="text-center">
+                    <img alt="Logomain" src="{{ absolute_url(asset(logo)) }}" style="vertical-align: middle !important;width:auto;height:auto;max-height:60px; max-width:120px; padding: 0 !important; margin-top:5px;"  class="logo-img">
+                    {# <img src="{{ asset('assets/assets/img/logo.png') }}" alt="logo" class=""> #}
+                    </h3>
+                    {% for flashMessage in app.session.flashbag.get('notice') %}
+                        <div class="alert alert-danger">
+                            <strong>Advertencia: </strong>{{ flashMessage }}
+                        </div>
+                    {% endfor %}
+                </div>
+                {{ form_start(form, {'attr': {'novalidate': 'novalidate', 'class': 'form-horizontal', 'style' : 'margin-bottom: 0px !important' }}) }}
+                <div class="content">
+                    <h3 style="text-align: center;margin-top: 0px;">Crea tu casillero</h3>
+                    <h5 class="title text-center"><strong style="font-weight: 200;">
+                        {% if header %}
+                            {{ header }}
+                        {% endif %}</h5>
+                    <hr>
+                    <div class="form-group">
+                        <label class="col-sm-3 control-label">Tipo de casillero</label>
+                        <div class="col-sm-9">
+                            {{ form_widget(form.type) }}
+                        </div>
+                        <div class="col-sm-6">
+                                {{ form_row(form.name_customer) }}
+                                <div id="nick-error"></div>
+                        </div>
+                        <div class="col-sm-6">
+                                {{ form_row(form.lastname_customer) }}
+                                <div id="nick-error"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-6">
+                                {{ form_row(form.mobile_customer) }}
+                                <div id="nick-error"></div>
+                        </div>
+                        <div class="col-sm-6">
+                                {{ form_row(form.phone_customer) }}
+                                <div id="nick-error"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-12">
+                                {{ form_row(form.address_customer) }}
+                                <div id="nick-error"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-9">
+                                <div style="width:99%">
+                                    <label>Ciudad, Estado, País</label>
+                                    <input type="hidden" id="citycustomer" style="width:100%;" />
+                                </div>
+                                <div id="nick-error"></div>
+                        </div>
+                        <div class="col-sm-3">
+                                {{ form_row(form.zip_customer) }}
+                                <div id="nick-error"></div>
+                        </div>
+                        <p style="margin-left: 20px;">No encuentra su ciudad agreguela al hacer clic en <a class="md-trigger" data-modal="agregar-ciudad"> "Agregar Ciudad"</a></p>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-6">
+                                {{ form_row(form.email_customer.first) }}
+                                <div id="nick-error"></div>
+                        </div>
+                        <div class="col-sm-6">
+                                {{ form_row(form.email_customer.second) }}
+                                <div id="nick-error"></div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-sm-6">
+                                {{ form_row(form.password.first) }}
+                                <div id="nick-error"></div>
+                        </div>
+                        <div class="col-sm-6">
+                                {{ form_row(form.password.second) }}
+                                <div id="nick-error"></div>
+                        </div>
+                    </div>
+                    {% if content %}
+                        <p style="margin-left: 15px;">Al hacer clic en "Crear cuenta", aceptas nuestros <a class="md-trigger" data-modal="termcond">Términos y Condiciones</a> y Política de privacidad</p>
+                    {% endif %}
+                    
+                    <div align="center" class="g-recaptcha" data-sitekey="{{ google_public_key }}"></div>
+                    
+                    {{ form_row(form.submit, { 'attr': {'class': 'btn btn-block btn-success btn-rad btn-lg'} }) }}
+
+                    <p class="spacer">¿Ya tienes una cuenta? <a href="{{ path('login') }}">Iniciar sesión</a> </p>
+                    
+                    <!-- Modal  Agregar ciudad-->
+                    <div id="agregar-ciudad" class="md-modal colored-header custom-width md-effect-8">
+                        <div class="md-content">
+                            <div class="modal-header">
+                                <h3>Agregar Ciudad</h3>
+                                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close">×</button>
+                            </div>
+                            <div class="modal-body col-sm-12 col-md-12">
+                                {{ form_row(form.country_customer) }}
+                                {{ form_row(form.state_customer) }}
+                                {{ form_row(form.cityname_customer) }}
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" data-dismiss="modal" class="btn btn-default btn-flat md-close canceladd">Cancelar</button>
+                                <button type="button" data-dismiss="modal" class="btn btn-primary btn-flat md-close addcity">Agregar</button>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Modal  Agregar ciudad-->
+                    <!-- TERMCOND Modal-->
+                    <div id="termcond" class="md-modal colored-header custom-width md-effect-7">
+                        <div class="md-content">
+                            <div class="modal-header">
+                                <h3>Términos y Condiciones</h3>
+                                <button type="button" data-dismiss="modal" aria-hidden="true" class="close md-close">×</button>
+                            </div>
+                            <div class="modal-body col-sm-12 col-md-12">
+                                {{ content }}
+                            </div>
+                            <div class="modal-footer">
+                                <center>
+                                <button type="button" data-dismiss="modal" class="btn btn-default btn-flat md-close">Cerrar</button>
+                                </center>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- TERMCOND Modal-->
+                </div>
+                {{ form_end(form) }}
+            </div>
+            <div class="text-center out-links"><a href="#">© 2016-2018 Trackingpremium</a></div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block javascripts %}
+<script src="{{ asset('assets/mylibs/utilityLib.js') }}" type="text/javascript"></script>
+<script type="text/javascript">
+    function ClearCus() {
+        $('#pobox_type_id_customer').val(0);
+        $('#pobox_type_name_customer').val('');
+        $('#pobox_type_lastname_customer').val('');
+        $('#pobox_type_address_customer').val('');
+        $('#pobox_type_cityid_customer').val(0);
+        $('#pobox_type_cityname_customer').val('');
+        $('#citycustomer').select2('data', null);
+        $('#pobox_type_phone_customer').val('');
+        $('#pobox_type_mobile_customer').val('');
+        $('#pobox_type_barrio_customer').val('');
+        $('#pobox_type_email_customer_first').val('');
+        $('#pobox_type_email_customer_second').val('');
+        $('#pobox_type_zip_customer').val('');
+        $('#pobox_type_type_1').iCheck('check');
+        $('#pobox_type_type').change();
+        return true;
+    }
+    $(document).ready(function () {        
+        $("#citycustomer").select2({
+            placeholder: "Buscar Ciudad",
+            ajax: {
+                url: "{{ path('city_find') }}",
+                dataType: 'json',
+                delay: 250,
+                data: function (term) {
+                    return {
+                        q: term, //search term
+                    };
+                },
+                results: function (data) {
+                    return {
+                        results: data,
+                    };
+                },
+                cache: true
+                },
+             minimumInputLength: 2,
+             formatInputTooShort: function (input, min) { var n = min - input.length; return "Por favor ingrese  " + n + " carcater" + (n == 1? "" : "es") + " mas"; },
+             formatNoMatches: function () { return "No se encuentran resultados"; },
+        });
+        $('#citycustomer').on("change", function(e) { 
+            var cityid = $('#citycustomer').val();
+            $('#pobox_type_cityid_customer').val(cityid);
+            var complete = $('#citycustomer').select2('data').text;
+            var ini1 = complete.lastIndexOf('(');
+            var ini2 = complete.lastIndexOf(',');
+            var end = complete.lastIndexOf(')');
+            var state = complete.substring(ini1+1,ini2);
+            var country = complete.substring(ini2+2,end);
+            // $('#pobox_type_country_customer').val('');
+            $('#pobox_type_country_customer option').map(function () {
+                if ($(this).text() == country) return this;
+            }).prop('selected', 'selected');
+            utilityLib.statesbyname('#pobox_type_state_customer', '#pobox_type_country_customer', state, "{{ url('select_states') }}"); 
+            $('#pobox_type_cityname_customer').val(complete.substring(0,ini1-1));
+        });
+        $('#pobox_type_country_customer').change(function(){
+           var val = "#pobox_type_country_customer";
+           utilityLib.statesbyname('#pobox_type_state_customer', val, '', "{{ url('select_states') }}");
+           return false;
+        });
+        $('#pobox_type_state_customer').change(function(){
+            // console.log('CAMBIO el estado');
+            $('#pobox_type_cityid_customer').val(0);
+            utilityLib.showCity('{{ form.vars.id }}','customer');
+            return false;
+        });
+        $('#pobox_type_cityname_customer').change(function(){
+            $('#pobox_type_cityid_customer').val(0);
+            utilityLib.showCity('{{ form.vars.id }}','customer');
+            return false;
+        });
+        var citySID = $("#pobox_type_cityid_customer").val();
+        var citySname = $("#pobox_type_cityname_customer").val();
+        if (citySID && citySname) {
+            // console.log('Hola:  ' +  citySID + ' ' + citySname);
+            $('#citycustomer').select2('data', {id: citySID, text: citySname});
+        }
+        $('#pobox_type_type_1').iCheck('check');
+        $('#pobox_type_type_2').on('ifChecked', function(event){
+            $('#pobox_type_lastname_customer').val('');
+            $('#pobox_type_lastname_customer').prop('readonly', true);
+        });
+        $('#pobox_type_type_1').on('ifChecked', function(event){
+            $('#pobox_type_lastname_customer').prop('readonly', false);
+        });
+        $('#pobox_type_email_customer_first, #pobox_type_email_customer_second').change(function() {
+            $('#guide_type_id_customer').val(0);
+        });
+        $('#pobox_type_submit').click(function(evt) {
+            // evt.preventDefault();
+            var cityid = $('#pobox_type_cityid_customer').val();
+            var country =  $('#pobox_type_country_customer').val();
+            var state =  $('#pobox_type_state_customer').val();
+            var name =  $('#pobox_type_cityname_customer').val();
+            //funalert('HOLA ' + cityid + ' ' + country + ' ' + state + ' ' + name);
+            if ((cityid == 0) && ((country < 1) || (state < 1) || (name == ''))) {
+                funalert('Debe seleccionar una ciudad..');
+                return false;
+            }
+            return true;
+        });
+        $('#pobox_type_cityname_customer').change();
+        
+        $('.canceladd').click(function(evt) {
+            $('#pobox_type_cityname_customer').val('');
+            $('#pobox_type_country_customer').val('');
+            $('#pobox_type_state_customer').val('');
+            $('#pobox_type_cityname_customer').change();
+            // console.log($('#pobox_type_cityid_customer').val());
+            $('#citycustomer').select2('data', null);
+        });
+    });
+</script>
+{% endblock %}
